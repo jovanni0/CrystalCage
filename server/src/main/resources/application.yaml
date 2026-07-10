@@ -1,6 +1,15 @@
 ktor:
-  deployment:
-    port: 8080
-  application:
-    modules:
-      - dev.jovanni0.RoutingKt.configureRouting
+    deployment:
+        port: 8080
+    application:
+        modules:
+            - dev.jovanni0.ApplicationKt.module
+jwt:
+    secret: "replace-with-a-real-secret-from-env"
+    issuer: "crystalcage-server"
+    audience: "crystalcage-client"
+    realm: "crystalcage"
+database:
+    jdbc_url: "jdbc:postgresql://localhost:5432/crystalcage"
+    username: "postgres"
+    password: "postgres"
