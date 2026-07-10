@@ -64,7 +64,7 @@ BookEdition {
     string book_id            FK
     string label                 "nullable"
     date   release_date          "nullable"
-    date   first_added
+    date   added_at
     string format
 }
 
@@ -95,7 +95,7 @@ Cover {
     string id           PK
     string book_id      FK
     string label           "nullable"
-    date   first_added
+    date   added_at
 }
 
 Author   ||--o{ Universe    : "has"

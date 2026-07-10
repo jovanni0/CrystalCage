@@ -45,11 +45,11 @@
 - `GET /books/by-series?author=...` = retrieves a list of books of a specific author, sorted by series, as `[{ series: { id, name}, universe: { id, name }, books: [{ id, title, cover_id }] }]`
 - `GET /books/series?id=...` = retrieve series info as `{ series_name, author: { id, first_name, last_name }, books: [{ id, title, release_date, word_count, read_status }] }`.
 - `GET /books/{id}/details` = retrieve the book details as `{ author: { id, first_name, last_name }, universe: { id, name }, series: { id, name }, volume_number, title, cover_id, read_status, number_or_reads, release_date, word_count, tags: [{ id, name }], opinion, blurb }`. the number of reads and read is calculated server-side based on the read records for the book, using the algorithm described [here](database-model.md#read-status).
-- `GET /books/{id}/covers` = get a list of cover IDs and data for a book as `[{ id, label, first_added }]`. the cover image has to be loaded separately.
+- `GET /books/{id}/covers` = get a list of cover IDs and data for a book as `[{ id, label, added_at }]`. the cover image has to be loaded separately.
 - `GET /books/{id}/full` = retrieves full information about a book as `{ author: { id, first_name, last_name }, universe: { id, name } | null, series: { id, name } | null, volume_number: int|null, title, preferred_cover: { id, name }, release_date, word_count, tags: [{ id, name }], opinion, blurb, number_or_covers }`.
-- `GET /books/{id}/read-records` = retrieves all read records for the book, ordered from newest to oldest server-side as `[{ record_id, start_date, end_date: date|null, notes, edition: { label, format, first_added } }]`.
+- `GET /books/{id}/read-records` = retrieves all read records for the book, ordered from newest to oldest server-side as `[{ record_id, start_date, end_date: date|null, notes, edition: { label, format, added_at } }]`.
 - `GET /books/{id}/editions` = retrieve list of all editions for the book, as `[{ edition_id, label, format }]`.
-- `GET /books/{id}/editions/full` = retrieve a list of full information about editions, as `[{ id, label, format, first_added, reads: [{ id, red_number, start_date, end_date }] }]`
+- `GET /books/{id}/editions/full` = retrieve a list of full information about editions, as `[{ id, label, format, added_at, reads: [{ id, red_number, start_date, end_date }] }]`
 - `GET /books/{book_id}/read-records/{record_id}` = retrieve the information for a specific read record as `{ book: { book_id, author_first_name, author_last_name, title, word_count }, edition: { edition_id, label, format }, read_number, start_date, end_date, notes}`. the server has to compute the number of the read record in relation to the others (chronological order).
 - `POST /books` = create a new book entry based on the block of data collected in the app. multipart endpoint.
 - `POST /books/{id}/editions` = create a new edition, as `{ file, label, format }`. this is a multipart request.
