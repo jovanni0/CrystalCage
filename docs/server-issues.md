@@ -1,6 +1,6 @@
 # Server Issues
 
-## connection pooling and `search_path` leakage
+## 1. connection pooling and `search_path` leakage
 
 **problem**: HikariCP does not reset session-level state (including `search_path`) on connection checkin/checkout. confirmed experimentally using a test in `TenantIsolationTests`: a pooled connection with `maximumPoolSize = 1` retains the previous request's `search_path` when handed to the next request. this means a request that forgets to explicitly set the schema will silently run queries against whichever tenant schema the connection was last used for (a cross-tenant data leak).
 
