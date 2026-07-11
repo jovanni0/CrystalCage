@@ -1,5 +1,6 @@
 package dev.jovanni0.repositories
 
+import dev.jovanni0.database.transactions.sharedTransaction
 import dev.jovanni0.records.UserRecord
 import dev.jovanni0.tables.User
 import org.jetbrains.exposed.v1.core.eq
@@ -16,7 +17,7 @@ class UserRepository
      */
     fun findByUsername(username: String): UserRecord?
     {
-        return transaction {
+        return sharedTransaction {
             User
                 .selectAll()
                 .where { User.username eq username}
@@ -39,7 +40,7 @@ class UserRepository
      */
     fun findById(id: String): UserRecord?
     {
-        return transaction {
+        return sharedTransaction {
             User
                 .selectAll()
                 .where { User.id eq Uuid.parse(id) }
