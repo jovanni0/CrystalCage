@@ -34,14 +34,14 @@ Author {
 Universe {
     string id                  PK
     string author_id           FK
-    string universe_name
+    string name
 }
 
 Series {
     string id                  PK
     string author_id           FK
     string universe_id         FK "nullable"
-    string series_name
+    string name
     bool   is_finished            "false"
 }
 
@@ -64,8 +64,8 @@ BookEdition {
     string book_id            FK
     string label                 "nullable"
     date   release_date          "nullable"
-    date   added_at
     string format
+    date   added_at
 }
 
 ReadRecord {
@@ -82,7 +82,7 @@ ReadRecord {
 
 Tag {
     string id          PK
-    string name
+    string name           "unique"
     string description    "nullable"
 }
 
