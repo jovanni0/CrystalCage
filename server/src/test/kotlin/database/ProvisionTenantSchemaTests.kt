@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.database.transactions.tenantTransaction
-import dev.jovanni0.tables.Author
+import dev.jovanni0.tables.tenant.AuthorTable
 import dev.jovanni0.tables.User
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -70,7 +70,7 @@ class ProvisionTenantSchemaTests
         provisionTenantSchema(data_source, user_id)
 
         val row_count = tenantTransaction("user_$user_id") {
-            Author
+            AuthorTable
                 .selectAll()
                 .count()
         }

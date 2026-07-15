@@ -9,16 +9,14 @@ import dev.jovanni0.configureSerializer
 import dev.jovanni0.data_types.auth.LoginRequest
 import dev.jovanni0.data_types.auth.LoginResponse
 import dev.jovanni0.data_types.author.AuthorResponse
-import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.provisionTenantSchema
-import dev.jovanni0.database.tenant_schema
 import dev.jovanni0.database.transactions.sharedTransaction
 import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.UserRepository
 import dev.jovanni0.routes.authRoutes
 import dev.jovanni0.routes.authorRoutes
-import dev.jovanni0.tables.Author
+import dev.jovanni0.tables.tenant.AuthorTable
 import dev.jovanni0.tables.User
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -32,8 +30,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
 import io.ktor.server.testing.testApplication
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -112,7 +108,7 @@ class TenantResolutionIntegrationTests
         provisionTenantSchema(data_source, user_id)
 
         tenantTransaction("user_$user_id") {
-            SchemaUtils.create(Author)
+            SchemaUtils.create(AuthorTable)
         }
 
         return user_id
@@ -156,7 +152,7 @@ class TenantResolutionIntegrationTests
         val user_id = seedTenant(username, password)
 
         tenantTransaction("user_$user_id") {
-            Author.insert {
+            AuthorTable.insert {
                 it[last_name] = author
             }
         }

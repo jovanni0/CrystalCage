@@ -1,10 +1,10 @@
-package dev.jovanni0.tables
+package dev.jovanni0.tables.tenant
 
 import org.jetbrains.exposed.v1.core.Table
 
 
 
-object Author: Table("author")
+object AuthorTable: Table("author")
 {
     val id = uuid("id").autoGenerate()
     val first_name = varchar("first_name", 255).nullable()
