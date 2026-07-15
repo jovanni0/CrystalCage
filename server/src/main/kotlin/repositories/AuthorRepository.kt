@@ -18,7 +18,7 @@ class AuthorRepository
                 .selectAll()
                 .map {
                     AuthorRow(
-                        id = it[AuthorTable.id].toString(),
+                        id = it[AuthorTable.id],
                         first_name = it[AuthorTable.first_name],
                         last_name = it[AuthorTable.last_name]
                     )
@@ -37,7 +37,7 @@ class AuthorRepository
             }
 
             AuthorRow(
-                id = insert_statement[AuthorTable.id].toString(),
+                id = insert_statement[AuthorTable.id],
                 first_name = insert_statement[AuthorTable.first_name],
                 last_name = insert_statement[AuthorTable.last_name]
             )

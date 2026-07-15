@@ -161,6 +161,7 @@ fun Application.module()
     configureDatabase()
     configureSerializer()
     configureAuth(jwt_config)
+    configureStatusPages()
 
     val user_repository = UserRepository()
 

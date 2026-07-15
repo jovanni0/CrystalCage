@@ -167,7 +167,7 @@ class TenantResolutionIntegrationTests
 
         assertTrue(token.isNotEmpty())
 
-        val response = client.get("/author") {
+        val response = client.get("/authors") {
             header(HttpHeaders.Authorization, "Bearer $token")
         }
 

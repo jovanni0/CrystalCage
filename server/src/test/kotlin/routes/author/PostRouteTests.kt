@@ -27,6 +27,7 @@ import io.mockk.*
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.uuid.Uuid
 
 
 
@@ -154,7 +155,7 @@ class PostRouteTests
         every()
         {
             repo_mock.create("user_test-user", first_name, last_name)
-        } returns AuthorRow("uuid-1", first_name, last_name)
+        } returns AuthorRow(Uuid.random(), first_name, last_name)
 
         testAuthorRoute(repo_mock)
         { client ->

@@ -23,6 +23,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.uuid.Uuid
 
 
 
@@ -73,9 +74,10 @@ class GetRouteTests
     @Test
     fun `returns 200 ok with a list of authors`()
     {
+        val uuid_1 = Uuid.random()
         val db_rows = listOf(
-            AuthorRow("uuid-1", "John", "Doe"),
-            AuthorRow("uuid-2", "Jane", "Doe"),
+            AuthorRow(uuid_1, "John", "Doe"),
+            AuthorRow(Uuid.random(), "Jane", "Doe"),
         )
 
         every { repo_mock.findAll("user_$username") } returns db_rows
@@ -89,7 +91,7 @@ class GetRouteTests
             val body = response.body<List<AuthorResponse>>()
 
             assertEquals(2, body.size)
-            assertEquals("uuid-1", body[0].id)
+            assertEquals(uuid_1.toString(), body[0].id)
             assertEquals("Jane", body[1].first_name)
         }
     }

@@ -30,7 +30,7 @@ fun Route.authorRoutes(author_repository: AuthorRepository)
                 .findAll(schema_name)
                 .map {
                     AuthorResponse(
-                        id = it.id,
+                        id = it.id.toString(),
                         first_name = it.first_name,
                         last_name = it.last_name
                     )
@@ -56,7 +56,7 @@ fun Route.authorRoutes(author_repository: AuthorRepository)
             call.respond(
                 HttpStatusCode.Created,
                 AuthorResponse(
-                    id = created_author.id,
+                    id = created_author.id.toString(),
                     first_name = created_author.first_name,
                     last_name = created_author.last_name
                 )
