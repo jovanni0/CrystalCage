@@ -97,7 +97,7 @@ CREATE TABLE cover(
     added_at DATE NOT NULL,
 
     CONSTRAINT cover_book_id_fk FOREIGN KEY (book_id) REFERENCES book(id) ON DELETE CASCADE
-)
+);
 
 
 -- because of circular dependency, the book-cover link has to be done separately.
