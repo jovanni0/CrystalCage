@@ -6,7 +6,8 @@
 AuthLoginRequest    = `{ username, password }`
 
 <!-- response to a login -->
-AuthLoginResponse   = `{ id, token }`
+<!-- TODO: is this necessary or just use the UserProfileResponse -->
+AuthLoginResponse   = `{ id, token }` 
 
 <!-- response to user profile request -->
 UserProfileResponse  = `{ id, username, role, created_at }`
@@ -14,7 +15,7 @@ UserProfileResponse  = `{ id, username, role, created_at }`
 ## /library
 
 <!-- response to a search; on Library -->
-LibrarySearchResponse = `[{ type, label, id, image_id? }]`
+LibrarySearchResponse = `{ type, label, id, image_id? }`
 
 ## /authors
 
@@ -67,6 +68,8 @@ TagUpdateRequest    = `{ name?, description?, books: [ id ]? }`
 
 <!-- response to creating a tag -->
 TagResponse         = `{ id, name, description }`
+
+
 
 <!-- response to find all tags; on Add-EditBook/SelectTags -->
 TagSummaryResponse  = `{ id, name }`

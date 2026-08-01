@@ -141,6 +141,8 @@ the process of determining the state of the book is:
 		- if all records have `end_date` set and `dnf = false`, then the book is `READ` and the read count can be found out based on these records.
 	- if there is only the historic record, the book is `READ`.
 
+> the historical read should be counted towards the number of reads, but only once, and only if it is not itself marked `dnf = true`. if the historical read has `dnf = true` and no other dated records exist, the book is `DNF`, not `READ`.
+
 ### Files on disk
 
 for saving both covers and editions to disk, the chosen solution is to implement a system that allows relevant information to be stored in filenames while also maintaining the link to the database entry, by placing the ID of the record in the filename. a filename will look like this:
