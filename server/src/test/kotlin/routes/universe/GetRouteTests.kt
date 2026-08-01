@@ -85,7 +85,7 @@ class GetRouteTests
     {
         val author_uuid = Uuid.random()
         val db_rows = listOf(
-            UniverseRow(Uuid.random().toString(), author_uuid.toString(), "Murderbot"),
+            UniverseRow(Uuid.random(), author_uuid, "Murderbot"),
         )
 
         every { repo_mock.findAllByAuthorId("user_$username", author_uuid) } returns db_rows

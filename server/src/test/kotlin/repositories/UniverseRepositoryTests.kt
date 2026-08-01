@@ -9,15 +9,19 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.assertThrows
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
@@ -184,5 +188,50 @@ class UniverseRepositoryTests
         }
 
         assertEquals("author $author_id does not exist", exception.message)
+    }
+
+
+    @Nested
+    inner class FindById
+    {
+        @Test
+        fun `returns the correct owning author`()
+        {
+            val schema = tenants[0]
+            val author = author_repo.create(schema, "First", "Last")
+            val universe = universe_repo.create(schema, "Some Universe", author.id)
+
+            val result = universe_repo.findById(schema, universe.id)
+
+            assertNotNull(result)
+            assertEquals(author.id, result.author_id)
+        }
+
+
+        @Test
+        fun `returns null for non-existent universe`()
+        {
+            val schema = tenants[0]
+
+            val result = universe_repo.findById(schema, Uuid.random())
+
+            assertNull(result)
+        }
+    }
+
+
+    @Nested
+    inner class Exists
+    {
+        @Test
+        fun `check does not see universes from a different tenant`()
+        {
+            val author_schema1 = author_repo.create(tenants[0], "First", "Last")
+            val universe_schema1 = universe_repo.create(tenants[0], "Universe", author_schema1.id)
+
+            val result = universe_repo.exists(tenants[1], universe_schema1.id)
+
+            assertFalse(result)
+        }
     }
 }
