@@ -3,13 +3,28 @@ package dev.jovanni0.repositories
 import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.records.author.AuthorRow
 import dev.jovanni0.tables.tenant.AuthorTable
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import kotlin.uuid.Uuid
 
 
 
 class AuthorRepository
 {
+    fun exists(schema_name: String, author_id: Uuid): Boolean
+    {
+        return tenantTransaction(schema_name)
+        {
+            AuthorTable
+                .selectAll()
+                .where { AuthorTable.id eq author_id }
+                .empty()
+                .not()
+        }
+    }
+
+
     fun findAll(tenant_schema: String): List<AuthorRow>
     {
         return tenantTransaction(tenant_schema)

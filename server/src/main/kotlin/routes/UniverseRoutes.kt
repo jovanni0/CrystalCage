@@ -35,7 +35,7 @@ fun Route.universeRoutes(universe_repository: UniverseRepository)
                 .findAllByAuthorId(schema_name, author_id)
                 .map {
                     UniverseResponse(
-                        id = it.id,
+                        id = it.id.toString(),
                         author_id = author_id.toString(),
                         name = it.name,
                     )
@@ -68,8 +68,8 @@ fun Route.universeRoutes(universe_repository: UniverseRepository)
 
             call.respond(
                 UniverseResponse(
-                    id = new_universe.id,
-                    author_id = new_universe.author_id,
+                    id = new_universe.id.toString(),
+                    author_id = new_universe.author_id.toString(),
                     name = new_universe.name,
                 )
             )

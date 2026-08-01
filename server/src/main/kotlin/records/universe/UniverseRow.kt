@@ -1,9 +1,11 @@
 package dev.jovanni0.records.universe
 
+import kotlin.uuid.Uuid
+
 
 
 data class UniverseRow(
-    val id: String,
-    val author_id: String,
+    val id: Uuid,
+    val author_id: Uuid,
     val name: String,
 )

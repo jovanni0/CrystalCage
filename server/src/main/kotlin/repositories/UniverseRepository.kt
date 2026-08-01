@@ -15,6 +15,19 @@ import kotlin.uuid.Uuid
 
 class UniverseRepository
 {
+    fun exists(schema_name: String, universe_id: Uuid): Boolean
+    {
+        return tenantTransaction(schema_name)
+        {
+            UniverseTable
+                .selectAll()
+                .where { UniverseTable.id eq universe_id }
+                .empty()
+                .not()
+        }
+    }
+
+
     fun findAllByAuthorId(schema_name: String, author_id: Uuid): List<UniverseRow>
     {
         return tenantTransaction(schema_name)
@@ -25,11 +38,30 @@ class UniverseRepository
                 .orderBy(UniverseTable.name, SortOrder.ASC)
                 .map {
                     UniverseRow(
-                        id = it[UniverseTable.id].toString(),
-                        author_id = it[UniverseTable.author_id].toString(),
+                        id = it[UniverseTable.id],
+                        author_id = it[UniverseTable.author_id],
                         name = it[UniverseTable.name]
                     )
                 }
+        }
+    }
+
+
+    fun findById(schema_name: String, universe_id: Uuid): UniverseRow?
+    {
+        return tenantTransaction(schema_name)
+        {
+            UniverseTable
+                .selectAll()
+                .where { UniverseTable.id eq universe_id }
+                .map {
+                    UniverseRow(
+                        id = it[UniverseTable.id],
+                        author_id = it[UniverseTable.author_id],
+                        name = it[UniverseTable.name]
+                    )
+                }
+                .firstOrNull()
         }
     }
 
@@ -55,8 +87,8 @@ class UniverseRepository
             }
 
             UniverseRow(
-                id = insert_statement[UniverseTable.id].toString(),
-                author_id = insert_statement[UniverseTable.author_id].toString(),
+                id = insert_statement[UniverseTable.id],
+                author_id = insert_statement[UniverseTable.author_id],
                 name = insert_statement[UniverseTable.name]
             )
         }
