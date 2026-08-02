@@ -145,3 +145,26 @@ suspend fun ApplicationCall.parseUuidsOrRespond(value: List<String>, field_name:
 
     return parsed
 }
+
+
+suspend fun ApplicationCall.parsePatchUuidOrRespond(patch: Patch<String>, field_name: String): Patch<Uuid>?
+{
+    return when(patch)
+    {
+        is Patch.Undefined -> Patch.Undefined
+        is Patch.Value ->
+        {
+            val raw = patch.value ?: return Patch.Value(null)
+
+            val uuid = parseUuid(raw).value
+
+            if (uuid == null)
+            {
+                respond(HttpStatusCode.BadRequest, "$field_name is not a valid UUID")
+                return null
+            }
+
+            Patch.Value(uuid)
+        }
+    }
+}

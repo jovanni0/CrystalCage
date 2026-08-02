@@ -6,6 +6,8 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.database.DbConfig
+import dev.jovanni0.exceptions.ConfigurationException
+import dev.jovanni0.exceptions.ConflictException
 import dev.jovanni0.exceptions.NotFoundException
 import dev.jovanni0.repositories.UserRepository
 import dev.jovanni0.routes.authRoutes
@@ -16,6 +18,7 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.plugins.statuspages.exception
 import io.ktor.server.response.respond
 import io.ktor.server.routing.*
 import org.flywaydb.core.Flyway
@@ -134,12 +137,18 @@ fun Application.configureStatusPages()
             call.respond(HttpStatusCode.NotFound, cause.message)
         }
 
+        exception<ConflictException> { call, cause ->
+            call.respond(HttpStatusCode.Conflict, cause.message)
+        }
+
+        exception<ConfigurationException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest, cause.message)
+        }
+
         exception<ExposedSQLException> { call, cause ->
             when (cause.sqlState)
             {
                 "23503" -> call.respond(HttpStatusCode.BadRequest, "referenced entity does not exist")
-                // TODO: this is too specific to live here, should be handled on the repo level with a check and custom exception.
-                "23505" -> call.respond(HttpStatusCode.BadRequest, "a tag with the same name already exists")
                 else -> call.respond(HttpStatusCode.InternalServerError, "database error")
             }
         }
