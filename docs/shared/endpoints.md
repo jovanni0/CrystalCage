@@ -418,6 +418,23 @@ retrieve the information for a specific read record.the read number is computed 
 - request:  none
 - response: `ReadRecordResponse`
 
+`POST /read-records`
+create a new read record.
+- request: `ReadRecordCreateRequest`
+- response: `ReadRecordResponse`
+```ts
+ReadRecordCreateRequest {
+    book_id: string,
+    edition_id: string|null,
+    start_date: string | null
+    end_date: string | null
+    did_not_finish: boolean
+    is_historical: boolean
+    stop_position?: string | null
+    notes?: string | null
+}
+```
+
 `PATCH /read-records/{id}`
  edit the read record.
 - request:  `ReadRecordUpdateRequest`

@@ -115,7 +115,7 @@ Tag      ||--o{ BookTag     : "tagged in"
 this is the table structure for the database. the following table are of special interest:
 - `Book` = represents the abstract record of a book, meaning it's not tied to a specific edition of format. it holds the information that is shared between the different editions, and is the common link between these said editions. the `launch_date` represents the date the first edition of the book has been launched.
 - `BookEdition` = an extension of the `Book`, contains the information that makes that edition different from the book. `label` is some text the user attaches to the edition. `release_date` is the date the edition was released, different from the book launch date.
-- `ReadRecord` = represents a read pass of an edition of a book. each edition can have multiple read passes. if the record has the `start_date` set as null, it means that the read is historical - the user does not remember when they read it. an edition cannot have multiple historical read records, and a read record cannot have the start date null and the end date set. `stop_position` is a catch-all field where users can save anything that will help them know where they stopped reading.
+- `ReadRecord` = represents a read pass of an edition of a book. each edition can have multiple read passes. if the record has the `start_date` set as null, it means that the read is historical - the user does not remember when they read it. an book cannot have multiple historical read records, and a read record cannot have the start date null and the end date set. `stop_position` is a catch-all field where users can save anything that will help them know where they stopped reading.
 - `BookTag` = links a tag to a book.
 
 ## Database-derived logic
