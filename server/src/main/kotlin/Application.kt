@@ -83,6 +83,9 @@ fun Application.configureSerializer()
 {
 
     install(ContentNegotiation) {
+        // Json's `encodeDefaults` defaults to `false`; this is relied on to keep
+        // `Patch.Undefined` fields from ever being serialized if such a DTO is
+        // echoed back in a response.
         json()
     }
 }

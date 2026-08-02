@@ -123,3 +123,25 @@ suspend fun ApplicationCall.tryParseUuidOrRespond(value: String?, param_name: St
 
     return result
 }
+
+
+
+suspend fun ApplicationCall.parseUuidsOrRespond(value: List<String>, field_name: String): List<Uuid>?
+{
+    val parsed = mutableListOf<Uuid>()
+
+    for (raw in value)
+    {
+        val result = parseUuid(raw)
+
+        if (result.value == null)
+        {
+            respond(HttpStatusCode.BadRequest, "$field_name contains invalid UUID $raw")
+            return null
+        }
+
+        parsed.add(result.value)
+    }
+
+    return parsed
+}

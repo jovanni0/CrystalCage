@@ -2,15 +2,51 @@ package dev.jovanni0.repositories
 
 import dev.jovanni0.data_types.ReadStatus
 import dev.jovanni0.database.transactions.tenantTransaction
+import dev.jovanni0.records.book.BookDetailRow
 import dev.jovanni0.records.book.BookSummaryRow
 import dev.jovanni0.tables.tenant.BookTable
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
 
 
 class BookRepository
 {
+    /**
+     * TODO: temporary implementation for use in unit tests. needs to be expanded.
+     */
+    fun findById(schema_name: String, id: Uuid): BookDetailRow?
+    {
+        return tenantTransaction(schema_name)
+        {
+            BookTable
+                .selectAll()
+                .where { BookTable.id eq id }
+                .map {
+                    BookDetailRow(
+                        id = it[BookTable.id],
+                        author_id = it[BookTable.author_id],
+                        series_id = it[BookTable.series_id],
+                        universe_id = it[BookTable.universe_id],
+                        cover_id = it[BookTable.cover_id],
+                        volume_number = it[BookTable.volume_number]?.toFloat(),
+                        title = it[BookTable.title],
+                        launch_date = it[BookTable.launch_date],
+                        word_count = it[BookTable.word_count],
+                        blurb = it[BookTable.blurb],
+                        notes = it[BookTable.notes],
+                        tag_ids = listOf(),
+                        read_status = ReadStatus.UNREAD,
+                        reread_count = 0,
+                    )
+                }
+                .firstOrNull()
+        }
+    }
+
+
     /**
      * TODO: temporary implementation for use in unit tests. needs to be expanded.
      */
