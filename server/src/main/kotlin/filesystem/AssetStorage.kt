@@ -5,6 +5,7 @@ import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.uuid.Uuid
 
 
 
@@ -84,5 +85,31 @@ class AssetStorage(private val base_directory: Path)
     fun resolveDirectory(schema_name: String, category: AssetCategory): Path
     {
         return base_directory.resolve(schema_name).resolve(category.dir_name)
+    }
+
+
+    fun findByEmbeddedId(schema_name: String, category: AssetCategory, id: Uuid): Path?
+    {
+        val dir_path = resolveDirectory(schema_name, category)
+
+        if (!Files.exists(dir_path))
+        {
+            return null
+        }
+
+        val match = Files
+            .list(dir_path)
+            .use { stream ->
+                stream.filter { path ->
+                    val name = path.fileName.toString()
+                    val without_extension = name.substringBeforeLast('.')
+
+                    without_extension.substringAfterLast('.') == id.toString()
+                }
+            }
+            .findFirst()
+            .orElse(null)
+
+        return match
     }
 }
