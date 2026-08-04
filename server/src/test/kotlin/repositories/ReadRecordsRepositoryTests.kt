@@ -3,15 +3,19 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.exceptions.ConfigurationException
 import dev.jovanni0.exceptions.ConflictException
+import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.BookRepository
 import dev.jovanni0.repositories.EditionRepository
 import dev.jovanni0.repositories.ReadRecordRepository
+import dev.jovanni0.tables.tenant.EditionTable
 import dev.jovanni0.utils.Patch
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -22,6 +26,7 @@ import org.junit.jupiter.api.assertThrows
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
+import java.nio.file.Files
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -37,7 +42,7 @@ class ReadRecordsRepositoryTests
 {
     private val author_repo = AuthorRepository()
     private val book_repo = BookRepository()
-    private val edition_repo = EditionRepository()
+    private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
     private val read_record_repo = ReadRecordRepository()
 
 
@@ -98,6 +103,28 @@ class ReadRecordsRepositoryTests
             tenants.forEach {
                 exec("TRUNCATE TABLE \"$it\".read_record, \"$it\".book_edition, \"$it\".book, \"$it\".author RESTART IDENTITY CASCADE")
             }
+        }
+    }
+
+
+    private fun insertEdition(
+        schema: String,
+        book_id: Uuid,
+        label: String? = null,
+        release_date: LocalDate? = null,
+        format: String = "hardcover",
+        added_at: LocalDate = LocalDate.now(),
+    ): Uuid
+    {
+        return tenantTransaction(schema)
+        {
+            EditionTable.insert {
+                it[EditionTable.book_id] = book_id
+                it[EditionTable.label] = label
+                it[EditionTable.release_date] = release_date
+                it[EditionTable.format] = format
+                it[EditionTable.added_at] = added_at
+            }[EditionTable.id]
         }
     }
 
@@ -250,14 +277,14 @@ class ReadRecordsRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val book = book_repo.create(schema, author.id, null, null, "Some Book")
-            val edition = edition_repo.create(schema, book.id, null, null, "paperback")
+            val edition_id = insertEdition(schema, book.id, null, null, "paperback")
 
-            val created = read_record_repo.create(schema, book.id, edition.id, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
+            val created = read_record_repo.create(schema, book.id, edition_id, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             val result = read_record_repo.findById(schema, created.id)
 
             assertNotNull(result)
-            assertEquals(edition.id, result.edition_id)
+            assertEquals(edition_id, result.edition_id)
         }
 
 
@@ -305,16 +332,17 @@ class ReadRecordsRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val book = book_repo.create(schema, author.id, null, null, "Some Book")
-            val edition = edition_repo.create(schema, book.id, null, null, "paperback")
+            val edition_id = insertEdition(schema, book.id, null, null, "paperback")
+
 
             val result = read_record_repo.create(
-                schema, book.id, edition.id,
+                schema, book.id, edition_id,
                 LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10),
                 true, false, "page 100", "some notes"
             )
 
             assertEquals(book.id, result.book_id)
-            assertEquals(edition.id, result.edition_id)
+            assertEquals(edition_id, result.edition_id)
             assertEquals(LocalDate.of(2024, 1, 1), result.start_date)
             assertEquals(LocalDate.of(2024, 1, 10), result.end_date)
             assertTrue(result.did_not_finish)

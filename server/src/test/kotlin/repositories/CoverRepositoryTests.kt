@@ -58,7 +58,7 @@ class CoverRepositoryTests
     private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
     private val author_repo = AuthorRepository()
     private val book_repo = BookRepository()
-    private val edition_repo = EditionRepository()
+    private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
     private val read_record_repo = ReadRecordRepository()
     private val mock_cover_storage = mockk<AssetStorage>(relaxed = true)
     private val mock_cover_repo = CoverRepository(mock_cover_storage)
