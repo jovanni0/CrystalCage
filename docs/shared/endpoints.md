@@ -348,7 +348,7 @@ delete a cover. also needs to make sure the cover is removed from the book recor
 ## /editions
 
 `GET /editions?book_id=...`
-retrieve list of all editions for the book.
+retrieve list of all editions for the book, ordered by `added_at` asc.
 - request:  none
 - response: `EditionResponse[]`
 ```ts
