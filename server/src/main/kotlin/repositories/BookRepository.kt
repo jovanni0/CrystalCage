@@ -121,4 +121,17 @@ class BookRepository
                 .firstOrNull()
         }
     }
+
+
+    fun exists(schema_name: String, id: Uuid): Boolean
+    {
+        return tenantTransaction(schema_name)
+        {
+            BookTable
+                .selectAll()
+                .where { BookTable.id eq id }
+                .empty()
+                .not()
+        }
+    }
 }
