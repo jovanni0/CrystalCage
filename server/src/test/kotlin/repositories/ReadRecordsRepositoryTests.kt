@@ -3,12 +3,14 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.data_types.BookCreateContext
 import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.exceptions.ConfigurationException
 import dev.jovanni0.exceptions.ConflictException
 import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.BookRepository
+import dev.jovanni0.repositories.CoverRepository
 import dev.jovanni0.repositories.EditionRepository
 import dev.jovanni0.repositories.ReadRecordRepository
 import dev.jovanni0.tables.tenant.EditionTable
@@ -41,8 +43,9 @@ import kotlin.uuid.Uuid
 class ReadRecordsRepositoryTests
 {
     private val author_repo = AuthorRepository()
-    private val book_repo = BookRepository()
+    private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
     private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
+    private val book_repo = BookRepository(author_repo, cover_repo, edition_repo)
     private val read_record_repo = ReadRecordRepository()
 
 
@@ -137,7 +140,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val result = read_record_repo.findAllByBookId(schema, book.id)
 
@@ -150,7 +153,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(
                 schema, book.id, null,
@@ -181,7 +184,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             read_record_repo.create(schema, book.id, null, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 10), false, false, null, null)
             read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -197,8 +200,8 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book Two")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title = "Book One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title = "Book Two"))
 
             read_record_repo.create(schema, book1.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
             read_record_repo.create(schema, book2.id, null, LocalDate.of(2024, 2, 1), LocalDate.of(2024, 2, 10), false, false, null, null)
@@ -216,12 +219,12 @@ class ReadRecordsRepositoryTests
             val schema1 = tenants[0]
             val schema2 = tenants[1]
             val author1 = author_repo.create(schema1, "First", "Last")
-            val book1 = book_repo.create(schema1, author1.id, null, null, "Book One")
+            val book1 = book_repo.create(schema1, BookCreateContext(author1.id, title = "Book One"))
 
             read_record_repo.create(schema1, book1.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             val author2 = author_repo.create(schema2, "First", "Last")
-            val book2 = book_repo.create(schema2, author2.id, null, null, "Book Two")
+            val book2 = book_repo.create(schema2, BookCreateContext(author2.id, title = "Book Two"))
 
             val result_schema2 = read_record_repo.findAllByBookId(schema2, book2.id)
 
@@ -249,7 +252,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(
                 schema, book.id, null,
@@ -276,7 +279,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val edition_id = insertEdition(schema, book.id, null, null, "paperback")
 
             val created = read_record_repo.create(schema, book.id, edition_id, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -293,7 +296,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
@@ -312,7 +315,7 @@ class ReadRecordsRepositoryTests
             val schema1 = tenants[0]
             val schema2 = tenants[1]
             val author = author_repo.create(schema1, "First", "Last")
-            val book = book_repo.create(schema1, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema1, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(schema1, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
@@ -331,7 +334,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val edition_id = insertEdition(schema, book.id, null, null, "paperback")
 
 
@@ -357,7 +360,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val result = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), null, false, false, null, null)
 
@@ -373,7 +376,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val result = read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
@@ -386,7 +389,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
             assertThrows<ConflictException> {
@@ -400,8 +403,8 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book Two")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title = "Book One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title = "Book Two"))
             read_record_repo.create(schema, book1.id, null, null, null, false, true, null, null)
 
             val result = read_record_repo.create(schema, book2.id, null, null, null, false, true, null, null)
@@ -415,7 +418,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             assertThrows<ConflictException> {
                 read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), null, false, true, null, null)
@@ -428,7 +431,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             assertThrows<ConflictException> {
                 read_record_repo.create(schema, book.id, null, null, LocalDate.of(2024, 1, 10), false, true, null, null)
@@ -441,7 +444,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             read_record_repo.create(schema, book.id, null, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 10), false, false, null, null)
             read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -456,7 +459,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
             val fetched = read_record_repo.findById(schema, created.id)
@@ -472,7 +475,7 @@ class ReadRecordsRepositoryTests
             val schema1 = tenants[0]
             val schema2 = tenants[1]
             val author = author_repo.create(schema1, "First", "Last")
-            val book = book_repo.create(schema1, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema1, BookCreateContext(author.id, title = "Some Book"))
 
             val created = read_record_repo.create(schema1, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
@@ -489,7 +492,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, "old position", "old notes")
 
             val result = read_record_repo.update(
@@ -514,7 +517,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, "some position", "some notes")
 
             read_record_repo.update(
@@ -535,7 +538,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, "position", "notes")
 
             val result = read_record_repo.update(
@@ -571,7 +574,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
             val dated = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
@@ -590,7 +593,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             assertThrows<ConflictException> {
@@ -608,7 +611,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             val result = read_record_repo.update(
@@ -633,7 +636,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
             assertThrows<ConflictException> {
@@ -651,7 +654,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
             val result = read_record_repo.update(
@@ -675,7 +678,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
             assertThrows<ConflictException> {
@@ -693,7 +696,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             assertThrows<ConflictException> {
@@ -711,7 +714,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             assertThrows<ConfigurationException> {
@@ -729,7 +732,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             assertThrows<ConfigurationException> {
@@ -748,7 +751,7 @@ class ReadRecordsRepositoryTests
             val schema1 = tenants[0]
             val schema2 = tenants[1]
             val author1 = author_repo.create(schema1, "First", "Last")
-            val book1 = book_repo.create(schema1, author1.id, null, null, "Book")
+            val book1 = book_repo.create(schema1, BookCreateContext(author1.id, title = "Book"))
             val created1 = read_record_repo.create(schema1, book1.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, "original", null)
 
             val result = read_record_repo.update(
@@ -775,7 +778,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             val result = read_record_repo.delete(schema, created.id)
@@ -801,7 +804,7 @@ class ReadRecordsRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val record1 = read_record_repo.create(schema, book.id, null, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 10), false, false, null, null)
             val record2 = read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
@@ -820,7 +823,7 @@ class ReadRecordsRepositoryTests
             val schema1 = tenants[0]
             val schema2 = tenants[1]
             val author = author_repo.create(schema1, "First", "Last")
-            val book = book_repo.create(schema1, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema1, BookCreateContext(author.id, title = "Some Book"))
             val created = read_record_repo.create(schema1, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
 
             val result = read_record_repo.delete(schema2, created.id)

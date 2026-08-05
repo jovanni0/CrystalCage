@@ -2,14 +2,13 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import dev.jovanni0.exceptions.AuthorNotFoundException
+import dev.jovanni0.exceptions.not_found.AuthorNotFoundException
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.UniverseRepository
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach

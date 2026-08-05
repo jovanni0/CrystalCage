@@ -2,9 +2,13 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.data_types.BookCreateContext
 import dev.jovanni0.data_types.ReadStatus
+import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.BookRepository
+import dev.jovanni0.repositories.CoverRepository
+import dev.jovanni0.repositories.EditionRepository
 import dev.jovanni0.repositories.ReadRecordRepository
 import dev.jovanni0.repositories.SeriesRepository
 import dev.jovanni0.repositories.UniverseRepository
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.Nested
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
+import java.nio.file.Files
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertNotEquals
@@ -245,7 +250,9 @@ class SeriesRepositoryTests
     @Nested
     inner class FindById
     {
-        private val book_repo = BookRepository()
+        private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
+        private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
+        private val book_repo = BookRepository(author_repo, cover_repo, edition_repo)
         private val read_record_repo = ReadRecordRepository()
 
 
@@ -283,8 +290,7 @@ class SeriesRepositoryTests
             val universe = universe_repo.create(schema, "Some Universe", author.id)
             val series = series_repo.create(schema, author.id, universe.id, "My Series", true)
 
-            val other_author = author_repo.create(schema, "Other", "Author")
-            book_repo.create(schema, other_author.id, null, series.id, "Some Title")
+            book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Some Title"))
 
             val result = series_repo.findById(schema, series.id)
 
@@ -303,7 +309,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             val result = series_repo.findById(schema, series.id)
 
@@ -324,7 +330,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             read_record_repo.create(schema, book.id, null, LocalDate.of(2023, 1, 1), LocalDate.of(2023, 1, 10), false, false, null, null)
             read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -348,9 +354,9 @@ class SeriesRepositoryTests
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
 
-            val book_unread = book_repo.create(schema, author.id, null, series.id, "Unread Book")
-            val book_in_progress = book_repo.create(schema, author.id, null, series.id, "In Progress Book")
-            val book_read = book_repo.create(schema, author.id, null, series.id, "Read Book")
+            val book_unread = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title =  "Unread Book"))
+            val book_in_progress = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "In Progress Book"))
+            val book_read = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title =  "Read Book"))
 
             read_record_repo.create(schema, book_in_progress.id, null, LocalDate.of(2024, 1, 1), null, false, false, null, null)
             read_record_repo.create(schema, book_read.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -388,7 +394,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book With Nulls")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book With Nulls"))
 
             val result = series_repo.findById(schema, series.id)
 
@@ -411,8 +417,8 @@ class SeriesRepositoryTests
             val series1 = series_repo.create(schema, author.id, null, "Series One", false)
             val series2 = series_repo.create(schema, author.id, null, "Series Two", false)
 
-            book_repo.create(schema, author.id, null, series1.id, "Book In Series One")
-            book_repo.create(schema, author.id, null, series2.id, "Book In Series Two")
+            book_repo.create(schema, BookCreateContext(author.id, series_id = series1.id, title = "Book In Series One"))
+            book_repo.create(schema, BookCreateContext(author.id, series_id = series2.id, title = "Book In Series Two"))
 
             val result = series_repo.findById(schema, series1.id)
 
@@ -428,7 +434,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
 
@@ -449,7 +455,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             read_record_repo.create(schema, book.id, null, null, null, true, true, null, null)
 
@@ -470,7 +476,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             read_record_repo.create(schema, book.id, null, null, null, false, true, null, null)
             read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -492,7 +498,7 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book One")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book One"))
 
             read_record_repo.create(schema, book.id, null, null, null, true, true, null, null)
             read_record_repo.create(schema, book.id, null, LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 10), false, false, null, null)
@@ -514,8 +520,8 @@ class SeriesRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Series", false)
-            val book_a = book_repo.create(schema, author.id, null, series.id, "Book A")
-            val book_b = book_repo.create(schema, author.id, null, series.id, "Book B")
+            val book_a = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book A"))
+            val book_b = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book B"))
 
             read_record_repo.create(schema, book_a.id, null, null, null, false, true, null, null) // historical, not dnf
             read_record_repo.create(schema, book_b.id, null, null, null, true, true, null, null)  // historical, dnf

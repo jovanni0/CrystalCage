@@ -2,6 +2,7 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.data_types.BookCreateContext
 import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.exceptions.AssetStorageException
 import dev.jovanni0.filesystem.AssetStorage
@@ -9,6 +10,7 @@ import dev.jovanni0.filesystem.BookFilenameContext
 import dev.jovanni0.filesystem.FilenameBuilder
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.BookRepository
+import dev.jovanni0.repositories.CoverRepository
 import dev.jovanni0.repositories.EditionRepository
 import dev.jovanni0.repositories.ReadRecordRepository
 import dev.jovanni0.tables.tenant.EditionTable
@@ -49,8 +51,9 @@ import java.nio.file.Path
 class EditionRepositoryTests
 {
     private val author_repo = AuthorRepository()
-    private val book_repo = BookRepository()
+    private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
     private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
+    private val book_repo = BookRepository(author_repo, cover_repo, edition_repo)
 
 
     companion object
@@ -115,7 +118,7 @@ class EditionRepositoryTests
 
     private fun insertBook(schema: String, author_id: Uuid, title: String = "Test Book"): Uuid
     {
-        return book_repo.create(schema, author_id, null, null, title).id
+        return book_repo.create(schema, BookCreateContext(author_id, title = title)).id
     }
 
 

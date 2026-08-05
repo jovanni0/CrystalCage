@@ -7,13 +7,12 @@ import dev.jovanni0.configureAuth
 import dev.jovanni0.configureSerializer
 import dev.jovanni0.configureStatusPages
 import dev.jovanni0.data_types.universe.request.UniverseCreateRequest
-import dev.jovanni0.exceptions.AuthorNotFoundException
+import dev.jovanni0.exceptions.not_found.AuthorNotFoundException
 import dev.jovanni0.repositories.UniverseRepository
 import dev.jovanni0.routes.universeRoutes
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody

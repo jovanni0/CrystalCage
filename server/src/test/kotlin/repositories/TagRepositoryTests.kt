@@ -2,8 +2,12 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.data_types.BookCreateContext
+import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.BookRepository
+import dev.jovanni0.repositories.CoverRepository
+import dev.jovanni0.repositories.EditionRepository
 import dev.jovanni0.repositories.SeriesRepository
 import dev.jovanni0.repositories.TagRepository
 import dev.jovanni0.utils.Patch
@@ -20,6 +24,7 @@ import org.junit.jupiter.api.assertThrows
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.postgresql.PostgreSQLContainer
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -34,7 +39,9 @@ class TagRepositoryTests
 {
     private val tag_repo = TagRepository()
     private val author_repo = AuthorRepository()
-    private val book_repo = BookRepository()
+    private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
+    private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
+    private val book_repo = BookRepository(author_repo, cover_repo, edition_repo)
     private val series_repo = SeriesRepository()
 
 
@@ -130,7 +137,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
 
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
@@ -147,9 +154,9 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book Two")
-            val book3 = book_repo.create(schema, author.id, null, null, "Book Three")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title =  "Book One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title =  "Book Two"))
+            val book3 = book_repo.create(schema, BookCreateContext(author.id, title =  "Book Three"))
             val tag = tag_repo.create(schema, "Fantasy", null)
 
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book1.id, book2.id, book3.id), emptyList())
@@ -166,8 +173,8 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book Two")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title = "Book One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title = "Book Two"))
 
             val tag_no_books = tag_repo.create(schema, "Empty Tag", null)
             val tag_one_book = tag_repo.create(schema, "One Book Tag", null)
@@ -268,7 +275,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -291,9 +298,9 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book Two")
-            val book3 = book_repo.create(schema, author.id, null, null, "Book Three")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title = "Book One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title = "Book Two"))
+            val book3 = book_repo.create(schema, BookCreateContext(author.id, title = "Book Three"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book1.id, book2.id, book3.id), emptyList())
 
@@ -311,7 +318,7 @@ class TagRepositoryTests
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
             val series = series_repo.create(schema, author.id, null, "Some Series", false)
-            val book = book_repo.create(schema, author.id, null, series.id, "Book In Series")
+            val book = book_repo.create(schema, BookCreateContext(author.id, series_id = series.id, title = "Book In Series"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -327,14 +334,14 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Title")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Title"))
             val tag = tag_repo.create(schema, "My Tag", "My Description")
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
             val result = tag_repo.findById(schema, tag.id)
 
             assertNotNull(result)
-            assertEquals(tag.id, result!!.id)
+            assertEquals(tag.id, result.id)
             assertEquals("My Tag", result.name)
             assertEquals("My Description", result.description)
         }
@@ -345,8 +352,8 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book1 = book_repo.create(schema, author.id, null, null, "Book For Tag One")
-            val book2 = book_repo.create(schema, author.id, null, null, "Book For Tag Two")
+            val book1 = book_repo.create(schema, BookCreateContext(author.id, title = "Book For Tag One"))
+            val book2 = book_repo.create(schema, BookCreateContext(author.id, title = "Book For Tag Two"))
 
             val tag1 = tag_repo.create(schema, "Tag One", null)
             val tag2 = tag_repo.create(schema, "Tag Two", null)
@@ -537,7 +544,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
 
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
@@ -555,7 +562,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -573,8 +580,8 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book_to_remove = book_repo.create(schema, author.id, null, null, "Book To Remove")
-            val book_to_add = book_repo.create(schema, author.id, null, null, "Book To Add")
+            val book_to_remove = book_repo.create(schema, BookCreateContext(author.id, title = "Book To Remove"))
+            val book_to_add = book_repo.create(schema, BookCreateContext(author.id, title = "Book To Add"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book_to_remove.id), emptyList())
 
@@ -593,7 +600,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -611,7 +618,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
 
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, emptyList(), listOf(book.id))
@@ -628,7 +635,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -716,7 +723,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 
@@ -738,7 +745,7 @@ class TagRepositoryTests
         {
             val schema = tenants[0]
             val author = author_repo.create(schema, "First", "Last")
-            val book = book_repo.create(schema, author.id, null, null, "Some Book")
+            val book = book_repo.create(schema, BookCreateContext(author.id, title = "Some Book"))
             val tag = tag_repo.create(schema, "Fantasy", null)
             tag_repo.update(schema, tag.id, Patch.Undefined, Patch.Undefined, listOf(book.id), emptyList())
 

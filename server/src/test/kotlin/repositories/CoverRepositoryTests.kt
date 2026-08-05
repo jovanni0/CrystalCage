@@ -2,6 +2,7 @@ package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.jovanni0.data_types.BookCreateContext
 import dev.jovanni0.database.transactions.tenantTransaction
 import dev.jovanni0.exceptions.AssetStorageException
 import dev.jovanni0.filesystem.AssetStorage
@@ -57,8 +58,8 @@ class CoverRepositoryTests
 {
     private val cover_repo = CoverRepository(AssetStorage(Files.createTempDirectory("cover-repo-tests")))
     private val author_repo = AuthorRepository()
-    private val book_repo = BookRepository()
     private val edition_repo = EditionRepository(AssetStorage(Files.createTempDirectory("edition-repo-tests")))
+    private val book_repo = BookRepository(author_repo, cover_repo, edition_repo)
     private val read_record_repo = ReadRecordRepository()
     private val mock_cover_storage = mockk<AssetStorage>(relaxed = true)
     private val mock_cover_repo = CoverRepository(mock_cover_storage)
@@ -126,7 +127,7 @@ class CoverRepositoryTests
 
     private fun insertBook(schema: String, author_id: Uuid, title: String = "Test Book"): Uuid
     {
-        return book_repo.create(schema, author_id, null, null, title).id
+        return book_repo.create(schema, BookCreateContext(author_id, title = title)).id
     }
 
     
