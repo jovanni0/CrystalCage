@@ -1,4 +1,4 @@
-package routes.author
+package repositories
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
@@ -16,8 +16,6 @@ import org.testcontainers.postgresql.PostgreSQLContainer
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-
-
 
 @Testcontainers
 class AuthorRepositoryTests
