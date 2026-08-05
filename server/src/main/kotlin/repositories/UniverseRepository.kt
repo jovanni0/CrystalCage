@@ -1,7 +1,7 @@
 package dev.jovanni0.repositories
 
 import dev.jovanni0.database.transactions.tenantTransaction
-import dev.jovanni0.exceptions.AuthorNotFoundException
+import dev.jovanni0.exceptions.not_found.AuthorNotFoundException
 import dev.jovanni0.records.universe.UniverseRow
 import dev.jovanni0.tables.tenant.AuthorTable
 import dev.jovanni0.tables.tenant.UniverseTable

@@ -6,9 +6,12 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.database.DbConfig
+import dev.jovanni0.exceptions.AssetStorageException
+import dev.jovanni0.exceptions.AuthorMismatchException
 import dev.jovanni0.exceptions.ConfigurationException
 import dev.jovanni0.exceptions.ConflictException
-import dev.jovanni0.exceptions.NotFoundException
+import dev.jovanni0.exceptions.PathTooLongException
+import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.repositories.UserRepository
 import dev.jovanni0.routes.authRoutes
 import io.ktor.http.HttpStatusCode
@@ -137,12 +140,24 @@ fun Application.configureStatusPages()
             call.respond(HttpStatusCode.NotFound, cause.message)
         }
 
-        exception<ConflictException> { call, cause ->
+        exception<AssetStorageException> {call, cause ->
+            call.respond(HttpStatusCode.InternalServerError, cause.message)
+        }
+
+        exception<AuthorMismatchException> { call, cause ->
             call.respond(HttpStatusCode.Conflict, cause.message)
         }
 
         exception<ConfigurationException> { call, cause ->
             call.respond(HttpStatusCode.BadRequest, cause.message)
+        }
+
+        exception<ConflictException> { call, cause ->
+            call.respond(HttpStatusCode.Conflict, cause.message)
+        }
+
+        exception<PathTooLongException> { call, cause ->
+            call.respond(HttpStatusCode.InternalServerError, cause.message)
         }
 
         exception<ExposedSQLException> { call, cause ->

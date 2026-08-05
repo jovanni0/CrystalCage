@@ -1,4 +1,4 @@
-package dev.jovanni0.exceptions
+package dev.jovanni0.exceptions.not_found
 
 
 

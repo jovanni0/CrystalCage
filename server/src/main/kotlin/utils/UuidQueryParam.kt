@@ -125,6 +125,25 @@ suspend fun ApplicationCall.tryParseUuidOrRespond(value: String?, param_name: St
 }
 
 
+suspend fun ApplicationCall.parseUuidOrRespond(value: Update<String?>, param_name: String): Update<Uuid?>?
+{
+    if (value !is Update.Value)
+    {
+        return Update.Undefined
+    }
+
+    val result = parseUuid(value.value)
+
+    if (!result.is_valid)
+    {
+        respond(HttpStatusCode.BadRequest, "$param_name is not a valid UUID")
+        return null
+    }
+
+    return Update.Value(result.value)
+}
+
+
 
 suspend fun ApplicationCall.parseUuidsOrRespond(value: List<String>, field_name: String): List<Uuid>?
 {
@@ -146,6 +165,31 @@ suspend fun ApplicationCall.parseUuidsOrRespond(value: List<String>, field_name:
     return parsed
 }
 
+
+suspend fun ApplicationCall.parseUuidsOrRespond(value: Update<List<String>>, field_name: String): Update<List<Uuid>>?
+{
+    if (value !is Update.Value)
+    {
+        return Update.Undefined
+    }
+
+    val parsed = mutableListOf<Uuid>()
+
+    for (raw in value.value)
+    {
+        val result = parseUuid(raw)
+
+        if (result.value == null)
+        {
+            respond(HttpStatusCode.BadRequest, "$field_name contains invalid UUID $raw")
+            return null
+        }
+
+        parsed.add(result.value)
+    }
+
+    return Update.Value(parsed)
+}
 
 suspend fun ApplicationCall.parsePatchUuidOrRespond(patch: Patch<String>, field_name: String): Patch<Uuid>?
 {
