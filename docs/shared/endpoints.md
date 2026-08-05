@@ -208,15 +208,15 @@ deletes a tag and all it's usage in all books.
 ## /books
 
 `GET /books?author_id=&series_id=&universe_id=&tag_id=`
-retrieves all books filtered by author/universe/series/tag.
+retrieves all books filtered by author/universe/series/tag, ordered by last_name-first_name-universe_name-series_name-volume_number-title.
 - request:  none
 - response: `BookSummaryResponse[]`
 ```ts
 BookSummaryResponse {
   id: string
   author_id: string
-  series_id: string | null
   universe_id: string | null
+  series_id: string | null
   cover_id: string | null
   volume_number: number | null
   title: string
@@ -255,8 +255,8 @@ create a new book entry based on the block of data collected in the app.
 ```ts
 BookCreateRequest {
   author_id: string
-  series_id?: string
   universe_id?: string
+  series_id?: string
   volume_number?: number
   title: string
   launch_date?: string
@@ -273,6 +273,7 @@ BookCreateRequest {
     file: File
     label?: string
     format: string
+    release_date?: string
   }[]
 }
 ```
@@ -284,8 +285,8 @@ update book information.
 ```ts
 BookUpdateRequest {
   author_id?: string
-  series_id?: string | null
   universe_id?: string | null
+  series_id?: string | null
   cover_id?: string | null
   volume_number?: number | null
   title?: string
@@ -296,6 +297,11 @@ BookUpdateRequest {
   tag_ids?: string[]
 }
 ```
+
+`DELETE /books/{id}`
+delete a book by id.
+- request:  none
+- response: none
 
 ## /covers
 
