@@ -26,6 +26,7 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging:3.5.1")
     implementation("io.ktor:ktor-server-partial-content:3.5.1")
     implementation("io.ktor:ktor-server-config-yaml:3.5.1")
+    implementation("io.ktor:ktor-server-cors:3.5.1")
     implementation("ch.qos.logback:logback-classic:1.5.35")
 
     implementation("org.postgresql:postgresql:42.7.11")

@@ -6,40 +6,20 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.database.DbConfig
-import dev.jovanni0.exceptions.AssetStorageException
-import dev.jovanni0.exceptions.AuthorMismatchException
-import dev.jovanni0.exceptions.ConfigurationException
-import dev.jovanni0.exceptions.ConflictException
-import dev.jovanni0.exceptions.PathTooLongException
+import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
-import dev.jovanni0.repositories.AuthorRepository
-import dev.jovanni0.repositories.BookRepository
-import dev.jovanni0.repositories.CoverRepository
-import dev.jovanni0.repositories.EditionRepository
-import dev.jovanni0.repositories.ReadRecordRepository
-import dev.jovanni0.repositories.SeriesRepository
-import dev.jovanni0.repositories.TagRepository
-import dev.jovanni0.repositories.UniverseRepository
-import dev.jovanni0.repositories.UserRepository
-import dev.jovanni0.routes.authRoutes
-import dev.jovanni0.routes.authorRoutes
-import dev.jovanni0.routes.bookRoutes
-import dev.jovanni0.routes.coverRoutes
-import dev.jovanni0.routes.editionRoutes
-import dev.jovanni0.routes.readRecordRoutes
-import dev.jovanni0.routes.seriesRoutes
-import dev.jovanni0.routes.tagRoutes
-import dev.jovanni0.routes.universeRoutes
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.json
+import dev.jovanni0.repositories.*
+import dev.jovanni0.routes.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.statuspages.StatusPages
-import io.ktor.server.plugins.statuspages.exception
-import io.ktor.server.response.respond
+import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
@@ -47,12 +27,10 @@ import org.jetbrains.exposed.v1.jdbc.Database
 import kotlin.io.path.Path
 
 
-
 /**
  * handles request authentication on protected routes. rejects requests that do not have a valid claim token.
  */
-fun Application.configureAuth(jwt_config: AuthConfig)
-{
+fun Application.configureAuth(jwt_config: AuthConfig) {
     val jwt_verifier = JWT
         .require(Algorithm.HMAC256(jwt_config.secret))
         .withIssuer(jwt_config.issuer)
@@ -70,19 +48,15 @@ fun Application.configureAuth(jwt_config: AuthConfig)
                 val realm = it.payload.getClaim("realm").asString()
                 val user_id = it.payload.getClaim("user_id").asString()
 
-                if (realm == jwt_config.realm && user_id != null)
-                {
+                if (realm == jwt_config.realm && user_id != null) {
                     JWTPrincipal(it.payload)
-                }
-                else
-                {
+                } else {
                     null
                 }
             }
         }
     }
 }
-
 
 
 /**
@@ -99,9 +73,9 @@ fun Application.configureRouting(
     edition_repository: EditionRepository,
     cover_repository: CoverRepository,
     read_record_repository: ReadRecordRepository
-)
-{
+) {
     routing {
+        serverRoutes()
         authRoutes(user_repository, jwt_config)
         authorRoutes(author_repository)
         bookRoutes(book_repository)
@@ -115,12 +89,10 @@ fun Application.configureRouting(
 }
 
 
-
 /**
  * install JSON request/response serialization.
  */
-fun Application.configureSerializer()
-{
+fun Application.configureSerializer() {
 
     install(ContentNegotiation) {
         // Json's `encodeDefaults` defaults to `false`; this is relied on to keep
@@ -131,8 +103,7 @@ fun Application.configureSerializer()
 }
 
 
-fun Application.configureDatabase(): HikariDataSource
-{
+fun Application.configureDatabase(): HikariDataSource {
     val db_config = DbConfig(
         jdbc_url = environment.config.property("database.jdbc_url").getString(),
         username = environment.config.property("database.username").getString(),
@@ -166,15 +137,14 @@ fun Application.configureDatabase(): HikariDataSource
 /**
  * register exception handlers.
  */
-fun Application.configureStatusPages()
-{
+fun Application.configureStatusPages() {
     install(StatusPages)
     {
         exception<NotFoundException> { call, cause ->
             call.respond(HttpStatusCode.NotFound, cause.message)
         }
 
-        exception<AssetStorageException> {call, cause ->
+        exception<AssetStorageException> { call, cause ->
             call.respond(HttpStatusCode.InternalServerError, cause.message)
         }
 
@@ -195,8 +165,7 @@ fun Application.configureStatusPages()
         }
 
         exception<ExposedSQLException> { call, cause ->
-            when (cause.sqlState)
-            {
+            when (cause.sqlState) {
                 "23503" -> call.respond(HttpStatusCode.BadRequest, "referenced entity does not exist")
                 else -> call.respond(HttpStatusCode.InternalServerError, "database error")
             }
@@ -205,12 +174,25 @@ fun Application.configureStatusPages()
 }
 
 
+fun Application.configureCors() {
+
+    install(CORS)
+    {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+    }
+}
+
 
 /**
  * application entry point.
  */
-fun Application.module()
-{
+fun Application.module() {
     val jwt_config = AuthConfig(
         environment.config.property("jwt.secret").getString(),
         environment.config.property("jwt.issuer").getString(),
@@ -223,6 +205,7 @@ fun Application.module()
     configureSerializer()
     configureAuth(jwt_config)
     configureStatusPages()
+    configureCors()
 
     val storage = AssetStorage(Path("./crystalcage"))
 
