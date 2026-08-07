@@ -12,8 +12,25 @@ import dev.jovanni0.exceptions.ConfigurationException
 import dev.jovanni0.exceptions.ConflictException
 import dev.jovanni0.exceptions.PathTooLongException
 import dev.jovanni0.exceptions.not_found.NotFoundException
+import dev.jovanni0.filesystem.AssetStorage
+import dev.jovanni0.repositories.AuthorRepository
+import dev.jovanni0.repositories.BookRepository
+import dev.jovanni0.repositories.CoverRepository
+import dev.jovanni0.repositories.EditionRepository
+import dev.jovanni0.repositories.ReadRecordRepository
+import dev.jovanni0.repositories.SeriesRepository
+import dev.jovanni0.repositories.TagRepository
+import dev.jovanni0.repositories.UniverseRepository
 import dev.jovanni0.repositories.UserRepository
 import dev.jovanni0.routes.authRoutes
+import dev.jovanni0.routes.authorRoutes
+import dev.jovanni0.routes.bookRoutes
+import dev.jovanni0.routes.coverRoutes
+import dev.jovanni0.routes.editionRoutes
+import dev.jovanni0.routes.readRecordRoutes
+import dev.jovanni0.routes.seriesRoutes
+import dev.jovanni0.routes.tagRoutes
+import dev.jovanni0.routes.universeRoutes
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.*
@@ -27,6 +44,7 @@ import io.ktor.server.routing.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.Database
+import kotlin.io.path.Path
 
 
 
@@ -73,10 +91,26 @@ fun Application.configureAuth(jwt_config: AuthConfig)
 fun Application.configureRouting(
     jwt_config: AuthConfig,
     user_repository: UserRepository,
+    author_repository: AuthorRepository,
+    universe_repository: UniverseRepository,
+    series_repository: SeriesRepository,
+    book_repository: BookRepository,
+    tag_repository: TagRepository,
+    edition_repository: EditionRepository,
+    cover_repository: CoverRepository,
+    read_record_repository: ReadRecordRepository
 )
 {
     routing {
         authRoutes(user_repository, jwt_config)
+        authorRoutes(author_repository)
+        bookRoutes(book_repository)
+        coverRoutes(book_repository, cover_repository)
+        editionRoutes(book_repository, edition_repository)
+        readRecordRoutes(read_record_repository)
+        seriesRoutes(author_repository, universe_repository, series_repository)
+        tagRoutes(tag_repository)
+        universeRoutes(universe_repository)
     }
 }
 
@@ -190,10 +224,28 @@ fun Application.module()
     configureAuth(jwt_config)
     configureStatusPages()
 
+    val storage = AssetStorage(Path("./crystalcage"))
+
     val user_repository = UserRepository()
+    val author_repository = AuthorRepository()
+    val universe_repository = UniverseRepository()
+    val series_repository = SeriesRepository()
+    val tag_repository = TagRepository()
+    val edition_repository = EditionRepository(storage)
+    val cover_repository = CoverRepository(storage)
+    val book_repository = BookRepository(author_repository, cover_repository, edition_repository)
+    val read_record_repository = ReadRecordRepository()
 
     configureRouting(
         jwt_config,
         user_repository,
+        author_repository,
+        universe_repository,
+        series_repository,
+        book_repository,
+        tag_repository,
+        edition_repository,
+        cover_repository,
+        read_record_repository,
     )
 }
