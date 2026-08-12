@@ -1,5 +1,5 @@
 import type {PersistedSession} from "@data-types/PersistedSession";
-import { Preferences } from '@capacitor/preferences';
+import      { Preferences }    from "@capacitor/preferences";
 
 
 

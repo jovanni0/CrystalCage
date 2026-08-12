@@ -25,6 +25,9 @@
 	"dependencies": {
 		"@capacitor/android": "^8.5.0",
 		"@capacitor/core": "^8.5.0",
-		"@capacitor/preferences": "^8.0.1"
+		"@capacitor/preferences": "^8.0.1",
+		"@codemirror/lang-markdown": "^6.5.2",
+		"codemirror": "^6.0.2",
+		"marked": "^18.0.9"
 	}
 }

@@ -22,8 +22,15 @@ export default {
             "@components": "./src/components",
             "@icons": "./src/icons",
             "@controllers": "./src/controllers",
-            "@services": "./src/services",
             "@data-types": "./src/types",
+            "@stores": "./src/stores",
+            "@loggers": "./src/loggers",
+            "@dtos": "./src/dtos",
         }
+    },
+    onwarn: (warning, handler) => 
+    {
+        if (warning.message.includes('https://svelte.dev/docs/kit/load#making-fetch-requests')) return;
+        handler(warning);
     }
 };

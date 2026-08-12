@@ -1,0 +1,19 @@
+{
+    "files.exclude": {
+        ".idea": true,
+        ".svelte-kit": true,
+        ".vscode": true,
+        "node_modules": true,
+        "android": true,
+        "build": true,
+        ".gitignore": true,
+        ".npmrc": true,
+        "capacitor.config.ts": true,
+        "package.json": true,
+        "pnpm-lock.yaml": true,
+        "pnpm-workspace.yaml": true,
+        "svelte.config.js": true,
+        "tsconfig.json": true,
+        "vite.config.ts": true
+    }
+}

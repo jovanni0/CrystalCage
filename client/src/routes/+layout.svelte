@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { session_manager } 	from "@root/CompositionRoot.ts";
-	import { page }				from "$app/state";
-	import { goto } 			from "$app/navigation";
-	import favicon 				from '$lib/assets/favicon.svg';
+	import { session_manager } from "@root/CompositionRoot";
+	import { page }            from "$app/state";
+	import { goto }            from "$app/navigation";
 
 
 
@@ -36,8 +35,17 @@
 
 
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+<main>
+    {@render children()}
+</main>
 
-{@render children()}
+
+
+<style>
+    main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+</style>

@@ -1,12 +1,13 @@
-import type { UserProfileResponse }     from "../dtos/UserProfileResponse";
-import type { SessionStorage }          from "./SessionStorage";
-import type { AuthContext }             from "@data-types/AuthContext";
-import type { LoginResult }             from "@data-types/LoginResult";
-import type { SessionStatus }           from "@root/types/SessionStatus";
-import      { ApiClient }               from "./ApiClient"
-import      { isNotNull, isNull }       from "@root/utils/NullishChecks";
-import      { NotFoundError }           from "@root/errors/NotFoundError";
-import      { UnauthorizedError }       from "@root/errors/UnauthorizedError";
+import type { UserProfileResponse } from "../dtos/UserProfileResponse";
+import type { SessionStorage }      from "./SessionStorage";
+import type { AuthContext }         from "@data-types/AuthContext";
+import type { LoginResult }         from "@data-types/LoginResult";
+import type { SessionStatus }       from "@root/types/SessionStatus";
+import type { Logger }              from "@loggers/Logger";
+import      { ApiClient }           from "./ApiClient"
+import      { isNotNull, isNull }   from "@root/utils/NullishChecks";
+import      { NotFoundError }       from "@root/errors/NotFoundError";
+import      { UnauthorizedError }   from "@root/errors/UnauthorizedError";
 
 
 
@@ -43,7 +44,11 @@ export class SessionManager
     }
 
 
-    constructor(private api: ApiClient, private storage: SessionStorage)
+    constructor(
+        private api: ApiClient, 
+        private storage: SessionStorage,
+        private logger: Logger,
+    )
     {
         this.api.configureAuth(
             () => this.getAuthContext(),
@@ -127,7 +132,7 @@ export class SessionManager
         }
         catch (e)
         {
-            console.log(`caught error while trying to ping server: ${e.message}`)
+            this.logger.error("caught error while trying to ping server", { error: e })
 
             return false
         }
@@ -156,7 +161,7 @@ export class SessionManager
 
             this.status = "AUTHENTICATED"
 
-            console.log(`received /login response: ${response}`)
+            this.logger.info("received /login response", { response: response })
         }
         catch (e)
         {

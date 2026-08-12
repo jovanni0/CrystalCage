@@ -13,7 +13,6 @@ export function isNull<TypeT>(value: TypeT | null): value is null
 }
 
 
-
 export function isNotNull<TypeT>(value: TypeT | null): value is TypeT
 {
     return value !== null

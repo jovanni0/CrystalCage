@@ -1,66 +1,120 @@
 @font-face {
-    font-family: 'Inter';
-    src: url("/InterVariable.woff2") format("woff2");
-    font-weight: 100 900;
-    font-style: normal;
-    font-display: swap;
+  font-family: 'Inter';
+  src: url("/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
-    font-family: 'Inter';
-    src: url("/InterVariable-Italic.woff2") format('woff2');
-    font-weight: 100 900;
-    font-style: italic;
-    font-display: swap;
+  font-family: 'Inter';
+  src: url("/InterVariable-Italic.woff2") format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
 }
 
 :root {
-    --base: hsl(0 0% 91%);
-    --raised: hsl(0 0% 96%);
-    --raised-border: hsl(0 0% 88%);
-    --lowered: hsl(0 0% 86%);
-    --lowered-border: hsl(0 0% 75%);
-    --dividers: hsl(0 0% 75%);
-    --text: hsl(0 0% 15%);
-    --text-inverted: hsl(0 0% 90%);
-    --text-secondary: hsl(0 0% 45%);
-    --text-secondary-inverted: hsl(0 0% 75%);
-    --text-primary: hsl(175 65% 20%);
-    --primary-background: hsl(175 20% 65%);
-    --placeholder: hsl(0 0% 35%);
-    --red-text: hsl(0 70% 35%);
-    --red-background: hsl(0 50% 45%);
-    --orange-text: hsl(15 65% 40%);
-    --green-text: hsl(125 70% 20%);
-    --green-background: hsl(125 50% 35%);
-    --t17-19: hsl(220 70% 65%);
-    --t17-19-secondary: hsl(220 45% 75%);
-    --t19-21: hsl(100 35% 50%);
-    --t19-21-secondary: hsl(100 30% 70%);
-    --t21-23: hsl(45 60% 50%);
-    --t21-23-secondary: hsl(45 50% 65%);
-    --t23-25: hsl(15 60% 55%);
-    --t23-25-secondary: hsl(15 40% 70%);
-    --off: hsl(0 0% 70%);
-    --off-secondary: hsl(0 0% 80%);
-    --antifreeze: hsl(193 50% 60%);
-    --antifreeze-secondary: hsl(193 30% 75%);
+    font-family: "Inter", sans-serif;
+
+    --base-hsl: 0 0% 95%;
+    --raised-hsl: 0 0% 100%;
+    --raised-border-hsl: 0 0% 98%;
+    --dividers-hsl: 0 0% 75%;
+    --lowered-hsl: 0 0% 87%;
+    --lowered-border-hsl: 0 0% 75%;
+    --placeholder-hsl: 0 0% 90%;
+
+    --text-hsl: 0 0% 15%;
+    --text-inverted-hsl: 0 0% 90%;
+    --text-secondary-hsl: 0 0% 45%;
+    --text-secondary-inverted-hsl: 0 0% 75%;
+
+    --green-text-hsl: 110 40% 25%;
+    --green-background-hsl: 110 30% 80%;
+    --amber-primary-hsl: 40 50% 25%;
+    --amber-secondary-hsl: 40 50% 75%;
+    --amber-background-hsl: 40 50% 35%;
+    --red-primary-hsl: 0 50% 30%;
+    --red-secondary-hsl: 0 40% 80%;
+    --red-background-hsl: 0 50% 40%;
+
+    --base: hsl(var(--base-hsl));
+    --raised: hsl(var(--raised-hsl));
+    --raised-border: hsl(var(--raised-border-hsl));
+    --dividers: hsl(var(--dividers-hsl));
+    --lowered: hsl(var(--lowered-hsl));
+    --lowered-border: hsl(var(--lowered-border-hsl));
+    --placeholder: hsl(var(--placeholder-hsl));
+
+    --text: hsl(var(--text-hsl));
+    --text-inverted: hsl(var(--text-inverted-hsl));
+    --text-secondary: hsl(var(--text-secondary-hsl));
+    --text-secondary-inverted: hsl(var(--text-secondary-inverted-hsl));
+
+    --primary-text-hsl: 175 65% 20%;
+    --primary-secondary-hsl: 175 65% 90%;
+    --primary-text: hsl(var(--primary-text-hsl));
+    --primary-secondary-hsl: hsl(var(--primary-secondary-hsl));
+
+    --green-text: hsl(var(--green-text-hsl));
+    --green-background: hsl(var(--green-background-hsl));
+    --amber-primary: hsl(var(--amber-primary-hsl));
+    --amber-secondary: hsl(var(--amber-secondary-hsl));
+    --amber-background: hsl(var(--amber-background-hsl));
+    --red-primary: hsl(var(--red-primary-hsl));
+    --red-secondary: hsl(var(--red-secondary-hsl));
+    --red-background: hsl(var(--red-background-hsl));
+
+
+    --input-fill-hsla: 0 0% 0% / 0.05;
+    --input-fill: hsla(var(--input-fill-hsla));
+
+
+    --peach-text-hsl: 22 80% 30%;
+    --peach-secondary-hsl: 22 75% 80%;
+    --mauve-text-hsl: 266 80% 40%;
+    --mauve-secondary-hsl: 266 80% 85%;
+    --teal-text-hsl: 183 74% 20%;
+    --teal-secondary-hsl: 183 45% 75%;
+
+    --peach-text: hsl(var(--peach-text-hsl));
+    --peach-secondary: hsl(var(--peach-secondary-hsl));
+    --mauve-text: hsl(var(--mauve-text-hsl));
+    --mauve-secondary: hsl(var(--mauve-secondary-hsl));
+    --teal-text: hsl(var(--teal-text-hsl));
+    --teal-secondary: hsl(var(--teal-secondary-hsl));
 }
 
-html,
+
 body {
     margin: 0;
     padding: 0;
     width: 100vw;
     height: 100vh;
-    overflow: hidden;
-
     background-color: var(--base);
     color: var(--text);
-    font-family: "Inter", sans-serif;
+    overflow: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
 
+html, body {
+    scrollbar-width: none;
+}
+
+html, body {
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+html, body {
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    touch-action: manipulation;
 }
 
 button {
@@ -72,15 +126,4 @@ button {
 a {
     color: inherit;
     text-decoration: none;
-}
-
-*::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-}
-
-* {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
 }
