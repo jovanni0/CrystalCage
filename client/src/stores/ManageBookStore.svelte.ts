@@ -26,10 +26,10 @@ export class ManageBookStore
     private cover_query    = new CoverQuery()
     private edition_query  = new EditionQuery()
 
-    private authors:   AuthorResponse[]   = []
-    private universes: UniverseResponse[] = []
-    private series:    SeriesResponse[]   = []
-    private tags:      TagResponse[]      = []
+    private authors:   AuthorResponse[]   = $state([])
+    private universes: UniverseResponse[] = $state([])
+    private series:    SeriesResponse[]   = $state([])
+    private tags:      TagResponse[]      = $state([])
 
     public is_initialized: boolean = false
 
@@ -82,10 +82,12 @@ export class ManageBookStore
     { }
 
 
-    public initialize()
+    public async initialize()
     {
-        this.fetchAuthors()
-        this.fetchTags()
+        await Promise.all([
+            this.fetchAuthors(), 
+            this.fetchTags()
+        ])
 
         this.is_initialized = true
     }

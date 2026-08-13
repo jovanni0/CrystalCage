@@ -1,13 +1,20 @@
-import { manage_book_store } from "@root/CompositionRoot"
+import { manage_book_store, session_manager } from "@root/CompositionRoot"
 import { redirect } from "@sveltejs/kit"
 
 
 
-export const load = async ({ url }) =>
+export const load = async ({ url, parent }) =>
 {
+    await parent()
+
+    if (session_manager.status !== "AUTHENTICATED")
+    {
+        return
+    }
+
     if (url.pathname === "/add-book" && manage_book_store.is_initialized == false)
     {
-        manage_book_store.initialize()
+        await manage_book_store.initialize()
 
         return
     }

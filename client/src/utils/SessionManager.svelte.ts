@@ -54,6 +54,8 @@ export class SessionManager
             () => this.getAuthContext(),
             () => this.handleInvalidSession()
         )
+
+        this.logger.info("set auth context")
     }
 
 
