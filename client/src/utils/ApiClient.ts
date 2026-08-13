@@ -135,10 +135,12 @@ export class ApiClient
 
 
 
-    public async getUniverses(author_id: string): Promise<UniverseResponse[]>
+    public async getUniverses(author_id: string | null): Promise<UniverseResponse[]>
     {
+        const query = author_id !== null ? `?author_id=${author_id}` : ""
+
         const response = await this.request(
-            `/universes?author_id=${author_id}`,
+            `/universes${query}`,
             {
                 method: "GET"
             }
@@ -163,11 +165,28 @@ export class ApiClient
     }
 
 
-    public async getSeries(author_id: string, universe_id: string | null): Promise<SeriesResponse[]>
+    public async getSeries(author_id: string | null, universe_id: string | null): Promise<SeriesResponse[]>
     {
+        const author_filter = author_id !== null ? `author_id=${author_id}` : ""
         const universe_filter = universe_id !== null ? `&universe_id=${universe_id}` : ""
+        
+        let filter = ""
+
+        if (author_id !== null && universe_id !== null)
+        {
+            filter = `?author_id=${author_filter}&universe_id=${universe_filter}`
+        }
+        else if (universe_id !== null)
+        {
+            filter = `?universe_id=${universe_filter}`
+        }
+        else if (author_id !== null)
+        {
+            filter = `?author_id=${author_filter}`
+        }
+        
         const response = await this.request(
-            `/series?author_id=${author_id}${universe_filter}`,
+            `/series${filter}`,
             {
                 method: "GET"
             }
@@ -239,5 +258,33 @@ export class ApiClient
         )
 
         return response.json()
+    }
+
+
+    public async getBooks(): Promise<BookSummaryResponse[]>
+    {
+        this.logger.debug("sending GET /books")
+
+        const response = await this.request(
+            `/books`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getCoverBlob(id: string): Promise<Blob>
+    {
+        const response = await this.request(
+            `/covers/${id}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.blob()
     }
 }

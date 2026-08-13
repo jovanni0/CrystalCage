@@ -1,6 +1,7 @@
 <script lang="ts">
-    import { BASE_URL } from "$lib/api/author";
+    // import { BASE_URL } from "$lib/api/author";
     import CoverPlaceholder from "./cover-placeholder.svelte";
+    import CoverImage from "./CoverImage.svelte";
 
     let {
         title,
@@ -16,9 +17,9 @@
 <div class="gallery-cover">
     <div class="cover-image">
         {#if cover_id}
-            <img 
-                src={`${BASE_URL}/covers/${cover_id}`} 
-                alt="cover" 
+            <CoverImage
+                cover_id = { cover_id }
+                alt = "cover-image"
             />
         {:else}
             <CoverPlaceholder />
@@ -46,11 +47,6 @@
         object-fit: cover;
         border-radius: 8px;
         overflow: hidden;
-    }
-
-    img {
-        width: 100%;
-        aspect-ratio: 2/3;
     }
 
     span {

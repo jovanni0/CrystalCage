@@ -16,7 +16,7 @@
 
         if (status === "AUTHENTICATED" && path.startsWith("/login")) 
         {
-            goto("/dashboard");
+            goto("/library");
         } 
         else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
         {

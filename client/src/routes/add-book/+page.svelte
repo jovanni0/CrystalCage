@@ -9,6 +9,7 @@
     import { marked }            from "marked";
     import { manage_book_store } from "@root/CompositionRoot";
     import TopbarConfirmCancel   from "@root/components/topbar-confirm-cancel.svelte";
+    import { goBack }            from "@root/utils/go-back";
 
 
     let error_message = $state<string|null>(null)
@@ -30,6 +31,7 @@
     {
         manage_book_store.reset()
         error_message = null
+        goBack()
     }
 </script>
 

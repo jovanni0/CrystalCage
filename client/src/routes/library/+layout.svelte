@@ -1,7 +1,8 @@
-<!-- <script lang="ts">
+<script lang="ts">
     import TopbarSearch from "@components/topbar-search.svelte"
     import Button       from "@components/button.svelte";
     import FAB          from "@components/FAB.svelte";
+    import { library_store } from "@root/CompositionRoot";
 
     
     let { children } = $props()
@@ -12,7 +13,7 @@
 <div class="layout-wrapper">
     <TopbarSearch />
 
-    {#if library_controller.is_library_empty}
+    {#if library_store.is_library_empty}
         <div class="filler">
             <div class="empty-message">
                 <span>Your library is empty.</span>
@@ -45,6 +46,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        position: relative;
     }
 
     main {
@@ -73,4 +75,4 @@
         bottom: 24px;
         line-height: 0;
     }
-</style> -->
+</style>
