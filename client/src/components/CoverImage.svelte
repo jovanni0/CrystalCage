@@ -12,7 +12,7 @@
     } = $props()
 
     let image_url: string | null = $state(null)
-    let status: CoverImageStatus = $state(cover_id === null ? "ERROR" : "IDLE")
+    let status: CoverImageStatus = $state("IDLE")
 
 
     async function load()
@@ -66,7 +66,16 @@
 
 
 <style>
-    img {
+    .cover
+    {
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    img 
+    {
         width: 100%;
         aspect-ratio: 2/3;
     }

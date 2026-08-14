@@ -15,6 +15,10 @@ import type { TagCreateRequest }         from "@dtos/TagCreateRequest";
 import type { BookCreateRequest }        from "@dtos/BookCreateRequest";
 import type { BookSummaryResponse }      from "@dtos/BookSummaryResponse";
 import type { SeriesDetailResponse }     from "@root/dtos/SeriesDetailResponse";
+import type { BookDetailResponse }       from "@root/dtos/BookDetailResponse";
+import type { CoverResponse }            from "@root/dtos/CoverResponse";
+import type { ReadRecordResponse }       from "@root/dtos/ReadRecordResponse";
+import type { EditionResponse }          from "@root/dtos/EditionResponse";
 import      { isNullOrUndefined }        from "@root/utils/NullishChecks";
 import      { NotFoundError }            from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
@@ -318,6 +322,21 @@ export class ApiClient
     }
 
 
+    public async getBook(id: string): Promise<BookDetailResponse>
+    {
+        this.logger.debug(`sending GET /books/${id}`)
+
+        const response = await this.request(
+            `/books/${id}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
     public async getCoverBlob(id: string): Promise<Blob>
     {
         const response = await this.request(
@@ -328,5 +347,56 @@ export class ApiClient
         )
 
         return response.blob()
+    }
+
+
+    public async getCovers(book_id: string): Promise<CoverResponse[]>
+    {
+        const filter = `?book_id=${book_id}`
+
+        this.logger.debug(`sending GET /covers${filter}`)
+
+        const response = await this.request(
+            `/covers${filter}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getReadRecords(book_id: string): Promise<ReadRecordResponse[]>
+    {
+        const filter = `?book_id=${book_id}`
+
+        this.logger.debug(`sending GET /read-records${filter}`)
+
+        const response = await this.request(
+            `/read-records${filter}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getEditions(book_id: string): Promise<EditionResponse[]>
+    {
+        const filter = `?book_id=${book_id}`
+
+        this.logger.debug(`sending GET /editions${filter}`)
+
+        const response = await this.request(
+            `/editions${filter}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
     }
 }

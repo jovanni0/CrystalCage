@@ -6,6 +6,9 @@ import type { BooksBySeries } from "@root/types/BooksAsSeries"
 import type { LibraryByAuthor }     from "@root/types/LibraryByAuthor"
 import type { LibraryAsSeries }     from "@root/types/LibraryAsSeries"
 import type { LibraryItem }         from "@root/types/LibraryItem"
+import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
+import type { EditionResponse } from "@root/dtos/EditionResponse"
+import type { ReadHistoryItem } from "@root/types/ReadHistoryItem"
 
 
 
@@ -146,4 +149,27 @@ export function groupBySeries(books: BookSummaryResponse[], universes: UniverseR
     }
 
     return Array.from(grouped.values())
+}
+
+
+export function buildReadHistory(records: ReadRecordResponse[], editions: EditionResponse[]): ReadHistoryItem[]
+{
+    const edition_map: Map<string, EditionResponse> = new Map(editions.map(it => [it.id, it]))
+
+    return records.map(it =>
+    {
+        const edition = it.edition_id ? edition_map.get(it.edition_id) : undefined
+
+        return {
+            id: it.id,
+            start_date: it.start_date,
+            end_date: it.end_date,
+            did_not_finish: it.did_not_finish,
+            is_historical: it.is_historical,
+            notes: it.notes,
+            edition_name: edition?.label ?? "(Unknown Edition)",
+            edition_release_date: edition?.release_date ?? "",
+            edition_format: edition?.format ?? "(Unknown)",
+        }
+    })
 }
