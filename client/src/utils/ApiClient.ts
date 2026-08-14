@@ -288,11 +288,24 @@ export class ApiClient
     }
 
 
-    public async getBooks(series_id: string | null): Promise<BookSummaryResponse[]>
+    // GET /books?author_id=&series_id=&universe_id=&tag_id=
+    public async getBooks(
+        author_id:   string | null = null, 
+        universe_id: string | null = null,
+        series_id:   string | null = null,
+        tag_id:      string | null = null,
+    ): Promise<BookSummaryResponse[]>
     {
-        this.logger.debug("sending GET /books")
+        const query_components: string[] = []
 
-        const query = series_id !== null ? `?series_id=${series_id}` : ""
+        if (author_id)   query_components.push(`author_id=${author_id}`)
+        if (universe_id) query_components.push(`universe_id=${universe_id}`)
+        if (series_id)   query_components.push(`series_id=${series_id}`)
+        if (tag_id)      query_components.push(`tag_id=${tag_id}`)
+
+        const query = query_components.length > 0 ? `?${query_components.join("&")}` : ""
+        
+        this.logger.debug(`sending GET /books${query}`)
 
         const response = await this.request(
             `/books${query}`,

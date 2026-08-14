@@ -5,17 +5,22 @@
 
     let {
         title,
-        cover_id
+        cover_id,
+        href,
     } : {
         title: string
         cover_id?: string
+        href: string
     } = $props()
 </script>
 
 
 
 <div class="gallery-cover">
-    <div class="cover-image">
+    <a 
+        class = "cover-image"
+        href  = { href }
+    >
         {#if cover_id}
             <CoverImage
                 cover_id = { cover_id }
@@ -24,7 +29,7 @@
         {:else}
             <CoverPlaceholder />
         {/if}
-    </div>
+    </a>
 
     <span>{title}</span>
 </div>

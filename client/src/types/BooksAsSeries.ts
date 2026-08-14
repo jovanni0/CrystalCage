@@ -2,8 +2,9 @@ import type { LibraryItem } from "./LibraryItem"
 
 
 
-export type LibraryBySeries = {
-    author_name:   string
+export type BooksBySeries = {
+    id:            string
+    title:         string
     universe_name: string
     items:         LibraryItem[]
 }

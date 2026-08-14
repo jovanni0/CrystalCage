@@ -4,7 +4,7 @@ import type { SeriesResponse }      from "@root/dtos/SeriesResponse";
 import type { UniverseResponse }    from "@root/dtos/UniverseResponse";
 import type { Logger }              from "@root/loggers/Logger";
 import type { LibraryByAuthor }     from "@root/types/LibraryByAuthor";
-import type { LibraryBySeries }     from "@root/types/LibraryBySeries";
+import type { LibraryAsSeries }     from "@root/types/LibraryAsSeries";
 import type { LibraryItem }         from "@root/types/LibraryItem";
 import type { ApiClient }           from "@root/utils/ApiClient";
 import { groupAsSeries, groupByAuthor } from "@root/utils/LibraryGroupings";
@@ -20,7 +20,7 @@ export class LibraryStore
 
     public gallery:   LibraryItem[]     = $derived(this.books.map(it => ({ name: it.title, cover_id: it.cover_id, number_of_volumes: 0, id: it.id })))
     public by_author: LibraryByAuthor[] = $derived(groupByAuthor(this.authors, this.books))
-    public by_series: LibraryBySeries[] = $derived(groupAsSeries(this.authors, this.universes, this.series, this.books))
+    public by_series: LibraryAsSeries[] = $derived(groupAsSeries(this.authors, this.universes, this.series, this.books))
 
     public is_library_empty: boolean = $derived(this.books.length === 0)
 
@@ -48,7 +48,7 @@ export class LibraryStore
 
     private async fetchBooks()
     {
-        this.books = await this.api.getBooks(null)
+        this.books = await this.api.getBooks()
     }
 
 

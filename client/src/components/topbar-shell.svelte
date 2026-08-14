@@ -28,9 +28,11 @@
         </div>
     </div>
 
-    <div class="bottom">
-        {@render bottom?.()}
-    </div>
+    {#if bottom}
+        <div class="bottom">
+            {@render bottom?.()}
+        </div>
+    {/if}
 </div>
 
 
@@ -54,6 +56,11 @@
         display: flex;
         flex-direction: row;
         align-items: flex-start;
+    }
+
+    .left, .right {
+        min-width: 48px;
+        flex-shrink: 0;
     }
 
     .center {

@@ -12,6 +12,7 @@
             <CategorySeparator 
                 title    = { group.author_name }
                 subtitle = { group.universe_name }
+                href     = { `/author/${group.author_id}` }
             />
 
             <div class="covers">
@@ -19,6 +20,7 @@
                     <BookCoverGallery 
                         title    = { series.name }
                         cover_id = { series.cover_id ?? undefined }
+                        href     = { `/series/${series.id}` }
                     />
                 {/each}
             </div>

@@ -10,6 +10,7 @@
         <BookCoverGallery
             title    = { book.name }
             cover_id = { book.cover_id ?? undefined }
+            href     = { `/book/${id}` }
         />
     {/each}
 </div>

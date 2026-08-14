@@ -2,8 +2,9 @@ import type { AuthorResponse }      from "@root/dtos/AuthorResponse"
 import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
 import type { SeriesResponse }      from "@root/dtos/SeriesResponse"
 import type { UniverseResponse }    from "@root/dtos/UniverseResponse"
+import type { BooksBySeries } from "@root/types/BooksAsSeries"
 import type { LibraryByAuthor }     from "@root/types/LibraryByAuthor"
-import type { LibraryBySeries }     from "@root/types/LibraryBySeries"
+import type { LibraryAsSeries }     from "@root/types/LibraryAsSeries"
 import type { LibraryItem }         from "@root/types/LibraryItem"
 
 
@@ -26,6 +27,7 @@ export function groupByAuthor(authors: AuthorResponse[], books: BookSummaryRespo
         if (!author_group)
         {
             author_group = {
+                author_id: book.author_id,
                 author_name: author_name_id.get(book.author_id) ?? "Unknown",
                 items: []
             }
@@ -45,48 +47,103 @@ export function groupByAuthor(authors: AuthorResponse[], books: BookSummaryRespo
 }
 
 
-export function groupAsSeries(authors: AuthorResponse[], universes: UniverseResponse[], series: SeriesResponse[], books: BookSummaryResponse[]): LibraryBySeries[]
+export function groupAsSeries(authors: AuthorResponse[], universes: UniverseResponse[], series: SeriesResponse[], books: BookSummaryResponse[]): LibraryAsSeries[] 
 {
-    const author_id_name = new Map(authors.map(it => [it.id, formatAuthorName(it)]))
-    const universe_id_name = new Map(universes.map(it => [it.id, it.name]))
-    const series_id_name = new Map(series.map(it => [it.id, it.name]))
+    const author_id_name:   Map<string, string> = new Map(authors.map(it => [it.id, formatAuthorName(it)]))
+    const universe_id_name: Map<string, string> = new Map(universes.map(it => [it.id, it.name]))
+    const series_id_name:   Map<string, string> = new Map(series.map(it => [it.id, it.name]))
 
-    const grouped = new Map<string, Map<string, Map<string, LibraryItem>>>()
+    const groups = new Map<string, { group: LibraryAsSeries; items_map: Map<string, LibraryItem> }>()
 
     for (const book of books) 
     {
-        const author_id = book.author_id
-        const universe_id = book.universe_id ?? "none"
-        const series_id = book.series_id ?? "standalone"
+        const group_key = `${book.author_id}:${book.universe_id ?? "none"}`
 
-        const by_universe = grouped.get(author_id) ?? new Map()
-        grouped.set(author_id, by_universe)
-
-        const by_series = by_universe.get(universe_id) ?? new Map()
-        by_universe.set(universe_id, by_series)
-
-        let item = by_series.get(series_id)
-
-        if (!item) 
+        if (!groups.has(group_key)) 
         {
-            item = {
+            const new_group = {
+                author_id: book.author_id,
+                author_name: author_id_name.get(book.author_id) ?? 'Unknown',
+                universe_name: book.universe_id ? universe_id_name.get(book.universe_id) ?? 'Unknown' : 'Standalone',
+                items: [],
+            }
+
+            groups.set(group_key, { group: new_group, items_map: new Map() })
+        }
+
+        const { group, items_map: items_map } = groups.get(group_key)!
+        const series_key = book.series_id ?? "standalone"
+
+        if (!items_map.has(series_key)) 
+        {
+            const item: LibraryItem = {
                 id: book.id,
-                name: series_id_name.get(book.series_id ?? "") ?? "standalone",
+                name: book.series_id ? series_id_name.get(book.series_id) ?? "Standalone" : "Standalone",
                 cover_id: book.cover_id,
                 number_of_volumes: 0,
             }
 
-            by_series.set(series_id, item)
+            items_map.set(series_key, item)
+            group.items.push(item)
         }
 
-        item.number_of_volumes++
+        items_map.get(series_key)!.number_of_volumes++
     }
 
-    return [...grouped.entries()].flatMap( ([author_id, by_universe]) =>
-        [...by_universe.entries()].map( ([universe_id, by_series]) => ({
-            author_name: author_id_name.get(author_id) ?? "Unknown",
-            universe_name: universe_id === "none" ? "Standalone" : universe_id_name.get(universe_id) ?? "Unknown",
-            items: [...by_series.values()],
-        }))
-    )
+    return Array.from(groups.values(), it => it.group)
+}
+
+
+export function groupBySeries(books: BookSummaryResponse[], universes: UniverseResponse[], series: SeriesResponse[])
+{
+    const standalone_key:   string                     = "standalone"
+    const universe_id_name: Map<string, string>        = new Map(universes.map(it => [it.id, it.name]))
+    const series_id_name:   Map<string, string>        = new Map(series.map(it => [it.id, it.name]))
+    const grouped:          Map<string, BooksBySeries> = new Map()
+
+    for (const book of books) 
+    {
+        const item: LibraryItem = {
+            id: book.id,
+            name: book.title,
+            cover_id: book.cover_id,
+            number_of_volumes: 0
+        }
+
+        if (!book.series_id)
+        {
+            if (!grouped.has(standalone_key))
+            {
+                const group: BooksBySeries = { 
+                    id: crypto.randomUUID(),
+                    title: "Standalone", 
+                    universe_name: "", 
+                    items: []
+                }
+
+                grouped.set(standalone_key, group)
+            }
+
+            grouped.get(standalone_key)!.items.push(item)
+            continue
+        }
+
+        const key = `${book.universe_id ?? 'no_univ'}:${book.series_id}`
+
+        if (!grouped.has(key))
+        {
+            const group: BooksBySeries = {
+                id: crypto.randomUUID(),
+                title: series_id_name.get(book.series_id) ?? "(Unknown Series)",
+                universe_name: book.universe_id ? universe_id_name.get(book.universe_id) ?? "" : "",
+                items: []
+            }
+
+            grouped.set(key, group)
+        }
+
+        grouped.get(key)!.items.push(item)
+    }
+
+    return Array.from(grouped.values())
 }
