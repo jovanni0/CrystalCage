@@ -14,6 +14,7 @@ import type { TagResponse }              from "@dtos/TagResponse";
 import type { TagCreateRequest }         from "@dtos/TagCreateRequest";
 import type { BookCreateRequest }        from "@dtos/BookCreateRequest";
 import type { BookSummaryResponse }      from "@dtos/BookSummaryResponse";
+import type { SeriesDetailResponse }     from "@root/dtos/SeriesDetailResponse";
 import      { isNullOrUndefined }        from "@root/utils/NullishChecks";
 import      { NotFoundError }            from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
@@ -119,6 +120,19 @@ export class ApiClient
     }
 
 
+    async getAuthorById(id: string): Promise<AuthorResponse>
+    {
+        const response = await this.request(
+            `/authors/${id}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
     public async createAuthor(request: AuthorCreateRequest): Promise<AuthorResponse>
     {
         const response = await this.request(
@@ -174,19 +188,32 @@ export class ApiClient
 
         if (author_id !== null && universe_id !== null)
         {
-            filter = `?author_id=${author_filter}&universe_id=${universe_filter}`
+            filter = `?${author_filter}&${universe_filter}`
         }
         else if (universe_id !== null)
         {
-            filter = `?universe_id=${universe_filter}`
+            filter = `?${universe_filter}`
         }
         else if (author_id !== null)
         {
-            filter = `?author_id=${author_filter}`
+            filter = `?${author_filter}`
         }
         
         const response = await this.request(
             `/series${filter}`,
+            {
+                method: "GET"
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getSeriesById(id: string): Promise<SeriesDetailResponse>
+    {
+        const response = await this.request(
+            `/series/${id}`,
             {
                 method: "GET"
             }
@@ -261,12 +288,14 @@ export class ApiClient
     }
 
 
-    public async getBooks(): Promise<BookSummaryResponse[]>
+    public async getBooks(series_id: string | null): Promise<BookSummaryResponse[]>
     {
         this.logger.debug("sending GET /books")
 
+        const query = series_id !== null ? `?series_id=${series_id}` : ""
+
         const response = await this.request(
-            `/books`,
+            `/books${query}`,
             {
                 method: "GET",
             }

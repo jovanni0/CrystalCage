@@ -48,7 +48,7 @@ export class LibraryStore
 
     private async fetchBooks()
     {
-        this.books = await this.api.getBooks()
+        this.books = await this.api.getBooks(null)
     }
 
 

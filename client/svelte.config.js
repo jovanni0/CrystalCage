@@ -17,6 +17,9 @@ export default {
             precompress: false,
             strict: true,
         }),
+        prerender: {
+			handleUnseenRoutes: "ignore"
+		},
         alias: {
             "@root": "./src",
             "@components": "./src/components",
