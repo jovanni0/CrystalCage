@@ -24,6 +24,9 @@ import      { NotFoundError }            from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
 import      { UnauthorizedError }        from "@root/errors/UnauthorizedError";
 import      { toFormData }               from "@dtos/BookCreateRequest";
+import type { TagUpdateRequest }         from "@root/dtos/TagUpdateRequest";
+import type { TagDetailResponse }        from "@root/dtos/TagDetailResponse";
+import { ConflictError }                 from "@root/errors/ConflictError";
 
 
 
@@ -67,6 +70,8 @@ export class ApiClient
                 throw new UnauthorizedError(`request ${path} returned 401 Unauthorized`)
             case 404:
                 throw new NotFoundError(`request ${path} returned 404 Not Found`)
+            case 409:
+                throw new ConflictError(response.statusText)
         }
 
         return response
@@ -256,6 +261,53 @@ export class ApiClient
         )
 
         return response.json()
+    }
+
+
+    public async getTag(id: string): Promise<TagDetailResponse>
+    {
+        this.logger.debug(`sending GET /tags/${id}`)
+
+        const response = await this.request(
+            `/tags/${id}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async updateTag(id: string, request: TagUpdateRequest): Promise<TagDetailResponse>
+    {
+        this.logger.debug(`sending PATCH /tags/${id}`, { request: request })
+
+        const response = await this.request(
+            `/tags/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async deleteTag(id: string): Promise<boolean>
+    {
+        this.logger.debug(`sending DELETE /tags/${id}`)
+
+        const response = await this.request(
+            `/tags/${id}`,
+            {
+                method: "DELETE"
+            }
+        )
+
+        return response.status === 204
     }
 
 

@@ -20,6 +20,9 @@ importers:
       '@codemirror/lang-markdown':
         specifier: ^6.5.2
         version: 6.5.2
+      '@codemirror/view':
+        specifier: ^6.43.8
+        version: 6.43.8
       codemirror:
         specifier: ^6.0.2
         version: 6.0.2

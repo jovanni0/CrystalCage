@@ -9,6 +9,8 @@ import type { LibraryItem }         from "@root/types/LibraryItem"
 import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
 import type { EditionResponse } from "@root/dtos/EditionResponse"
 import type { ReadHistoryItem } from "@root/types/ReadHistoryItem"
+import type { TagBookItem } from "@root/dtos/TagBookItem"
+import type { TagBookLink } from "@root/stores/TagMangementStore.svelte"
 
 
 
@@ -170,6 +172,24 @@ export function buildReadHistory(records: ReadRecordResponse[], editions: Editio
             edition_name: edition?.label ?? "(Unknown Edition)",
             edition_release_date: edition?.release_date ?? "",
             edition_format: edition?.format ?? "(Unknown)",
+        }
+    })
+}
+
+
+export function buildTagUsage(books: TagBookItem[], series: SeriesResponse[]): TagBookLink[]
+{
+    const series_map: Map<string, string> = new Map(series.map(it => [it.id, it.name]))
+
+    return books.map(it =>
+    {
+        const series = it.series_id ? series_map.get(it.series_id) ?? it.series_id : null
+
+        return {
+            book_id: it.id,
+            book_title: it.title,
+            series_name: series,
+            cover_id: it.cover_id
         }
     })
 }

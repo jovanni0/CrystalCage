@@ -17,7 +17,7 @@
         class = "author-link"
     >{ series_store.author_name }</a>
 </span>
-<lu class = "content">
+<ul class = "content">
     {#each series_store.books as book (book.id)}
         <SeriesListItem
             book_id    = { book.id }
@@ -29,7 +29,7 @@
             read_count = { book.reread_count }
         />
     {/each}
-</lu>
+</ul>
 
 
 <style>

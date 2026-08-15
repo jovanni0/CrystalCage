@@ -1,10 +1,13 @@
 <script lang="ts">
     import ChevronLeft from "@icons/chevron-left.svelte";
+    import type { Snippet }   from "svelte";
 
     let {
-        page_name = "Page name"
+        page_name = "Page name",
+        right
     } : {
         page_name?: string
+        right?: Snippet
     } = $props()
 </script>
 
@@ -17,7 +20,12 @@
         <ChevronLeft />
     </button>
     <span>{page_name}</span>
-    <div class="placeholder"></div>
+
+    {#if right}
+        {@render right()}
+    {:else}
+        <div class = "placeholder"></div>
+    {/if}
 </div>
 
 
