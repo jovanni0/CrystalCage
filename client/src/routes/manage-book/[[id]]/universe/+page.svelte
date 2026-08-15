@@ -1,14 +1,18 @@
 <script lang="ts">
-    import FieldAddSeach       from "@root/components/field-add-seach.svelte";
-    import ListSelectableRadio from "@root/components/list-selectable-radio.svelte";
-    import TopbarBack          from "@root/components/topbar-back.svelte";
-    import { logger, manage_book_store } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { logger }              from "@root/CompositionRoot";
+    import      FieldAddSeach           from "@root/components/field-add-seach.svelte";
+    import      ListSelectableRadio     from "@root/components/list-selectable-radio.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
+
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
 
     async function createUniverse(): Promise<void>
     {
-        const author_id = manage_book_store.author_id
-        const universe_name = manage_book_store.universe_search
+        const author_id = book_store.author_id
+        const universe_name = book_store.universe_search
 
         if (!author_id)
         {
@@ -16,7 +20,7 @@
             return
         }
 
-        const is_created = await manage_book_store.createUniverse(author_id, universe_name)
+        const is_created = await book_store.createUniverse(author_id, universe_name)
 
         if (!is_created)
         {
@@ -24,7 +28,7 @@
             return
         }
 
-        manage_book_store.series_search = ""
+        book_store.series_search = ""
     }
 </script>
 
@@ -37,36 +41,36 @@
 <div class="body">
     <div class="search-wrapper">
         <FieldAddSeach 
-            bind:value  = { manage_book_store.universe_search }
+            bind:value  = { book_store.universe_search }
             placeholder = "Search or add universe..."
         />
         
-        {#if !manage_book_store.is_author_selected}
+        {#if !book_store.is_author_selected}
             <span class="warning">You need to first select or create an author!</span>
         {/if}
     </div>
 
-    {#if manage_book_store.universe_results.length > 0}
+    {#if book_store.universe_results.length > 0}
         <div class="options">
-            {#each manage_book_store.universe_results as universe (universe.id)}
+            {#each book_store.universe_results as universe (universe.id)}
                 <ListSelectableRadio 
                     label    = { universe.name }
                     name     = "universe"
                     value    = { universe.id }
-                    checked  = { manage_book_store.universe_id === universe.id }
-                    onchange = { (id) => manage_book_store.setUniverseId(id) }
+                    checked  = { book_store.universe_id === universe.id }
+                    onchange = { (id) => book_store.setUniverseId(id) }
                 />
             {/each}
         </div>
     {/if}
 
-    {#if manage_book_store.is_author_selected && manage_book_store.universe_search !== ""}
+    {#if book_store.is_author_selected && book_store.universe_search !== ""}
         <button 
             class   = "create"
             onclick = { createUniverse }
         >
             <span>Create</span>
-            <span class="new-value">{ manage_book_store.universe_search.trim() }</span>
+            <span class="new-value">{ book_store.universe_search.trim() }</span>
         </button>
     {/if}
 </div>

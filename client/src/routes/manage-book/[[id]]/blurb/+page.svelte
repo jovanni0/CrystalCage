@@ -1,21 +1,22 @@
-
 <script lang="ts">
-    import { markdown }                 from "@codemirror/lang-markdown";
-    import TopbarBack                   from "@root/components/topbar-back.svelte";
-    import { manage_book_store }        from "@root/CompositionRoot";
-    import { EditorView, minimalSetup } from "codemirror";
-    import { onMount }                  from "svelte";
+    import type { BookManagementStore }      from "@root/stores/BookManagementStore.svelte.js";
+    import      { markdown }                 from "@codemirror/lang-markdown";
+    import      { EditorView, minimalSetup } from "codemirror";
+    import      { onMount }                  from "svelte";
+    import      TopbarBack                   from "@root/components/topbar-back.svelte";
 
-
+    
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
 
     let editor_el: HTMLDivElement
     let view: EditorView
 
-
+    
     onMount( () => 
     {
         view = new EditorView({
-            doc: manage_book_store.notes ?? undefined,
+            doc: book_store.blurb ?? undefined,
             extensions: [
                 minimalSetup,
                 markdown(),
@@ -23,7 +24,7 @@
                 {
                     if (update.docChanged)
                     {
-                        manage_book_store.notes = update.state.doc.toString()
+                        book_store.blurb = update.state.doc.toString()
                     }
                 }),
                 EditorView.theme({
@@ -43,11 +44,14 @@
 
 
 <TopbarBack 
-    page_name = "Notes"
+    page_name = "Blurb"
 />
 
 <div class="body">
-    <div class="editor" bind:this={editor_el}></div>
+    <div class="wrapper">
+        <span>The back of the cover blurb or your own summary.</span>
+        <div class="editor" bind:this={editor_el}></div>
+    </div>
 </div>
 
 
@@ -61,6 +65,18 @@
         flex: 1;
     }
     
+    .wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 100%;
+    }
+
+    span {
+        color: var(--text-secondary);
+        text-align: center;
+    }
+
     .editor {
         min-height: 50%;
         background-color: var(--input-fill);

@@ -1,16 +1,19 @@
 <script lang="ts">
-    import FieldAddSeach       from "@root/components/field-add-seach.svelte";
-    import ListSelectableRadio from "@root/components/list-selectable-radio.svelte";
-    import TopbarBack          from "@root/components/topbar-back.svelte";
-    import { manage_book_store, logger } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { logger }              from "@root/CompositionRoot";
+    import      FieldAddSeach           from "@root/components/field-add-seach.svelte";
+    import      ListSelectableRadio     from "@root/components/list-selectable-radio.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
 
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
 
     async function createSeries()
     {
-        const author_id = manage_book_store.author_id
-        const universe_id = manage_book_store.universe_id
-        const series_name = manage_book_store.series_search
+        const author_id = book_store.author_id
+        const universe_id = book_store.universe_id
+        const series_name = book_store.series_search
 
         if (!author_id)
         {
@@ -18,7 +21,7 @@
             return
         }
 
-        const is_created = await manage_book_store.createSeries(series_name, author_id, universe_id)
+        const is_created = await book_store.createSeries(series_name, author_id, universe_id)
 
         if (!is_created)
         {
@@ -26,7 +29,7 @@
             return
         }
 
-        manage_book_store.series_search = ""
+        book_store.series_search = ""
     }
 </script>
 
@@ -39,36 +42,36 @@
 <div class="body">
     <div class="search-wrapper">
         <FieldAddSeach 
-            bind:value  = { manage_book_store.series_search }
+            bind:value  = { book_store.series_search }
             placeholder = "Search or add series..."
         />
         
-        {#if !manage_book_store.is_author_selected}
+        {#if !book_store.is_author_selected}
             <span class="warning">You need to first select or create an author!</span>
         {/if}
     </div>
 
-    {#if manage_book_store.series_results.length > 0}
+    {#if book_store.series_results.length > 0}
         <div class="options">
-            {#each manage_book_store.series_results as series (series.id)}
+            {#each book_store.series_results as series (series.id)}
                 <ListSelectableRadio 
                     label    = { series.name }
                     name     = "series"
                     value    = { series.id }
-                    checked  = { manage_book_store.series_id === series.id }
-                    onchange = { (id) => manage_book_store.setSeriesId(id) }
+                    checked  = { book_store.series_id === series.id }
+                    onchange = { (id) => book_store.setSeriesId(id) }
                 />
             {/each}
         </div>
     {/if}
 
-    {#if manage_book_store.is_author_selected && manage_book_store.series_search !== ""}
+    {#if book_store.is_author_selected && book_store.series_search !== ""}
         <button 
             class   = "create"
             onclick = { createSeries }
         >
             <span>Create</span>
-            <span class="new-value">{ manage_book_store.series_search.trim() }</span>
+            <span class="new-value">{ book_store.series_search.trim() }</span>
         </button>
     {/if}
 </div>

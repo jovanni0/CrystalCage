@@ -1,37 +1,41 @@
 <script lang="ts">
-    import Chip                  from "@root/components/chip.svelte";
-    import ChipFormat            from "@root/components/chip-format.svelte";
-    import ListEntry             from "@root/components/list-entry.svelte";
-    import ListEntryDate         from "@root/components/list-entry-date.svelte";
-    import ListEntryNumber       from "@root/components/list-entry-number.svelte";
-    import ListEntryText         from "@root/components/list-entry-text.svelte";
-    import ListSingleItemEntry   from "@root/components/list-single-item-entry.svelte";
-    import { marked }            from "marked";
-    import { manage_book_store } from "@root/CompositionRoot";
-    import TopbarConfirmCancel   from "@root/components/topbar-confirm-cancel.svelte";
-    import { goBack }            from "@root/utils/go-back";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { goBack }              from "@root/utils/go-back";
+    import      { marked }              from "marked";
+    import      Chip                    from "@root/components/chip.svelte";
+    import      ChipFormat              from "@root/components/chip-format.svelte";
+    import      ListEntry               from "@root/components/list-entry.svelte";
+    import      ListEntryDate           from "@root/components/list-entry-date.svelte";
+    import      ListEntryNumber         from "@root/components/list-entry-number.svelte";
+    import      ListEntryText           from "@root/components/list-entry-text.svelte";
+    import      ListSingleItemEntry     from "@root/components/list-single-item-entry.svelte";
+    import      TopbarConfirmCancel     from "@root/components/topbar-confirm-cancel.svelte";
+    import CoverImage from "@root/components/CoverImage.svelte";
+    import CoverPlaceholder from "@root/components/cover-placeholder.svelte";
 
+
+    let { data } = $props()
+    const { 
+        book_store,
+        id 
+    } : { 
+        book_store: BookManagementStore
+        id: string | undefined 
+    } = $derived(data)
 
     let error_message = $state<string|null>(null)
+    const current_path = $derived(`/manage-book${id ? `/${id}` : ""}`)
 
     async function save()
     {
-        const result = await manage_book_store.save()
+        const result = await book_store.save()
 
         if (result)
         {
-            cancel()
+            goBack()
         }
 
         error_message = "An error occured while tring to save the book"
-    }
-
-
-    async function cancel()
-    {
-        manage_book_store.reset()
-        error_message = null
-        goBack()
     }
 </script>
 
@@ -39,7 +43,7 @@
 
 <TopbarConfirmCancel
     title     = "Add Book"
-    onCancel  = { cancel }
+    onCancel  = { goBack }
     onConfirm = { save }
 />
 
@@ -51,24 +55,28 @@
     <ListSingleItemEntry 
         key         = "COVERS"
         placeholder = "None added. Tap to modify."
-        href        = "/add-book/covers"
-        hasContent  = { manage_book_store.has_covers }
+        href        = { `${current_path}/covers` }
+        hasContent  = { book_store.has_covers }
     >
         <div class="cover-wrapper">
-            <img 
-                src   = { manage_book_store.default_cover?.preview_url }
-                alt   = "default cover"
-                class = "cover-image"
-            />
+            <div class = "cover-holder">
+                {#if book_store.default_cover?.image_source.kind === "file"}
+                    <img src={URL.createObjectURL(book_store.default_cover.image_source.file)} alt="cover" />
+                {:else if book_store.default_cover?.image_source.kind === "cover_id"}
+                    <CoverImage cover_id={book_store.default_cover?.image_source.cover_id} alt="cover" />
+                {:else}
+                    <CoverPlaceholder />
+                {/if}
+            </div>
 
             <div class="info">
                 <span 
                     class       = "title"
-                    class:unset = { manage_book_store.default_cover === null }
+                    class:unset = { book_store.default_cover === null }
                 >
-                    { manage_book_store.default_cover?.title ?? "(No title set)" }
+                    { book_store.default_cover?.label ?? "(No title set)" }
                 </span>
-                <span class="message">{ manage_book_store.cover_message }</span>
+                <span class="message">{ book_store.cover_message }</span>
             </div>
         </div>
     </ListSingleItemEntry>
@@ -78,31 +86,31 @@
 
         <ListEntry
             key   = "Author"
-            value = { manage_book_store.author_name ?? undefined }
-            href  = "/add-book/author"
+            value = { book_store.author_name ?? undefined }
+            href  = { `${current_path}/author` }
         />
         <ListEntry
             key   = "Universe"
-            value = { manage_book_store.universe_name ?? undefined }
-            href  = "/add-book/universe"
+            value = { book_store.universe_name ?? undefined }
+            href  = { `${current_path}/universe` }
         />
         <ListEntry
             key   = "Series"
-            value = { manage_book_store.series_name ?? undefined }
-            href  = "/add-book/series"
+            value = { book_store.series_name ?? undefined }
+            href  = { `${current_path}/series` }
         />
         <ListEntryNumber
             key        = "Volume"
             bind:value = {
-                () => manage_book_store.volume_number ?? undefined,
-                (v) => manage_book_store.volume_number = v ?? null
+                () => book_store.volume_number ?? undefined,
+                (v) => book_store.volume_number = v ?? null
             }
         />
         <ListEntryText
             key        = "Title"
             bind:value = {
-                () => manage_book_store.title ?? undefined,
-                (v) => manage_book_store.title = v ?? null
+                () => book_store.title ?? undefined,
+                (v) => book_store.title = v ?? null
             }
         />
     </div>
@@ -113,16 +121,16 @@
         <ListEntryDate
             key        = "Release date"
             bind:value = {
-                () => manage_book_store.launch_date?.toISOString().slice(0, 10) ?? "",
-                (v) => manage_book_store.launch_date = v ? new Date(v) : null
+                () => book_store.launch_date?.toISOString().slice(0, 10) ?? "",
+                (v) => book_store.launch_date = v ? new Date(v) : null
             }
         />
 
         <ListEntryNumber
             key        = "Word Count"
             bind:value = {
-                () => manage_book_store.word_count ?? undefined,
-                (v) => manage_book_store.word_count = v ?? null
+                () => book_store.word_count ?? undefined,
+                (v) => book_store.word_count = v ?? null
             }
         />
     </div>
@@ -130,11 +138,11 @@
     <ListSingleItemEntry
         key         = "TAGS"
         placeholder = "None set. Tap to select from a preset list or customize from scratch."
-        href        = "/add-book/tags"
-        hasContent  = { manage_book_store.cover_count > 0 }
+        href        = { `${current_path}/tags` }
+        hasContent  = { book_store.cover_count > 0 }
     >
         <div class="tags">
-            {#each manage_book_store.tag_names as tag (tag)}
+            {#each book_store.tag_names as tag (tag)}
                 <Chip text={tag} />
             {/each}
         </div>
@@ -143,35 +151,35 @@
     <ListSingleItemEntry
         key         = "NOTES"
         placeholder = "None set. Tap to add your thoughts on this book."
-        href        = "/add-book/notes"
-        hasContent  = { manage_book_store.has_notes }
+        href        = { `${current_path}/notes` }
+        hasContent  = { book_store.has_notes }
     >
-        {@html marked(manage_book_store.notes ?? "")}
+        {@html marked(book_store.notes ?? "")}
     </ListSingleItemEntry>
 
     <ListSingleItemEntry
         key         = "BLURB"
         placeholder = "None set. Tap to add a blurb (description) to this book."
-        href        = "/add-book/blurb"
-        hasContent  = { manage_book_store.has_blurb }
+        href        = { `${current_path}/blurb` }
+        hasContent  = { book_store.has_blurb }
     >
-        {@html marked(manage_book_store.blurb ?? "")}
+        {@html marked(book_store.blurb ?? "")}
     </ListSingleItemEntry>
 
     <ListSingleItemEntry 
         key         = "VERSIONS"
         placeholder = "None added. Tap to modify."
-        href        = "/add-book/editions"
-        hasContent  = { manage_book_store.has_editions }
+        href        = { `${current_path}/editions` }
+        hasContent  = { book_store.has_editions }
     >
         <div class="versions-wrapper">
             <div class="chips">
-                {#each manage_book_store.edition_types as format (format)}
+                {#each book_store.edition_types as format (format)}
                     <ChipFormat format={format} />
                 {/each}
             </div>
 
-            <span>{ manage_book_store.edition_message }</span>
+            <span>{ book_store.edition_message }</span>
         </div>
     </ListSingleItemEntry>
 </div>
@@ -211,7 +219,7 @@
         gap: 16px;
         align-items: center;
 
-        & .cover-image {
+        & .cover-holder {
             width: 75px;
             height: 112.5px;
             border-radius: 8px;

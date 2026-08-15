@@ -1,10 +1,12 @@
 <script lang="ts">
-    import Button                from "@root/components/button.svelte";
-    import ListEntryCover        from "@root/components/list-entry-cover.svelte";
-    import TopbarBack            from "@root/components/topbar-back.svelte";
-    import { manage_book_store } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      Button                  from "@root/components/button.svelte";
+    import      ListEntryCover          from "@root/components/list-entry-cover.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
-
+    
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
 
     let file_input: HTMLInputElement
 
@@ -15,7 +17,7 @@
 
         if (!file) return
 
-        manage_book_store.addCover(file)
+        book_store.addCover(file)
         file_input.value = ""
     }
 </script>
@@ -35,7 +37,7 @@
         style = "display: none"
     />
 
-    {#if manage_book_store.cover_count === 0}
+    {#if book_store.cover_count === 0}
         <div class="info">
             <span class="main">No covers added yet.</span>
             <span>Adding multiple covers lets you choose how this book appears in your library.</span>
@@ -54,16 +56,16 @@
         />
 
         <div class="covers">
-            {#each manage_book_store.covers as cover (cover.local_id)}
+            {#each book_store.covers as cover (cover.id)}
                 <ListEntryCover
-                    name        = "cover"
-                    input_value = { cover.title ?? undefined }
-                    cover_url   = { cover.preview_url }
-                    radio_value = { cover.local_id }
-                    checked     = { manage_book_store.default_cover_id === cover.local_id }
-                    onChange    = { (text) => manage_book_store.setCoverTitle(cover.local_id, text) }
-                    onDelete    = { () => manage_book_store.removeCover(cover.local_id) }
-                    onSelected  = { () => manage_book_store.setDefaultCoverId(cover.local_id) }
+                    name         = "cover"
+                    input_value  = { cover.label ?? undefined }
+                    image_source = { cover.image_source }
+                    radio_value  = { cover.id }
+                    checked      = { cover.is_default }
+                    onChange     = { (text) => book_store.setCoverLabel(cover.id, text) }
+                    onDelete     = { () => book_store.removeCover(cover.id) }
+                    onSelected   = { () => book_store.setDefaultCoverId(cover.id) }
                 />
             {/each}
         </div>

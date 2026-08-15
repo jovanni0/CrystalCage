@@ -1,15 +1,18 @@
 <script lang="ts">
-    import FieldAddSeach          from "@root/components/field-add-seach.svelte";
-    import ListSelectableCheckbox from "@root/components/list-selectable-checkbox.svelte";
-    import TopbarBack             from "@root/components/topbar-back.svelte";
-    import { logger, manage_book_store } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { logger }              from "@root/CompositionRoot";
+    import      FieldAddSeach           from "@root/components/field-add-seach.svelte";
+    import      ListSelectableCheckbox  from "@root/components/list-selectable-checkbox.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
 
-
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
+    
     async function createTag(): Promise<void>
     {
-        const tag_name = manage_book_store.tag_search
-        const is_created = await manage_book_store.createTag(tag_name, null)
+        const tag_name = book_store.tag_search
+        const is_created = await book_store.createTag(tag_name, null)
 
         if (!is_created)
         {
@@ -17,7 +20,7 @@
             return
         }
 
-        manage_book_store.tag_search = ""
+        book_store.tag_search = ""
     }
 </script>
 
@@ -29,30 +32,30 @@
 
 <div class="body">
     <FieldAddSeach 
-        bind:value  = { manage_book_store.tag_search }
+        bind:value  = { book_store.tag_search }
         placeholder = "Search or add tag..."
     />
 
-    {#if manage_book_store.tag_results.length > 0}
+    {#if book_store.tag_results.length > 0}
         <div class="options">
-            {#each manage_book_store.tag_results as tag (tag.id)}
+            {#each book_store.tag_results as tag (tag.id)}
                 <ListSelectableCheckbox 
                     label    = { tag.name }
                     value    = { tag.id }
-                    checked  = { manage_book_store.tag_ids.includes(tag.id) ?? false }
-                    onchange = { (id, selected) => manage_book_store.toggleTagId(id, selected) }
+                    checked  = { book_store.tag_ids.includes(tag.id) ?? false }
+                    onchange = { (id, selected) => book_store.toggleTagId(id, selected) }
                 />
             {/each}
         </div>
     {/if}
 
-    {#if manage_book_store.tag_search !== ""}
+    {#if book_store.tag_search !== ""}
         <button 
             class   = "create"
             onclick = { createTag }
         >
             <span>Create</span>
-            <span class="new-value">{ manage_book_store.tag_search.trim() }</span>
+            <span class="new-value">{ book_store.tag_search.trim() }</span>
         </button>
     {/if}
 </div>

@@ -21,7 +21,7 @@
 
                 <Button 
                     text="Add book" 
-                    href="/add-book"
+                    href="/manage-book"
                 />
             </div>
             
@@ -33,7 +33,7 @@
         </main>
 
         <div class="fab">
-            <FAB href="/add-book" />
+            <FAB href="/manage-book" />
         </div>
     {/if}
 </div>

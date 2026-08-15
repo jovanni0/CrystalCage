@@ -1,11 +1,12 @@
 <script lang="ts">
-    import Button                from "@root/components/button.svelte";
-    import ListEntryVersion      from "@root/components/list-entry-version.svelte";
-    import TopbarBack            from "@root/components/topbar-back.svelte";
-    import { manage_book_store } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      Button                  from "@root/components/button.svelte";
+    import      ListEntryVersion        from "@root/components/list-entry-version.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
 
-
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
     let file_input: HTMLInputElement
 
 
@@ -15,7 +16,7 @@
 
         if (!file) return
 
-        manage_book_store.addEdition(file)
+        book_store.addEdition(file)
         file_input.value = ""
     }
 </script>
@@ -35,7 +36,7 @@
         style="display: none"
     />
 
-    {#if !manage_book_store.has_editions}
+    {#if !book_store.has_editions}
         <div class="info">
             <span class="main">No files added yet</span>
             <span>When you have a copy — an EPUB, MOBI, or FVB — add it here as a version. You can have multiple versions of the same book and choose which one you're reading each time.</span>
@@ -54,13 +55,13 @@
         />
 
         <div class="editions">
-            {#each manage_book_store.editions as edition (edition.local_id)}
+            {#each book_store.editions as edition (edition.id)}
                 <ListEntryVersion 
-                    input_value = { edition.title ?? undefined }
+                    input_value = { edition.label ?? undefined }
                     format      = { edition.format }
-                    created_at  = { edition.created_at }
-                    onChange    = { (text) => manage_book_store.setEditionTitle(edition.local_id, text) }
-                    onDelete    = { () => manage_book_store.removeEdition(edition.local_id) }
+                    created_at  = { edition.added_at !== null ? new Date(edition.added_at) : new Date() }
+                    onChange    = { (text) => book_store.setEditionLabel(edition.id, text) }
+                    onDelete    = { () => book_store.removeEdition(edition.id) }
                 />
             {/each}
         </div>

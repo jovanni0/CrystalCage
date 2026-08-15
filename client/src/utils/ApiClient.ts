@@ -22,6 +22,11 @@ import type { EditionResponse }          from "@root/dtos/EditionResponse";
 import type { TagUpdateRequest }         from "@root/dtos/TagUpdateRequest";
 import type { TagDetailResponse }        from "@root/dtos/TagDetailResponse";
 import type { ReadRecordUpdateRequest }  from "@root/dtos/ReadRecordUpdateRequest";
+import { coverCreateRequestToFormData, type CoverCreateRequest }       from "@root/dtos/CoverCreateRequest";
+import type { BookUpdateRequest }        from "@root/dtos/BookUpdateRequest";
+import type { CoverUpdateRequest }       from "@root/dtos/CoverUpdateRequest";
+import { editionCreateRequestToFormData, type EditionCreateRequest }     from "@root/dtos/EditionCreateRequest";
+import type { EditionUpdateRequest }     from "@root/dtos/EditionUpdateRequest";
 import      { isNullOrUndefined }        from "@root/utils/NullishChecks";
 import      { NotFoundError }            from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
@@ -390,6 +395,23 @@ export class ApiClient
     }
 
 
+    public async updateBook(id: string, request: BookUpdateRequest): Promise<BookSummaryResponse>
+    {
+        this.logger.debug(`sending PATCH /books/${id}`)
+
+        const response = await this.request(
+            `/books/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
+            }
+        )
+
+        return response.json()
+    }
+
+
     public async getCoverBlob(id: string): Promise<Blob>
     {
         const response = await this.request(
@@ -417,6 +439,52 @@ export class ApiClient
         )
 
         return response.json()
+    }
+
+
+    public async createCover(request: CoverCreateRequest): Promise<CoverResponse>
+    {
+        this.logger.debug(`sending POST /covers`, { request: request })
+
+        const response = await this.request(
+            `/covers`,
+            {
+                method: "POST",
+                body: coverCreateRequestToFormData(request)
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async updateCover(id: string, request: CoverUpdateRequest): Promise<CoverResponse>
+    {
+        this.logger.debug(`sending PATCH /covers/${id}`, { request: request })
+
+        const response = await this.request(
+            `/covers/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async deleteCover(id: string): Promise<void>
+    {
+        this.logger.debug(`sending DELETE /covers/${id}`)
+
+        await this.request(
+            `/covers/${id}`,
+            {
+                method: "DELETE",
+            }
+        )
     }
 
 
@@ -485,4 +553,51 @@ export class ApiClient
 
         return response.json()
     }
+
+
+    public async createEdition(request: EditionCreateRequest): Promise<EditionResponse>
+    {
+        this.logger.debug(`sending POST /editions`, { request: request })
+
+        const response = await this.request(
+            `/editions`,
+            {
+                method: "POST",
+                body: editionCreateRequestToFormData(request)
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async updateEdition(id: string, request: EditionUpdateRequest): Promise<EditionResponse>
+    {
+        this.logger.debug(`sending PATCH /editions/${id}`, { request: request })
+
+        const response = await this.request(
+            `/editions/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async deleteEdition(id: string): Promise<void>
+    {
+        this.logger.debug(`sending DELETE /editions/${id}`)
+
+        await this.request(
+            `/editions/${id}`,
+            {
+                method: "DELETE",
+            }
+        )
+    }
+
 }

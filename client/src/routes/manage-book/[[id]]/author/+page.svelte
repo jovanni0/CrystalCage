@@ -1,16 +1,19 @@
 <script lang="ts">
-    import FieldAddSeach        from "@root/components/field-add-seach.svelte";
-    import ListSelectableRadio  from "@root/components/list-selectable-radio.svelte";
-    import TopbarBack           from "@root/components/topbar-back.svelte";
-    import { logger, manage_book_store } from "@root/CompositionRoot";
+    import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { logger }              from "@root/CompositionRoot";
+    import      FieldAddSeach           from "@root/components/field-add-seach.svelte";
+    import      ListSelectableRadio     from "@root/components/list-selectable-radio.svelte";
+    import      TopbarBack              from "@root/components/topbar-back.svelte";
 
 
+    let { data } = $props()
+    const { book_store } : { book_store: BookManagementStore } = $derived(data)
 
     async function createAuthor(): Promise<void>
     {
-        const full_name = manage_book_store.author_search
+        const full_name = book_store.author_search
 
-        const is_created = await manage_book_store.createAuthor(full_name)
+        const is_created = await book_store.createAuthor(full_name)
 
         if (!is_created)
         {
@@ -18,7 +21,7 @@
             return
         }
 
-        manage_book_store.author_search = ""
+        book_store.author_search = ""
     }
 </script>
 
@@ -30,35 +33,35 @@
 
 <div class="body">
     <FieldAddSeach 
-        bind:value  = { manage_book_store.author_search }
+        bind:value  = { book_store.author_search }
         placeholder = "Search or add author..."
     />
 
-    {#if manage_book_store.author_results.length > 0}
+    {#if book_store.author_results.length > 0}
         <div class="options">
-            {#each manage_book_store.author_results as author (author.id)}
+            {#each book_store.author_results as author (author.id)}
                 <ListSelectableRadio 
                     label    = {`${author.last_name}, ${author.first_name}`}
                     name     = "author"
                     value    = {author.id}
-                    checked  = {manage_book_store.author_id === author.id}
-                    onchange = { (id) => manage_book_store.setAuthorId(id) }
+                    checked  = {book_store.author_id === author.id}
+                    onchange = { (id) => book_store.setAuthorId(id) }
                 />
             {/each}
         </div>
     {/if}
 
-    {#if manage_book_store.author_search !== ""}
+    {#if book_store.author_search !== ""}
         <div class="new-option">
             <button 
                 class   = "create"
                 onclick = { createAuthor }
             >
                 <span>Create</span>
-                <span class="new-value">{ manage_book_store.author_search.trim() }</span>
+                <span class="new-value">{ book_store.author_search.trim() }</span>
             </button>
             
-            {#if !manage_book_store.author_search.includes(',')}
+            {#if !book_store.author_search.includes(',')}
                 <span class="warning">Make sure the format is <b>Last, First Name</b> separated with a colon (,) otherwise some features may break.</span>
             {/if}
         </div>

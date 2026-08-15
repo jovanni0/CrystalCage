@@ -1,12 +1,20 @@
 <script lang="ts">
-    import type { TopbarTab }    from "@root/types/TopbarTab.js";
-    import      TopbarBackTabbed from "@root/components/topbars/TopbarBackTabbed.svelte";
-    import      Pencil           from "@root/icons/Pencil.svelte";
+    import type { TopbarTab }           from "@root/types/TopbarTab";
+    import type { BookStore }           from "@root/stores/BookStore.svelte";
+    import      TopbarBackTabbed        from "@root/components/topbars/TopbarBackTabbed.svelte";
+    import      Pencil                  from "@root/icons/Pencil.svelte";
 
     
     let { data, children } = $props()
 
-    const { book_store } = $derived(data)
+    const { 
+        book_store, 
+        id 
+    } : {
+        book_store: BookStore,
+        id: string
+    } = $derived(data)
+
     const tabs: TopbarTab[] = $derived([
         { label: "Details", href: `/book/${book_store.book_id}` },
         { label: "Covers", href: `/book/${book_store.book_id}/covers` },
@@ -21,7 +29,7 @@
     tabs  = { tabs }
 >
     {#snippet right()}
-        <a href = { "" }>
+        <a href = { `/manage-book/${id}` }>
             <Pencil />
         </a>
     {/snippet}

@@ -10,5 +10,5 @@ export const load = async ({ params, parent }) =>
     const id = params.id
     const book_store = new BookStore(id, logger, api_client)
 
-    return { book_store }
+    return { book_store, id }
 }

@@ -26,7 +26,7 @@
 </main>
 
 <div class="fab">
-    <FAB href="/add-book" />
+    <FAB href="/manage-book" />
 </div>
 
 
