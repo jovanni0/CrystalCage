@@ -19,14 +19,15 @@ import type { BookDetailResponse }       from "@root/dtos/BookDetailResponse";
 import type { CoverResponse }            from "@root/dtos/CoverResponse";
 import type { ReadRecordResponse }       from "@root/dtos/ReadRecordResponse";
 import type { EditionResponse }          from "@root/dtos/EditionResponse";
+import type { TagUpdateRequest }         from "@root/dtos/TagUpdateRequest";
+import type { TagDetailResponse }        from "@root/dtos/TagDetailResponse";
+import type { ReadRecordUpdateRequest }  from "@root/dtos/ReadRecordUpdateRequest";
 import      { isNullOrUndefined }        from "@root/utils/NullishChecks";
 import      { NotFoundError }            from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
 import      { UnauthorizedError }        from "@root/errors/UnauthorizedError";
 import      { toFormData }               from "@dtos/BookCreateRequest";
-import type { TagUpdateRequest }         from "@root/dtos/TagUpdateRequest";
-import type { TagDetailResponse }        from "@root/dtos/TagDetailResponse";
-import { ConflictError }                 from "@root/errors/ConflictError";
+import      { ConflictError }            from "@root/errors/ConflictError";
 
 
 
@@ -429,6 +430,39 @@ export class ApiClient
             `/read-records${filter}`,
             {
                 method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getReadRecord(id: string): Promise<ReadRecordResponse>
+    {
+        this.logger.debug(`sending GET /read-records/${id}`)
+
+        const response = await this.request(
+            `/read-records/${id}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async updateReadRecord(id: string, request: ReadRecordUpdateRequest): Promise<ReadRecordResponse>
+    {
+        console.log(request)
+        this.logger.debug(`sending PATCH /read-records/${id}`, { request: request })
+
+        const response = await this.request(
+            `/read-records/${id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
             }
         )
 

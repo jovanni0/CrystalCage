@@ -8,7 +8,7 @@ import { VisibilityObserver } from "./utils/VisibilityObserver.ts";
 
 
 
-export const logger              = new ConsoleLogger()
+export const logger              = new ConsoleLogger("DEBUG")
 export const api_client          = new ApiClient(logger)
 export const session_storage     = new SessionStorage()
 export const session_manager     = new SessionManager(api_client, session_storage, logger)

@@ -29,6 +29,7 @@
         border-bottom: 1px solid var(--dividers);
         padding: 12px 8px;
         padding-right: 0;
+        align-items: center;
     }
 
     .key {
