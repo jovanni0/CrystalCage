@@ -33,6 +33,7 @@ import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredE
 import      { UnauthorizedError }        from "@root/errors/UnauthorizedError";
 import      { toFormData }               from "@dtos/BookCreateRequest";
 import      { ConflictError }            from "@root/errors/ConflictError";
+import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest.ts";
 
 
 
@@ -529,6 +530,23 @@ export class ApiClient
             `/read-records/${id}`,
             {
                 method: "PATCH",
+                body: JSON.stringify(request),
+                headers: { "Content-Type": "application/json" }
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async createReadRecord(request: ReadRecordCreateRequest): Promise<ReadRecordResponse>
+    {
+        this.logger.debug(`sending POST /read-records`, { request: request })
+
+        const response = await this.request(
+            `/read-records`,
+            {
+                method: "POST",
                 body: JSON.stringify(request),
                 headers: { "Content-Type": "application/json" }
             }

@@ -12,6 +12,7 @@ import { TagQuery } from "@root/queries/TagQuery"
 import { buildReadHistory, formatAuthorName } from "@root/utils/LibraryGroupings"
 import type { EditionResponse } from "@root/dtos/EditionResponse"
 import type { ReadHistoryItem } from "@root/types/ReadHistoryItem"
+import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest"
 
 
 
@@ -25,8 +26,8 @@ export class BookStore
     private book:     BookDetailResponse | null = $state(null)
     private reads:    ReadRecordResponse[]      = $state([])
     private tags:     TagResponse[]             = $state([])
-    private editions: EditionResponse[]         = $state([])
 
+    public editions: EditionResponse[]         = $state([])
     public covers: CoverResponse[] = $state([])
 
     public author_id:     string            = $derived(this.author?.id ?? "")
@@ -75,6 +76,7 @@ export class BookStore
             this.covers   = covers
             this.reads    = reads
             this.editions = editions
+
         }
         catch (e)
         {
@@ -110,5 +112,53 @@ export class BookStore
         }
 
         return universe
+    }
+
+
+    public async setCoverAsDefault(id: string)
+    {
+        const book = await this.api.updateBook(this.book_id, { cover_id: id })
+        this.covers = await this.api.getCovers(this.book_id)
+
+        console.log(this.covers)
+
+        if (this.book)
+        {
+            this.book.cover_id = book.cover_id
+            console.log(`set default ${id}`)
+        }
+    }
+
+
+    public async startRead(edition_id: string)
+    {
+        console.log("creating new record")
+
+        const read_record: ReadRecordCreateRequest = {
+            book_id: this.book_id,
+            edition_id: edition_id,
+            start_date: new Date().toISOString().slice(0, 10),
+            end_date: null,
+            did_not_finish: false,
+            is_historical: false,
+            stop_position: null,
+            notes: null
+        }
+
+        const record = await this.api.createReadRecord(read_record)
+        
+        this.reads = await this.api.getReadRecords(this.book_id)
+        this.book = await this.api.getBook(this.book_id)
+
+        console.log(`creted new record:`, read_record)
+    }
+
+
+    public async finishRead(id: string)
+    {
+        await this.api.updateReadRecord(id, { end_date: new Date().toISOString().slice(0, 10) })
+        
+        this.reads = await this.api.getReadRecords(this.book_id)
+        this.book = await this.api.getBook(this.book_id)
     }
 }

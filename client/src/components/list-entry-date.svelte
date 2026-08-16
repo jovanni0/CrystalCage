@@ -1,7 +1,7 @@
 <script lang="ts">
     let {
         key = "Key",
-        value = $bindable("")
+        value = $bindable()
     } : {
         key?: string
         value?: string

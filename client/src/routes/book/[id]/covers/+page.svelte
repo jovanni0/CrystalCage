@@ -13,10 +13,11 @@
 <div class = "content">
     {#each book_store.covers as cover (cover.id)}
         <BookCoverSelector 
-            cover_id    = { cover.id }
-            cover_name  = { cover.label }
-            added_at    = { cover.added_at }
-            selected    = { cover.is_default }
+            cover_id   = { cover.id }
+            cover_name = { cover.label }
+            added_at   = { cover.added_at }
+            selected   = { cover.is_default }
+            onClick    = { () => book_store.setCoverAsDefault(cover.id) }
         />
     {/each}
 </div>

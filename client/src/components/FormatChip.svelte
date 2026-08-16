@@ -14,7 +14,7 @@
     class = "chip"
     style:--chip-color = { color }
 >
-    <span>{ format }</span>
+    <span>{ format.toUpperCase() }</span>
 </div>
 
 
@@ -28,5 +28,6 @@
         color: var(--chip-color);
         font-size: 0.8rem;
         font-weight: 500;
+        align-self: center;
     }
 </style>

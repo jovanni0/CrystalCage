@@ -8,17 +8,21 @@
         cover_name,
         added_at,
         selected,
+        onClick,
     } : {
         cover_id: string
         cover_name: string | null
         added_at: string
-        selected: boolean
+        selected: boolean,
+        onClick?: (() => void | Promise<void>) | undefined
     } = $props()
+
+    console.log(selected)
 </script>
 
 
 
-<button>
+<button onclick = {onClick}>
     <CoverImage 
         source = {{ kind: "REMOTE", id: cover_id}}
         alt    = { cover_name ?? "book-cover" }
@@ -26,7 +30,7 @@
 
     <div 
         class = "star"
-        class:selected = { selected === true }
+        class:selected = { selected }
     >
         <Star />
     </div>
@@ -43,8 +47,8 @@
     button
     {
         position: relative;
-        width: 100%;
-        height: 100%;
+        display: flex;
+        flex-direction: column;
     }
 
     .star
@@ -54,7 +58,7 @@
         right: 0.5rem;
         color: var(--text-inverted);
 
-        &.selected
+        &.selected :global(svg)
         {
             fill: currentColor;
         }

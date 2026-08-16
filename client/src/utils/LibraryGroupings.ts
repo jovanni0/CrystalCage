@@ -170,7 +170,7 @@ export function buildReadHistory(records: ReadRecordResponse[], editions: Editio
             is_historical: it.is_historical,
             notes: it.notes,
             edition_name: edition?.label ?? "(Unknown Edition)",
-            edition_release_date: edition?.release_date ?? "",
+            edition_release_date: edition?.added_at ?? "",
             edition_format: edition?.format ?? "(Unknown)",
         }
     })
