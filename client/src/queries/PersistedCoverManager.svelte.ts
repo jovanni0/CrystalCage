@@ -74,7 +74,10 @@ export class PersistedCoverManager implements CoverManager
             id: response.id,
             label: response.label,
             is_default: response.is_default,
-            image_source: { kind: "cover_id", cover_id: response.id }
+            image_source: { 
+                kind: "REMOTE", 
+                id: response.id 
+            }
         }
     }
 }

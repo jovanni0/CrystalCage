@@ -10,17 +10,16 @@
     import      ListEntryText           from "@root/components/list-entry-text.svelte";
     import      ListSingleItemEntry     from "@root/components/list-single-item-entry.svelte";
     import      TopbarConfirmCancel     from "@root/components/topbar-confirm-cancel.svelte";
-    import CoverImage from "@root/components/CoverImage.svelte";
-    import CoverPlaceholder from "@root/components/cover-placeholder.svelte";
+    import      CoverImage              from "@root/components/CoverImage.svelte";
 
 
     let { data } = $props()
     const { 
         book_store,
-        id 
+        id
     } : { 
         book_store: BookManagementStore
-        id: string | undefined 
+        id:         string | undefined 
     } = $derived(data)
 
     let error_message = $state<string|null>(null)
@@ -59,15 +58,11 @@
         hasContent  = { book_store.has_covers }
     >
         <div class="cover-wrapper">
-            <div class = "cover-holder">
-                {#if book_store.default_cover?.image_source.kind === "file"}
-                    <img src={URL.createObjectURL(book_store.default_cover.image_source.file)} alt="cover" />
-                {:else if book_store.default_cover?.image_source.kind === "cover_id"}
-                    <CoverImage cover_id={book_store.default_cover?.image_source.cover_id} alt="cover" />
-                {:else}
-                    <CoverPlaceholder />
-                {/if}
-            </div>
+            <CoverImage 
+                source = { book_store.default_cover?.image_source ?? null}
+                alt    = "default-cover"
+                width  = "120px"
+            />
 
             <div class="info">
                 <span 
@@ -218,13 +213,6 @@
         flex-direction: row;
         gap: 16px;
         align-items: center;
-
-        & .cover-holder {
-            width: 75px;
-            height: 112.5px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
 
         & .info {
             display: flex;

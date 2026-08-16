@@ -19,7 +19,7 @@ import      { toBookCreateRequest2 }    from "@root/dtos/BookCreateRequest"
 import      { PersistedCoverManager }   from "@root/queries/PersistedCoverManager.svelte"
 import      { DraftCoverManager }       from "@root/queries/DraftCoverManager.svelte"
 import      { PersistedEditionManager } from "@root/queries/PersistedEditionManager.svelte"
-import      { DraftEditionManager }     from "@root/queries/DraftEditionManager"
+import      { DraftEditionManager }     from "@root/queries/DraftEditionManager.svelte"
 
 
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import CoverPlaceholder from "@root/components/cover-placeholder.svelte";
     import CoverImage       from "@root/components/CoverImage.svelte";
     import CircleX          from "@root/icons/CircleX.svelte";
 
@@ -20,16 +19,11 @@
 
 
 <li class = "book-link-list-item">
-    <div class = "cover">
-        {#if cover_id}
-            <CoverImage 
-                cover_id = { cover_id }
-                alt      = { title }
-            />
-        {:else}
-            <CoverPlaceholder />
-        {/if}
-    </div>
+    <CoverImage 
+        source = { cover_id ? { kind: "REMOTE", id: cover_id} : null }
+        alt    = { title }
+        width  = "80px"
+    />
 
     <div class = "details">
         <span class = "title">{ title }</span>
@@ -58,11 +52,6 @@
         list-style: none;
         gap: 0.75rem;
         align-items: center;
-    }
-
-    .cover
-    {
-        width: 80px;
     }
 
     .details

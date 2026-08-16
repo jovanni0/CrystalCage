@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { CoverSource } from "@root/types/CoverSource";
     import CoverImage from "./CoverImage.svelte";
     import RadioSelector from "./radio-selector.svelte";
 
@@ -16,7 +17,7 @@
         radio_value?: string
         input_value?: string
         checked: boolean
-        image_source: { kind: "file", file: File } | { kind: "cover_id", cover_id: string }
+        image_source: CoverSource
         onChange?: (value: string) => void
         onDelete?: () => void
         onSelected?: () => void
@@ -32,11 +33,11 @@
         onchange={() => { console.log("radio changed"); onSelected?.() }}
     >
 
-    {#if image_source.kind === "file"}
-        <img src={URL.createObjectURL(image_source.file)} alt="cover" />
-    {:else}
-        <CoverImage cover_id={image_source.cover_id} alt="cover" />
-    {/if}
+    <CoverImage 
+        source = { image_source } 
+        alt    = "cover" 
+        width  = "100px"
+    />
 
     <div class="info-body">
         <div class="info">
@@ -125,12 +126,5 @@
 
     input[type="radio"] {
         display: none;
-    }
-
-    .cover-image {
-        width: 100px;
-        height: 150px;
-        object-fit: cover;
-        border-radius: 4px;
     }
 </style>

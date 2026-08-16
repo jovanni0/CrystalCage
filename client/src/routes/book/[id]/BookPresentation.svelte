@@ -2,7 +2,6 @@
     import type { ReadStatus }      from "@root/types/ReadStatus";
     import      CoverImage          from "@root/components/CoverImage.svelte";
     import      ReadStatusIndicator from "@root/components/ReadStatusIndicator.svelte";
-    import CoverPlaceholder from "@root/components/cover-placeholder.svelte";
 
 
     let {
@@ -28,16 +27,11 @@
 
 
 <div class = "presentation">
-    {#if cover_id}
-        <div class = "cover-holder">
-            <CoverImage 
-                cover_id = { cover_id }
-                alt      = "book-cover"
-            />
-        </div>
-    {:else}
-        <CoverPlaceholder />
-    {/if}
+    <CoverImage 
+        source = { cover_id ? { kind: "REMOTE", id: cover_id} : null }
+        alt    = "book-cover"
+        width  = "160px"
+    />
 
     <div class="info">
         <span class = "author">
@@ -64,11 +58,6 @@
     {
         display: inline-flex;
         gap: 1.5rem;
-    }
-
-    .cover-holder
-    {
-        max-width: 160px;
     }
     
     .info

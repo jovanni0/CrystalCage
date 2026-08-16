@@ -1,23 +1,28 @@
 <script lang="ts">
     import type { CoverImageStatus } from "@root/types/CoverImageStatus";
+    import type { CoverSource }      from "@root/types/CoverSource";
     import      { api_client }       from "@root/CompositionRoot";
     import      { lazyVisible }      from "@root/utils/LazyVisible";
 
+
     let {
-        cover_id,
-        alt = ""
+        source,
+        alt,
+        width,
     } : {
-        cover_id: string,
-        alt: string
+        source: CoverSource | null
+        alt?:   string | undefined
+        width?: string | undefined
     } = $props()
 
-    let image_url: string | null = $state(null)
-    let status: CoverImageStatus = $state("IDLE")
+
+    let image_url: string | null    = $state(null)
+    let status:    CoverImageStatus = $state("IDLE")
 
 
     async function load()
     {
-        if (cover_id === null || status != "IDLE")
+        if (source === null || status != "IDLE")
         {
             return
         }
@@ -26,9 +31,18 @@
 
         try
         {
-            const blob = await api_client.getCoverBlob(cover_id)
-            image_url = URL.createObjectURL(blob)
-            status = "LOADED"
+            if (source.kind === "FILE")
+            {
+                image_url = URL.createObjectURL(source.file)
+                status = "LOADED"
+            }
+            else
+            {
+                const blob = await api_client.getCoverBlob(source.id)
+
+                image_url = URL.createObjectURL(blob)
+                status = "LOADED"
+            }
         }
         catch
         {
@@ -51,27 +65,36 @@
 
 
 <div 
-    class="cover" 
-    use:lazyVisible={load}
+    class           = "cover-observer" 
+    use:lazyVisible = { load }
+    style:--width   = { width }
 >
     {#if status === "LOADED"}
-        <img src={image_url} {alt} />
+        <img 
+            src = { image_url } 
+            alt = { alt } 
+        />
     {:else if status === "ERROR"}
-        <div class="cover-fallback"></div>
+        <div 
+            class = "cover-fallback"
+        ></div>
     {:else}
-        <div class="cover-skeleton"></div>
+        <div 
+            class = "cover-skeleton"
+        ></div>
     {/if}
 </div>
 
 
 
 <style>
-    .cover
+    .cover-observer
     {
         aspect-ratio: 2/3;
         object-fit: cover;
         border-radius: 8px;
         overflow: hidden;
+        width: var(--width);
     }
 
     img 

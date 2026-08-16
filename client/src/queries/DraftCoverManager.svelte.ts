@@ -62,7 +62,10 @@ export class DraftCoverManager implements CoverManager
             id: draft.local_id,
             label: draft.title,
             is_default: draft.local_id === this.default_id,
-            image_source: { kind: "file", file: draft.file }
+            image_source: { 
+                kind: "FILE", 
+                file: draft.file 
+            }
         }
     }
 }

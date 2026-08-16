@@ -20,8 +20,8 @@
 
 <button>
     <CoverImage 
-        cover_id = { cover_id }
-        alt      = { cover_name ?? "book-cover" }
+        source = {{ kind: "REMOTE", id: cover_id}}
+        alt    = { cover_name ?? "book-cover" }
     />
 
     <div 

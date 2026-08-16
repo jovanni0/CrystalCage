@@ -1,6 +1,5 @@
 <script lang="ts">
     import type { ReadStatus } from "@root/types/ReadStatus";
-    import CoverPlaceholder from "./cover-placeholder.svelte";
     import CoverImage from "./CoverImage.svelte";
     import ReadStatusIndicator from "./ReadStatusIndicator.svelte";
 
@@ -31,16 +30,11 @@
         class = "series-item"
         href  = { `/book/${book_id}` }
     >
-        <div class = "image">
-            {#if cover_id}
-                <CoverImage 
-                    cover_id = { cover_id }
-                    alt      = { title }
-                />
-            {:else}
-                <CoverPlaceholder />
-            {/if}
-        </div>
+        <CoverImage 
+            source = { cover_id ? { kind: "REMOTE", id: cover_id} : null }
+            alt    = { title }
+            width  = "130px"
+        />
 
         <div class="info">
             <span class = "title">{ title }</span>
@@ -77,14 +71,6 @@
         border-bottom: 1px solid var(--dividers);
         color: inherit;
         text-decoration: none;
-    }
-
-    .image
-    {
-        width: 130px;
-        aspect-ratio: 2/3;
-        border-radius: 8px;
-        overflow: hidden;
     }
 
     .info
