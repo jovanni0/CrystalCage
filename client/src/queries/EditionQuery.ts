@@ -1,4 +1,5 @@
-import type { EditionDraft } from "@root/types/EditionDraft"
+import type { EditionDraft }        from "@root/types/EditionDraft"
+import      { generateEphemeralId } from "@root/utils/IdGenerator"
 
 
 
@@ -6,7 +7,7 @@ export class EditionQuery
 {
     public prepareEdition(file: File): EditionDraft
     {
-        const local_id = crypto.randomUUID()
+        const local_id = generateEphemeralId()
         const format = file.name.split('.').at(-1) ?? "unknown"
 
         return { local_id, file, format, title: null, created_at: new Date() }

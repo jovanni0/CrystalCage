@@ -1,4 +1,5 @@
-import type { CoverDraft } from "@root/types/CoverDraft"
+import type { CoverDraft }          from "@root/types/CoverDraft"
+import      { generateEphemeralId } from "@root/utils/IdGenerator"
 
 
 
@@ -6,7 +7,7 @@ export class CoverQuery
 {
     public prepareCover(file: File): CoverDraft
     {
-        const local_id = crypto.randomUUID()
+        const local_id = generateEphemeralId()
         const preview_url = URL.createObjectURL(file)
 
         return { local_id, file, preview_url, title: null }

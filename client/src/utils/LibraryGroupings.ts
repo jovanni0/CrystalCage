@@ -2,15 +2,16 @@ import type { AuthorResponse }      from "@root/dtos/AuthorResponse"
 import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
 import type { SeriesResponse }      from "@root/dtos/SeriesResponse"
 import type { UniverseResponse }    from "@root/dtos/UniverseResponse"
-import type { BooksBySeries } from "@root/types/BooksAsSeries"
+import type { BooksBySeries }       from "@root/types/BooksAsSeries"
 import type { LibraryByAuthor }     from "@root/types/LibraryByAuthor"
 import type { LibraryAsSeries }     from "@root/types/LibraryAsSeries"
 import type { LibraryItem }         from "@root/types/LibraryItem"
-import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
-import type { EditionResponse } from "@root/dtos/EditionResponse"
-import type { ReadHistoryItem } from "@root/types/ReadHistoryItem"
-import type { TagBookItem } from "@root/dtos/TagBookItem"
-import type { TagBookLink } from "@root/stores/TagMangementStore.svelte"
+import type { ReadRecordResponse }  from "@root/dtos/ReadRecordResponse"
+import type { EditionResponse }     from "@root/dtos/EditionResponse"
+import type { ReadHistoryItem }     from "@root/types/ReadHistoryItem"
+import type { TagBookItem }         from "@root/dtos/TagBookItem"
+import type { TagBookLink }         from "@root/stores/TagMangementStore.svelte"
+import      { generateEphemeralId } from "./IdGenerator"
 
 
 
@@ -120,7 +121,7 @@ export function groupBySeries(books: BookSummaryResponse[], universes: UniverseR
             if (!grouped.has(standalone_key))
             {
                 const group: BooksBySeries = { 
-                    id: crypto.randomUUID(),
+                    id: generateEphemeralId(),
                     title: "Standalone", 
                     universe_name: "", 
                     items: []
@@ -138,7 +139,7 @@ export function groupBySeries(books: BookSummaryResponse[], universes: UniverseR
         if (!grouped.has(key))
         {
             const group: BooksBySeries = {
-                id: crypto.randomUUID(),
+                id: generateEphemeralId(),
                 title: series_id_name.get(book.series_id) ?? "(Unknown Series)",
                 universe_name: book.universe_id ? universe_id_name.get(book.universe_id) ?? "" : "",
                 items: []
