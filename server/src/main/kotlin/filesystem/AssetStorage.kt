@@ -100,15 +100,16 @@ class AssetStorage(private val base_directory: Path)
         val match = Files
             .list(dir_path)
             .use { stream ->
-                stream.filter { path ->
-                    val name = path.fileName.toString()
-                    val without_extension = name.substringBeforeLast('.')
+                stream
+                    .filter { path ->
+                        val name = path.fileName.toString()
+                        val without_extension = name.substringBeforeLast('.')
 
-                    without_extension.substringAfterLast('.') == id.toString()
-                }
+                        without_extension.substringAfterLast('.') == id.toString()
+                    }
+                    .findFirst()
+                    .orElse(null)
             }
-            .findFirst()
-            .orElse(null)
 
         return match
     }

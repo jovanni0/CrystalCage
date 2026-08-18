@@ -24,6 +24,7 @@ import io.ktor.server.routing.*
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.Database
+import javax.sql.DataSource
 import kotlin.io.path.Path
 
 
@@ -64,6 +65,7 @@ fun Application.configureAuth(jwt_config: AuthConfig) {
  */
 fun Application.configureRouting(
     jwt_config: AuthConfig,
+    data_source: DataSource,
     user_repository: UserRepository,
     author_repository: AuthorRepository,
     universe_repository: UniverseRepository,
@@ -76,7 +78,7 @@ fun Application.configureRouting(
 ) {
     routing {
         serverRoutes()
-        authRoutes(user_repository, jwt_config)
+        authRoutes(user_repository, jwt_config, data_source)
         authorRoutes(author_repository)
         bookRoutes(book_repository)
         coverRoutes(book_repository, cover_repository)
@@ -167,8 +169,13 @@ fun Application.configureStatusPages() {
         exception<ExposedSQLException> { call, cause ->
             when (cause.sqlState) {
                 "23503" -> call.respond(HttpStatusCode.BadRequest, "referenced entity does not exist")
-                else -> call.respond(HttpStatusCode.InternalServerError, "database error")
+//                else -> call.respond(HttpStatusCode.InternalServerError, "database error")
             }
+        }
+
+        exception<Throwable> { call, cause ->
+            call.application.log.error("Unhandled exception", cause)
+            call.respond(HttpStatusCode.InternalServerError, cause.message ?: "Unknown error")
         }
     }
 }
@@ -183,7 +190,7 @@ fun Application.configureCors() {
         allowHeader(HttpHeaders.Authorization)
         allowMethod(HttpMethod.Get)
         allowMethod(HttpMethod.Post)
-        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Patch)
         allowMethod(HttpMethod.Delete)
     }
 }
@@ -201,7 +208,7 @@ fun Application.module() {
     )
     jwt_config.validate()
 
-    configureDatabase()
+    val data_source = configureDatabase()
     configureSerializer()
     configureAuth(jwt_config)
     configureStatusPages()
@@ -221,6 +228,7 @@ fun Application.module() {
 
     configureRouting(
         jwt_config,
+        data_source,
         user_repository,
         author_repository,
         universe_repository,

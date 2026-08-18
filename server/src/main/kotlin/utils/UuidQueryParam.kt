@@ -191,16 +191,14 @@ suspend fun ApplicationCall.parseUuidsOrRespond(value: Update<List<String>>, fie
     return Update.Value(parsed)
 }
 
-suspend fun ApplicationCall.parsePatchUuidOrRespond(patch: Patch<String>, field_name: String): Patch<Uuid>?
+suspend fun ApplicationCall.parseUpdateUuidOrRespond(patch: Update<String?>, field_name: String): Update<Uuid>?
 {
     return when(patch)
     {
-        is Patch.Undefined -> Patch.Undefined
-        is Patch.Value ->
+        is Update.Undefined -> Update.Undefined
+        is Update.Value ->
         {
-            val raw = patch.value ?: return Patch.Value(null)
-
-            val uuid = parseUuid(raw).value
+            val uuid = parseUuid(patch.value).value
 
             if (uuid == null)
             {
@@ -208,7 +206,7 @@ suspend fun ApplicationCall.parsePatchUuidOrRespond(patch: Patch<String>, field_
                 return null
             }
 
-            Patch.Value(uuid)
+            Update.Value(uuid)
         }
     }
 }

@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class TagCreateRequest(
-    val name: String,
-    val description: String,
+    val name:        String,
+    val description: String? = null,
 )

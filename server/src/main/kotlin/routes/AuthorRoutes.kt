@@ -5,6 +5,7 @@ import dev.jovanni0.data_types.author.AuthorResponse
 import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.tenant_schema
 import dev.jovanni0.repositories.AuthorRepository
+import dev.jovanni0.utils.getUuidCallParamOrRespond
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -26,6 +27,8 @@ fun Route.authorRoutes(author_repository: AuthorRepository)
         {
             val schema_name = call.tenant_schema
 
+            println("got GET /authors request")
+
             val authors = author_repository
                 .findAll(schema_name)
                 .map {
@@ -37,6 +40,25 @@ fun Route.authorRoutes(author_repository: AuthorRepository)
                 }
 
             call.respond(authors)
+
+            println("responded to GET /authors request")
+        }
+
+
+        get("/authors/{id}")
+        {
+            val schema_name = call.tenant_schema
+            val id = call.getUuidCallParamOrRespond("id") ?: return@get
+
+            val author = author_repository.findById(schema_name, id)
+
+            if (author == null)
+            {
+                call.respond(HttpStatusCode.NotFound)
+                return@get
+            }
+
+            call.respond(author.toAuthorResponse())
         }
 
 

@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SeriesCreateRequest(
-    val author_id: String,
-    val universe_id: String?,
-    val name: String,
-    val is_finished: Boolean?,
+    val author_id:   String,
+    val universe_id: String? = null,
+    val name:        String,
+    val is_finished: Boolean? = null,
 )

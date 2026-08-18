@@ -28,6 +28,24 @@ class UniverseRepository
     }
 
 
+    fun findAll(schema_name: String): List<UniverseRow>
+    {
+        return tenantTransaction(schema_name)
+        {
+            UniverseTable
+                .selectAll()
+                .orderBy(UniverseTable.name, SortOrder.ASC)
+                .map {
+                    UniverseRow(
+                        id = it[UniverseTable.id],
+                        author_id = it[UniverseTable.author_id],
+                        name = it[UniverseTable.name]
+                    )
+                }
+        }
+    }
+
+
     fun findAllByAuthorId(schema_name: String, author_id: Uuid): List<UniverseRow>
     {
         return tenantTransaction(schema_name)

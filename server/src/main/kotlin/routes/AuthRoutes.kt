@@ -4,9 +4,11 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.auth.PasswordHasher
+import dev.jovanni0.data_types.UserRole
 import dev.jovanni0.data_types.auth.LoginRequest
 import dev.jovanni0.data_types.auth.LoginResponse
 import dev.jovanni0.data_types.auth.MeResponse
+import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.repositories.UserRepository
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -18,10 +20,14 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import java.util.Date
+import javax.sql.DataSource
 
 
-
-fun Route.authRoutes(user_repository: UserRepository, jwt_config: AuthConfig)
+fun Route.authRoutes(
+    user_repository: UserRepository,
+    jwt_config: AuthConfig,
+    data_source: DataSource,
+)
 {
     /**
      * authenticate the user.
@@ -60,6 +66,31 @@ fun Route.authRoutes(user_repository: UserRepository, jwt_config: AuthConfig)
                 token = token
             )
         )
+    }
+
+
+    post("/auth/signup")
+    {
+        val request = call.receive<LoginRequest>()
+
+        if (!request.validate())
+        {
+            call.respond(HttpStatusCode.BadRequest, "fields are blank or password is too short")
+            return@post
+        }
+
+        val password_hash = PasswordHasher.hash(request.password)
+        val result = user_repository.create(request.username, password_hash, UserRole.ADMIN)
+
+        if (result == null)
+        {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+
+        provisionTenantSchema(data_source, result.id)
+
+        call.respond(HttpStatusCode.Created)
     }
 
 

@@ -12,5 +12,5 @@ data class SeriesDetailResponse(
     val universe_id: String?,
     val name: String,
     val is_finished: Boolean,
-    val books: List<BookSummaryResponse>
+    val books: List<SeriesBookItem>
 )

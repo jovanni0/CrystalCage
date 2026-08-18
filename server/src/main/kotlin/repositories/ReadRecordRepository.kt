@@ -6,8 +6,11 @@ import dev.jovanni0.exceptions.ConflictException
 import dev.jovanni0.records.read_record.ReadRecordRow
 import dev.jovanni0.tables.tenant.ReadRecordTable
 import dev.jovanni0.utils.Patch
+import dev.jovanni0.utils.Update
 import dev.jovanni0.utils.setIfPresent
+import dev.jovanni0.utils.updateIfPresent
 import dev.jovanni0.utils.validateHistoricalTransaction
+import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.neq
@@ -29,6 +32,7 @@ class ReadRecordRepository
             ReadRecordTable
                 .selectAll()
                 .where { ReadRecordTable.book_id eq book_id }
+                .orderBy(ReadRecordTable.start_date, SortOrder.DESC)
                 .map {
                     ReadRecordRow(
                         id = it[ReadRecordTable.id],
@@ -135,32 +139,22 @@ class ReadRecordRepository
     fun update(
         schema_name: String,
         id: Uuid,
-        edition_id: Patch<Uuid>,
-        start_date: Patch<LocalDate>,
-        end_date: Patch<LocalDate>,
-        did_not_finish: Patch<Boolean>,
-        is_historical: Patch<Boolean>,
-        stop_position: Patch<String>,
-        notes: Patch<String>,
+        edition_id: Update<Uuid?>,
+        start_date: Update<LocalDate?>,
+        end_date: Update<LocalDate?>,
+        did_not_finish: Update<Boolean>,
+        is_historical: Update<Boolean>,
+        stop_position: Update<String?>,
+        notes: Update<String?>,
     ): Int?
     {
-        // TODO: this should be mitigated by removing auto-nullability from `Patch`.
-        if (did_not_finish is Patch.Value && did_not_finish.value == null)
-        {
-            throw ConfigurationException("did_not_finish cannot be null")
-        }
-        if (is_historical is Patch.Value && is_historical.value == null)
-        {
-            throw ConfigurationException("is_historical cannot be null")
-        }
-
-        val can_update = edition_id !is Patch.Undefined ||
-            start_date !is Patch.Undefined ||
-            end_date !is Patch.Undefined ||
-            did_not_finish !is Patch.Undefined ||
-            is_historical !is Patch.Undefined ||
-            stop_position !is Patch.Undefined ||
-            notes !is Patch.Undefined
+        val can_update = edition_id !is Update.Undefined ||
+            start_date !is Update.Undefined ||
+            end_date !is Update.Undefined ||
+            did_not_finish !is Update.Undefined ||
+            is_historical !is Update.Undefined ||
+            stop_position !is Update.Undefined ||
+            notes !is Update.Undefined
 
         if (!can_update)
         {
@@ -183,23 +177,28 @@ class ReadRecordRepository
 
             val effective_start_date = when(start_date)
             {
-                is Patch.Undefined -> current_start_date
-                is Patch.Value -> start_date.value
+                is Update.Undefined -> current_start_date
+                is Update.Value -> start_date.value
             }
             val effective_end_date = when(end_date)
             {
-                is Patch.Undefined -> current_end_date
-                is Patch.Value -> end_date.value
+                is Update.Undefined -> current_end_date
+                is Update.Value -> end_date.value
             }
 
-            val validation_error = validateHistoricalTransaction(is_historical, current_is_historical, effective_start_date, effective_end_date)
+            val is_historical_patch = when (is_historical) {
+                is Update.Undefined -> Patch.Undefined
+                is Update.Value -> Patch.Value(is_historical.value)
+            }
+            val validation_error = validateHistoricalTransaction(is_historical_patch, current_is_historical, effective_start_date, effective_end_date)
+
             if (validation_error != null)
             {
                 throw ConflictException(validation_error)
             }
 
             // check for conflict because there is already a historical record.
-            if (is_historical is Patch.Value && is_historical.value == true)
+            if (is_historical is Update.Value && is_historical.value == true)
             {
                 val has_historical = ReadRecordTable
                     .selectAll()
@@ -219,13 +218,13 @@ class ReadRecordRepository
 
             ReadRecordTable.update({ ReadRecordTable.id eq  id })
             {
-                it.setIfPresent(ReadRecordTable.edition_id, edition_id)
-                it.setIfPresent(ReadRecordTable.start_date, start_date)
-                it.setIfPresent(ReadRecordTable.end_date, end_date)
-                it.setIfPresent(ReadRecordTable.did_not_finish, did_not_finish)
-                it.setIfPresent(ReadRecordTable.is_historical, is_historical)
-                it.setIfPresent(ReadRecordTable.stop_position, stop_position)
-                it.setIfPresent(ReadRecordTable.notes, notes)
+                it.updateIfPresent(ReadRecordTable.edition_id, edition_id)
+                it.updateIfPresent(ReadRecordTable.start_date, start_date)
+                it.updateIfPresent(ReadRecordTable.end_date, end_date)
+                it.updateIfPresent(ReadRecordTable.did_not_finish, did_not_finish)
+                it.updateIfPresent(ReadRecordTable.is_historical, is_historical)
+                it.updateIfPresent(ReadRecordTable.stop_position, stop_position)
+                it.updateIfPresent(ReadRecordTable.notes, notes)
             }
         }
     }

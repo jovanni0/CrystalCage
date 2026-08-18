@@ -3,6 +3,7 @@ package dev.jovanni0.routes
 import dev.jovanni0.data_types.series.SeriesCreateRequest
 import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.tenant_schema
+import dev.jovanni0.records.series.SeriesRow
 import dev.jovanni0.repositories.AuthorRepository
 import dev.jovanni0.repositories.SeriesRepository
 import dev.jovanni0.repositories.UniverseRepository
@@ -27,6 +28,7 @@ fun Route.seriesRoutes(
         install(TenantResolution)
 
 
+        // GET /series(?author_id=...&universe_id=...)
         get("/series")
         {
             val schema_name = call.tenant_schema
@@ -49,7 +51,7 @@ fun Route.seriesRoutes(
 
             val result = series_repository.findAllByAuthorIdAndUniverseId(schema_name, author_id_result.value, universe_id_result.value)
 
-            call.respond(result)
+            call.respond(result.map { it.toSeriesResponse() })
         }
 
 
@@ -79,7 +81,7 @@ fun Route.seriesRoutes(
                 return@get
             }
 
-            call.respond(result)
+            call.respond(result.toSeriesDetailResponse())
         }
 
 
@@ -139,7 +141,7 @@ fun Route.seriesRoutes(
                 request.is_finished == true
             )
 
-            call.respond(HttpStatusCode.Created, result)
+            call.respond(HttpStatusCode.Created, result.toSeriesResponse())
         }
     }
 }

@@ -4,9 +4,12 @@ import dev.jovanni0.data_types.universe.request.UniverseCreateRequest
 import dev.jovanni0.data_types.universe.response.UniverseResponse
 import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.tenant_schema
+import dev.jovanni0.records.universe.UniverseRow
 import dev.jovanni0.repositories.UniverseRepository
+import dev.jovanni0.utils.parseUuid
 import dev.jovanni0.utils.requiredUuidQueryParam
 import dev.jovanni0.utils.tryParseUuidOrRespond
+import dev.jovanni0.utils.uuidQueryParam
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -24,24 +27,32 @@ fun Route.universeRoutes(universe_repository: UniverseRepository)
         install(TenantResolution)
 
 
+        // GET /universes(?author_id=...)
         get("/universes")
         {
             val schema_name = call.tenant_schema
-            val author_id = call.requiredUuidQueryParam("author_id") ?: return@get
+//            val author_id = call.requiredUuidQueryParam("author_id")
 
-            println("author_id: " + author_id)
+            val author_id_param = call.queryParameters["author_id"]
+            val author_id_req = parseUuid(author_id_param)
 
-            val universes = universe_repository
-                .findAllByAuthorId(schema_name, author_id)
-                .map {
-                    UniverseResponse(
-                        id = it.id.toString(),
-                        author_id = author_id.toString(),
-                        name = it.name,
-                    )
-                }
+            if (!author_id_req.is_valid)
+            {
+                call.respond(HttpStatusCode.BadRequest, "author_id is not a valid UUID $author_id_param")
+                return@get
+            }
 
-            call.respond(universes)
+            var universes: List<UniverseRow> = emptyList()
+            if (author_id_req.value === null)
+            {
+                universes = universe_repository.findAll(schema_name)
+            }
+            else
+            {
+                universes = universe_repository.findAllByAuthorId(schema_name, author_id_req.value)
+            }
+
+            call.respond(universes.map { it.toUniverseResponse() })
         }
 
 

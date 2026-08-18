@@ -1,5 +1,6 @@
 package dev.jovanni0.routes
 
+import dev.jovanni0.data_types.tags.TagCreateRequest
 import dev.jovanni0.data_types.tags.TagResponse
 import dev.jovanni0.data_types.tags.TagUpdateRequest
 import dev.jovanni0.database.TenantResolution
@@ -18,7 +19,7 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
-
+import io.ktor.server.routing.post
 
 
 fun Route.tagRoutes(
@@ -64,6 +65,17 @@ fun Route.tagRoutes(
             }
 
             call.respond(result)
+        }
+
+
+        post("/tags")
+        {
+            val schema_name = call.tenant_schema
+            val request = call.receive<TagCreateRequest>()
+
+            val result = tag_repository.create(schema_name, request.name, request.description)
+
+            call.respond(result.toTagResponse())
         }
 
 

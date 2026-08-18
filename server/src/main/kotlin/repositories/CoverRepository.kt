@@ -48,6 +48,7 @@ class CoverRepository(val cover_storage: AssetStorage)
                 )
                 .select(CoverTable.id, CoverTable.book_id, CoverTable.label, CoverTable.added_at, is_default)
                 .where { CoverTable.book_id eq book_id }
+                .orderBy(CoverTable.added_at, SortOrder.DESC)
                 .map {
                     CoverRow(
                         id = it[CoverTable.id],

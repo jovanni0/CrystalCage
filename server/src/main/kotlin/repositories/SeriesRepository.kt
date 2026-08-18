@@ -2,8 +2,11 @@ package dev.jovanni0.repositories
 
 import dev.jovanni0.data_types.ReadRecordAggregate
 import dev.jovanni0.data_types.book.BookSummaryResponse
+import dev.jovanni0.data_types.series.SeriesBookItem
 import dev.jovanni0.data_types.series.SeriesDetailResponse
 import dev.jovanni0.database.transactions.tenantTransaction
+import dev.jovanni0.records.series.SeriesBookRow
+import dev.jovanni0.records.series.SeriesDetailRow
 import dev.jovanni0.records.series.SeriesRow
 import dev.jovanni0.tables.tenant.BookTable
 import dev.jovanni0.tables.tenant.ReadRecordTable
@@ -52,7 +55,7 @@ class SeriesRepository
     }
 
 
-    fun findById(schema_name: String, id: Uuid): SeriesDetailResponse?
+    fun findById(schema_name: String, id: Uuid): SeriesDetailRow?
     {
         return tenantTransaction(schema_name)
         {
@@ -72,6 +75,7 @@ class SeriesRepository
                 .select(
                     SeriesTable.id, SeriesTable.author_id, SeriesTable.universe_id, SeriesTable.name, SeriesTable.is_finished,
                     BookTable.id, BookTable.author_id, BookTable.series_id, BookTable.universe_id, BookTable.cover_id, BookTable.volume_number, BookTable.title,
+                    BookTable.launch_date, BookTable.word_count,
                     ReadRecordTable.id, ReadRecordTable.end_date, ReadRecordTable.did_not_finish, ReadRecordTable.is_historical
                 )
                 .where { SeriesTable.id eq id }
@@ -99,23 +103,22 @@ class SeriesRepository
 
                     val (status, reread_count) = computeReadStatus(records)
 
-                    BookSummaryResponse(
-                        id = book_id.toString(),
-                        author_id = first[BookTable.author_id].toString(),
-                        series_id = first[BookTable.series_id]?.toString(),
-                        universe_id = first[BookTable.universe_id]?.toString(),
-                        cover_id = first[BookTable.cover_id]?.toString(),
+                    SeriesBookRow(
+                        id = book_id,
+                        cover_id = first[BookTable.cover_id],
                         volume_number = first[BookTable.volume_number]?.toFloat(),
                         title = first[BookTable.title],
+                        launch_date = first[BookTable.launch_date],
+                        word_count = first[BookTable.word_count],
                         read_status = status,
                         reread_count = reread_count
                     )
                 }
 
-            SeriesDetailResponse(
-                id = series_row[SeriesTable.id].toString(),
-                author_id = series_row[SeriesTable.author_id].toString(),
-                universe_id = series_row[SeriesTable.universe_id]?.toString(),
+            SeriesDetailRow(
+                id = series_row[SeriesTable.id],
+                author_id = series_row[SeriesTable.author_id],
+                universe_id = series_row[SeriesTable.universe_id],
                 name = series_row[SeriesTable.name],
                 is_finished = series_row[SeriesTable.is_finished],
                 books = books

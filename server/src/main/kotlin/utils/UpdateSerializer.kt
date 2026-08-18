@@ -11,6 +11,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonNull
+import tools.jackson.databind.ser.jdk.BooleanSerializer
 import java.time.LocalDate
 
 
@@ -26,6 +27,9 @@ object UpdateNullableFloatSerializer : KSerializer<Update<Float?>> by UpdateSeri
 
 object UpdateLocalDateSerializer : KSerializer<Update<LocalDate>> by UpdateSerializer(LocalDateSerializer)
 object UpdateNullableLocalDateSerializer : KSerializer<Update<LocalDate?>> by UpdateSerializer(LocalDateSerializer.nullable)
+
+object UpdateBooleanSerializer : KSerializer<Update<Boolean>> by UpdateSerializer(Boolean.serializer())
+object UpdateNullableBooleanSerializer : KSerializer<Update<Boolean?>> by UpdateSerializer(Boolean.serializer().nullable)
 
 
 class UpdateSerializer<TypeT>(private val value_serializer: KSerializer<TypeT>) : KSerializer<Update<TypeT>>

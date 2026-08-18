@@ -12,6 +12,25 @@ import kotlin.uuid.Uuid
 
 class AuthorRepository
 {
+    fun findById(schema_name: String, id: Uuid): AuthorRow?
+    {
+        return tenantTransaction(schema_name)
+        {
+            AuthorTable
+                .selectAll()
+                .where { AuthorTable.id eq id }
+                .map {
+                    AuthorRow(
+                        id = it[AuthorTable.id],
+                        first_name = it[AuthorTable.first_name],
+                        last_name = it[AuthorTable.last_name]
+                    )
+                }
+                .firstOrNull()
+        }
+    }
+
+
     fun exists(schema_name: String, author_id: Uuid): Boolean
     {
         return tenantTransaction(schema_name)

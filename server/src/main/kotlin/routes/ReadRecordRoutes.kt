@@ -6,7 +6,7 @@ import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.tenant_schema
 import dev.jovanni0.repositories.ReadRecordRepository
 import dev.jovanni0.utils.getUuidCallParamOrRespond
-import dev.jovanni0.utils.parsePatchUuidOrRespond
+import dev.jovanni0.utils.parseUpdateUuidOrRespond
 import dev.jovanni0.utils.parseUuid
 import dev.jovanni0.utils.requiredUuidQueryParam
 import io.ktor.http.HttpStatusCode
@@ -37,7 +37,7 @@ fun Route.readRecordRoutes(
 
             val result = read_record_repo.findAllByBookId(schema_name, book_id)
 
-            call.respond(result)
+            call.respond(result.map { it.toReadRecordResponse() })
         }
 
 
@@ -54,7 +54,7 @@ fun Route.readRecordRoutes(
                 return@get
             }
 
-            call.respond(result)
+            call.respond(result.toReadRecordResponse())
         }
 
 
@@ -96,7 +96,7 @@ fun Route.readRecordRoutes(
                 request.notes
             )
 
-            call.respond(HttpStatusCode.Created, result)
+            call.respond(HttpStatusCode.Created, result.toReadRecordResponse())
         }
 
 
@@ -106,7 +106,7 @@ fun Route.readRecordRoutes(
             val id = call.getUuidCallParamOrRespond("id") ?: return@patch
             val request = call.receive<ReadRecordUpdateRequest>()
 
-            val edition_id = call.parsePatchUuidOrRespond(request.edition_id, "edition_id") ?: return@patch
+            val edition_id = call.parseUpdateUuidOrRespond(request.edition_id, "edition_id") ?: return@patch
 
             val result = read_record_repo.update(
                 schema_name,
@@ -139,7 +139,7 @@ fun Route.readRecordRoutes(
                 return@patch
             }
 
-            call.respond(new_record)
+            call.respond(new_record.toReadRecordResponse())
         }
 
 
