@@ -7,6 +7,7 @@ import type { Logger }             from "@root/loggers/Logger"
 import type { ApiClient }          from "@root/utils/ApiClient"
 import { toLocalDateString } from "@root/utils/DataConversion"
 import      { formatAuthorName }   from "@root/utils/LibraryGroupings"
+import { getIntervalInDays } from "@root/utils/ReadRecordUtils"
 
 
 
@@ -34,7 +35,7 @@ export class ReadManagementStore
     
     public book_title:      string         = $derived(this.book?.title ?? "")
     public author_name:     string         = $derived(this.author ? formatAuthorName(this.author) : "")
-    public total_time:      number | null  = $derived(this.start_date && this.end_date ? Math.round((new Date(this.end_date).getTime() - new Date(this.start_date).getTime()) / 86_400_000) + 1 : null)
+    public total_time:      number | null  = $derived(getIntervalInDays(this.start_date, this.end_date))
     public pace:            number | null  = $derived(this.book?.word_count && this.total_time ? this.book?.word_count / this.total_time : null)
     public edition_options: EditionEntry[] = $derived(this.editions.map(it => ({ id: it.id, label: it.label, format: it.format}) ))
     public edition_label:   string         = $derived(this.selected_edition?.label ?? "")

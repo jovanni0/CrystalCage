@@ -87,7 +87,7 @@ export class ApiClient
 
     async ping(): Promise<PingResponse>
     {
-        console.log(`sending ping to server...`)
+        this.logger.debug("pinging server")
 
         const response = await this.request("/ping", {})
 
@@ -523,7 +523,6 @@ export class ApiClient
 
     public async updateReadRecord(id: string, request: ReadRecordUpdateRequest): Promise<ReadRecordResponse>
     {
-        console.log(request)
         this.logger.debug(`sending PATCH /read-records/${id}`, { request: request })
 
         const response = await this.request(

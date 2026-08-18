@@ -11,6 +11,7 @@
     let dialog: ReturnType<typeof EditionSelectorSheet>
     let selected_edition_id: string | null = $state(null)
 
+
     async function confirmStartRead()
     {
         if (selected_edition_id === null) 
@@ -31,7 +32,7 @@
                 <span class="main">No reads recorded yet.</span>
                 <span>Here you will see your read history for this book.</span>
             </div>
-            
+
             <Button 
                 text="Start read" 
                 type="primary" 
@@ -39,13 +40,17 @@
             />
         </div>
     {:else}
-        <div class = "start-reading">
-            <span>N days total read time</span>
-            <Button 
-                text    = "Start Reading"
-                onClick = { () => dialog.open() }
-            />
-        </div>
+        {#if book_store.can_start_read}
+            <div class = "start-reading">
+                <span>{ book_store.total_read_time } days total read time</span>
+
+                <Button 
+                    text    = "Start Reading"
+                    onClick = { () => dialog.open() }
+                />
+            </div>
+        {/if}
+
         {#each book_store.read_history as read, index (read.id)}
             <ReadListItem 
                 record_id        = { read.id }

@@ -13,6 +13,7 @@ import { buildReadHistory, formatAuthorName } from "@root/utils/LibraryGroupings
 import type { EditionResponse } from "@root/dtos/EditionResponse"
 import type { ReadHistoryItem } from "@root/types/ReadHistoryItem"
 import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest"
+import { getIntervalInDays } from "@root/utils/ReadRecordUtils"
 
 
 
@@ -30,21 +31,24 @@ export class BookStore
     public editions: EditionResponse[]         = $state([])
     public covers: CoverResponse[] = $state([])
 
-    public author_id:     string            = $derived(this.author?.id ?? "")
-    public author_name:   string            = $derived(this.author !== null ? formatAuthorName(this.author) : "")
-    public universe_name: string            = $derived(this.universe?.name ?? "")
-    public series_name:   string            = $derived(this.series?.name ?? "")
-    public title:         string            = $derived(this.book?.title ?? "")
-    public volume_number: number | null     = $derived(this.book?.volume_number ?? null)
-    public launch_date:   string | null     = $derived(this.book?.launch_date ?? null)
-    public word_count:    number | null     = $derived(this.book?.word_count ?? null)
-    public blurb:         string | null     = $derived(this.book?.blurb ?? null)
-    public notes:         string | null     = $derived(this.book?.notes ?? null)
-    public tag_names:     string[]          = $derived(this.book?.tag_ids.map(it => this.tag_query.nameOf(this.tags, it)).filter(it => it !== null) ?? [])
-    public read_status:   ReadStatus        = $derived(this.book?.read_status ?? "UNREAD")
-    public read_count:    number            = $derived(this.book?.reread_count ?? 0)
-    public read_history:  ReadHistoryItem[] = $derived(buildReadHistory(this.reads, this.editions))
-    public cover_id:      string | null     = $derived(this.book?.cover_id ?? null)
+    public author_id:       string            = $derived(this.author?.id ?? "")
+    public author_name:     string            = $derived(this.author !== null ? formatAuthorName(this.author) : "")
+    public universe_name:   string            = $derived(this.universe?.name ?? "")
+    public series_name:     string            = $derived(this.series?.name ?? "")
+    public title:           string            = $derived(this.book?.title ?? "")
+    public volume_number:   number | null     = $derived(this.book?.volume_number ?? null)
+    public launch_date:     string | null     = $derived(this.book?.launch_date ?? null)
+    public word_count:      number | null     = $derived(this.book?.word_count ?? null)
+    public blurb:           string | null     = $derived(this.book?.blurb ?? null)
+    public notes:           string | null     = $derived(this.book?.notes ?? null)
+    public tag_names:       string[]          = $derived(this.book?.tag_ids.map(it => this.tag_query.nameOf(this.tags, it)).filter(it => it !== null) ?? [])
+    public read_status:     ReadStatus        = $derived(this.book?.read_status ?? "UNREAD")
+    public read_count:      number            = $derived(this.book?.reread_count ?? 0)
+    public read_history:    ReadHistoryItem[] = $derived(buildReadHistory(this.reads, this.editions))
+    public cover_id:        string | null     = $derived(this.book?.cover_id ?? null)
+    public total_read_time: number            = $derived(this.reads.map(it => getIntervalInDays(it.start_date, it.end_date)).filter(it => it !== null).reduce( (total, it) => total + it, 0))
+
+    public can_start_read: boolean = $derived(this.reads.find(it => it.start_date !== null && it.end_date === null) === undefined)
 
 
     constructor(public book_id: string, private logger: Logger, private api: ApiClient)
@@ -120,19 +124,20 @@ export class BookStore
         const book = await this.api.updateBook(this.book_id, { cover_id: id })
         this.covers = await this.api.getCovers(this.book_id)
 
-        console.log(this.covers)
-
         if (this.book)
         {
             this.book.cover_id = book.cover_id
-            console.log(`set default ${id}`)
         }
     }
 
 
-    public async startRead(edition_id: string)
+    public async startRead(edition_id: string): Promise<void>
     {
-        console.log("creating new record")
+        if (!this.can_start_read)
+        {
+            this.logger.error("another read is alredy started")
+            return
+        }
 
         const read_record: ReadRecordCreateRequest = {
             book_id: this.book_id,
@@ -145,12 +150,20 @@ export class BookStore
             notes: null
         }
 
-        const record = await this.api.createReadRecord(read_record)
-        
-        this.reads = await this.api.getReadRecords(this.book_id)
-        this.book = await this.api.getBook(this.book_id)
+        try
+        {
+            const record = await this.api.createReadRecord(read_record)
+            
+            this.reads = await this.api.getReadRecords(this.book_id)
+            this.book = await this.api.getBook(this.book_id)
 
-        console.log(`creted new record:`, read_record)
+            this.logger.info("created a new read record", { record: record })
+        }
+        catch (e)
+        {
+            this.logger.error("failed to create a new record", { error: e })
+        }
+
     }
 
 

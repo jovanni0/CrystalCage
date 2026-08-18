@@ -30,7 +30,7 @@
         name={name}
         value={radio_value}
         checked={checked}
-        onchange={() => { console.log("radio changed"); onSelected?.() }}
+        onchange={ onSelected }
     >
 
     <CoverImage 

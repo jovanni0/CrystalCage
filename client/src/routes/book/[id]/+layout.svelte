@@ -25,7 +25,7 @@
 
 
 <TopbarBackTabbed 
-    title = { book_store.author_name }
+    title = { book_store.title }
     tabs  = { tabs }
 >
     {#snippet right()}

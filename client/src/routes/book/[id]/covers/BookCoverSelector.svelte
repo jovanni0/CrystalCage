@@ -16,8 +16,6 @@
         selected: boolean,
         onClick?: (() => void | Promise<void>) | undefined
     } = $props()
-
-    console.log(selected)
 </script>
 
 

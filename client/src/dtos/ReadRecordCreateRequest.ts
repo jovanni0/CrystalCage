@@ -3,7 +3,7 @@
 
 export type ReadRecordCreateRequest = {
     book_id:        string,
-    edition_id:     string|null,
+    edition_id:     string | null,
     start_date:     string | null
     end_date:       string | null
     did_not_finish: boolean

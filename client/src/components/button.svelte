@@ -72,7 +72,7 @@
     }
 
     .primary {
-        background-color: var(--text);
+        background-color: var(--primary-text);
         color: var(--text-inverted);
     }
 

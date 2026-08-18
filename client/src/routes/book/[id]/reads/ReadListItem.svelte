@@ -106,4 +106,11 @@
             flex: 1;
         }
     }
+
+    .currently-reading
+    {
+        font-weight: 500;
+        font-size: large;
+        color: var(--amber-primary);
+    }
 </style>

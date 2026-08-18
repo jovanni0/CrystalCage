@@ -69,7 +69,7 @@
 
         &.read
         {
-            background-color: var(--green-secondary);
+            background-color: var(--green-background);
             color: var(--green-text);
         }
     }
