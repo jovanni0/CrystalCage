@@ -131,7 +131,7 @@ export class BookStore
     }
 
 
-    public async startRead(edition_id: string): Promise<void>
+    public async startRead(edition_id: string | null): Promise<void>
     {
         if (!this.can_start_read)
         {

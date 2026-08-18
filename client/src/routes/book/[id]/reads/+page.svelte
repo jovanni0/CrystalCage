@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { BookStore } from "@root/stores/BookStore.svelte";
-    import      ReadListItem  from "./ReadListItem.svelte";
-    import Button from "@root/components/button.svelte";
-    import EditionSelectorSheet from "./EditionSelectorSheet.svelte";
+    import type { BookStore }        from "@root/stores/BookStore.svelte";
+    import      ReadListItem         from "./ReadListItem.svelte";
+    import      Button               from "@root/components/button.svelte";
+    import      EditionSelectorSheet from "./EditionSelectorSheet.svelte";
 
     
     let { data } = $props()
@@ -10,6 +10,18 @@
     const { book_store }: { book_store: BookStore } = $derived(data)
     let dialog: ReturnType<typeof EditionSelectorSheet>
     let selected_edition_id: string | null = $state(null)
+
+
+    function initializeStartRead()
+    {
+        if (book_store.editions.length > 0)
+        {
+            dialog.open()
+            return
+        }
+
+        book_store.startRead(null)
+    }
 
 
     async function confirmStartRead()
@@ -36,7 +48,7 @@
             <Button 
                 text="Start read" 
                 type="primary" 
-                onClick ={ () => dialog.open() }
+                onClick ={ initializeStartRead }
             />
         </div>
     {:else}

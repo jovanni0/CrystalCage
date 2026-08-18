@@ -3,6 +3,7 @@
     import type { CoverSource }      from "@root/types/CoverSource";
     import      { api_client }       from "@root/CompositionRoot";
     import      { lazyVisible }      from "@root/utils/LazyVisible";
+    import      BookOpen             from "./icons/book-open.svelte";
 
 
     let {
@@ -80,8 +81,13 @@
         ></div>
     {:else}
         <div 
-            class = "cover-skeleton"
-        ></div>
+            class = "image-placeholder"
+        >
+            <BookOpen 
+                width={32} 
+                height={32}
+            />
+        </div>
     {/if}
 </div>
 
@@ -101,5 +107,18 @@
     {
         width: 100%;
         aspect-ratio: 2/3;
+    }
+
+    .image-placeholder 
+    {
+        width: 100%;
+        height: 100%;
+        min-width: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--placeholder);
+        color: var(--text-secondary);
     }
 </style>

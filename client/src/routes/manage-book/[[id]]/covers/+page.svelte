@@ -1,5 +1,6 @@
 <script lang="ts">
     import type { BookManagementStore } from "@root/stores/BookManagementStore.svelte.js";
+    import      { logger }              from "@root/CompositionRoot.js";
     import      Button                  from "@root/components/button.svelte";
     import      ListEntryCover          from "@root/components/list-entry-cover.svelte";
     import      TopbarBack              from "@root/components/topbar-back.svelte";
@@ -15,7 +16,11 @@
     {
         const file = file_input.files?.[0]
 
-        if (!file) return
+        if (!file) 
+        {
+            logger.info("no file selected")
+            return
+        }
 
         book_store.addCover(file)
         file_input.value = ""
