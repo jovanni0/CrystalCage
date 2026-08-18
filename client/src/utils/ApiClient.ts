@@ -1,39 +1,41 @@
-import type { AuthContext }              from "@data-types/AuthContext";
-import type { AuthLoginRequest }         from "../dtos/AuthLoginRequest.ts";
-import type { AuthorCreateRequest }      from "@dtos/AuthorCreateRequest";
-import type { AuthorResponse }           from "@dtos/AuthorResponse";
-import type { AuthLoginResponse }        from "@dtos/AuthLoginResponse";
-import type { PingResponse }             from "@dtos/PingResponse";
-import type { UserProfileResponse }      from "@dtos/UserProfileResponse";
-import type { UniverseResponse }         from "@dtos/UniverseResponse";
-import type { UniverseCreateRequest }    from "@dtos/UniverseCreateRequest";
-import type { SeriesResponse }           from "@dtos/SeriesResponse";
-import type { SeriesCreateRequest }      from "@dtos/SeriesCreateRequest";
-import type { Logger }                   from "@loggers/Logger";
-import type { TagResponse }              from "@dtos/TagResponse";
-import type { TagCreateRequest }         from "@dtos/TagCreateRequest";
-import type { BookCreateRequest }        from "@dtos/BookCreateRequest";
-import type { BookSummaryResponse }      from "@dtos/BookSummaryResponse";
-import type { SeriesDetailResponse }     from "@root/dtos/SeriesDetailResponse";
-import type { BookDetailResponse }       from "@root/dtos/BookDetailResponse";
-import type { CoverResponse }            from "@root/dtos/CoverResponse";
-import type { ReadRecordResponse }       from "@root/dtos/ReadRecordResponse";
-import type { EditionResponse }          from "@root/dtos/EditionResponse";
-import type { TagUpdateRequest }         from "@root/dtos/TagUpdateRequest";
-import type { TagDetailResponse }        from "@root/dtos/TagDetailResponse";
-import type { ReadRecordUpdateRequest }  from "@root/dtos/ReadRecordUpdateRequest";
-import { coverCreateRequestToFormData, type CoverCreateRequest }       from "@root/dtos/CoverCreateRequest";
-import type { BookUpdateRequest }        from "@root/dtos/BookUpdateRequest";
-import type { CoverUpdateRequest }       from "@root/dtos/CoverUpdateRequest";
-import { editionCreateRequestToFormData, type EditionCreateRequest }     from "@root/dtos/EditionCreateRequest";
-import type { EditionUpdateRequest }     from "@root/dtos/EditionUpdateRequest";
-import      { isNullOrUndefined }        from "@root/utils/NullishChecks";
-import      { NotFoundError }            from "@root/errors/NotFoundError";
-import      { ServerNotConfiguredError } from "@root/errors/ServerNotConfiguredError";
-import      { UnauthorizedError }        from "@root/errors/UnauthorizedError";
-import      { toFormData }               from "@dtos/BookCreateRequest";
-import      { ConflictError }            from "@root/errors/ConflictError";
-import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest.ts";
+import type { AuthContext }                    from "@data-types/AuthContext";
+import type { AuthLoginRequest }               from "../dtos/AuthLoginRequest.ts";
+import type { AuthorCreateRequest }            from "@dtos/AuthorCreateRequest";
+import type { AuthorResponse }                 from "@dtos/AuthorResponse";
+import type { AuthLoginResponse }              from "@dtos/AuthLoginResponse";
+import type { PingResponse }                   from "@dtos/PingResponse";
+import type { UserProfileResponse }            from "@dtos/UserProfileResponse";
+import type { UniverseResponse }               from "@dtos/UniverseResponse";
+import type { UniverseCreateRequest }          from "@dtos/UniverseCreateRequest";
+import type { SeriesResponse }                 from "@dtos/SeriesResponse";
+import type { SeriesCreateRequest }            from "@dtos/SeriesCreateRequest";
+import type { Logger }                         from "@loggers/Logger";
+import type { TagResponse }                    from "@dtos/TagResponse";
+import type { TagCreateRequest }               from "@dtos/TagCreateRequest";
+import type { BookCreateRequest }              from "@dtos/BookCreateRequest";
+import type { BookSummaryResponse }            from "@dtos/BookSummaryResponse";
+import type { SeriesDetailResponse }           from "@root/dtos/SeriesDetailResponse";
+import type { BookDetailResponse }             from "@root/dtos/BookDetailResponse";
+import type { CoverResponse }                  from "@root/dtos/CoverResponse";
+import type { ReadRecordResponse }             from "@root/dtos/ReadRecordResponse";
+import type { EditionResponse }                from "@root/dtos/EditionResponse";
+import type { TagUpdateRequest }               from "@root/dtos/TagUpdateRequest";
+import type { TagDetailResponse }              from "@root/dtos/TagDetailResponse";
+import type { ReadRecordUpdateRequest }        from "@root/dtos/ReadRecordUpdateRequest";
+import type { CoverCreateRequest }             from "@root/dtos/CoverCreateRequest";
+import type { BookUpdateRequest }              from "@root/dtos/BookUpdateRequest";
+import type { CoverUpdateRequest }             from "@root/dtos/CoverUpdateRequest";
+import type { EditionCreateRequest }           from "@root/dtos/EditionCreateRequest";
+import type { EditionUpdateRequest }           from "@root/dtos/EditionUpdateRequest";
+import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreateRequest";
+import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
+import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
+import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
+import      { NotFoundError }                  from "@root/errors/NotFoundError";
+import      { ServerNotConfiguredError }       from "@root/errors/ServerNotConfiguredError";
+import      { UnauthorizedError }              from "@root/errors/UnauthorizedError";
+import      { toFormData }                     from "@dtos/BookCreateRequest";
+import      { ConflictError }                  from "@root/errors/ConflictError";
 
 
 
@@ -410,6 +412,19 @@ export class ApiClient
         )
 
         return response.json()
+    }
+
+
+    public async deleteBook(id: string): Promise<void>
+    {
+        this.logger.debug(`sending DELETE /books/${id}`)
+
+        await this.request(
+            `/books/${id}`,
+            {
+                method: "DELETE"
+            }
+        )
     }
 
 

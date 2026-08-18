@@ -30,7 +30,6 @@ export class BookManagementStore
     private series_query   = new SeriesQuery()
     private tag_query      = new TagQuery()
 
-    
     private cover_manager:   CoverManager | null       = $state(null)
     private edition_manager: EditionManager | null     = $state(null)
     private book:            BookDetailResponse | null = $state(null)
@@ -76,12 +75,13 @@ export class BookManagementStore
     public edition_count:    number               = $derived(this.editions.length)
     public edition_message:  string               = $derived(`${this.edition_count === 1 ? "1 type" : `${this.edition_count} types`} available`)
 
-    public is_author_selected:   boolean = $derived(!isNullOrUndefined(this.author_id))
-    public is_universe_selected: boolean = $derived(!isNullOrUndefined(this.universe_id))
-    public has_notes:            boolean = $derived(!isNullOrUndefined(this.notes))
-    public has_blurb:            boolean = $derived(!isNullOrUndefined(this.blurb))
-    public has_covers:           boolean = $derived(this.covers.length > 0)
-    public has_editions:         boolean = $derived(this.editions.length > 0)
+    public is_new_book:          boolean | undefined = $derived(this.is_initialized ? this.book === null : undefined)
+    public is_author_selected:   boolean             = $derived(!isNullOrUndefined(this.author_id))
+    public is_universe_selected: boolean             = $derived(!isNullOrUndefined(this.universe_id))
+    public has_notes:            boolean             = $derived(!isNullOrUndefined(this.notes))
+    public has_blurb:            boolean             = $derived(!isNullOrUndefined(this.blurb))
+    public has_covers:           boolean             = $derived(this.covers.length > 0)
+    public has_editions:         boolean             = $derived(this.editions.length > 0)
 
 
     constructor(
@@ -262,23 +262,32 @@ export class BookManagementStore
     }
 
 
-    public reset()
+    public async deleteBook()
     {
-        this.author_id        = null
-        this.universe_id      = null
-        this.series_id        = null
-        this.volume_number    = null
-        this.title            = null
-        this.launch_date      = null
-        this.word_count       = null
-        this.blurb            = null
-        this.notes            = null
-        this.tag_ids          = []
+        if (this.book == null)
+        {
+            if (this.is_initialized === false)
+            {
+                this.logger.error("trying to delete a book when store is not initialized")
+            }
+            else
+            {
+                this.logger.error("trying to delete the book when the store is in create mode")
+            }
 
-        this.author_search   = ""
-        this.universe_search = ""
-        this.series_search   = ""
-        this.tag_search      = ""
+            return
+        }
+
+        try
+        {
+            await this.api.deleteBook(this.book.id)
+            return true
+        }
+        catch (e)
+        {
+            this.logger.error("while trying to delete book", { error: e })
+            return false
+        }
     }
 
 

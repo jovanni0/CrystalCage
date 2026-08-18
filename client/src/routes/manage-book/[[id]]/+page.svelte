@@ -11,6 +11,7 @@
     import      ListSingleItemEntry     from "@root/components/list-single-item-entry.svelte";
     import      TopbarConfirmCancel     from "@root/components/topbar-confirm-cancel.svelte";
     import      CoverImage              from "@root/components/CoverImage.svelte";
+    import      Button                  from "@root/components/button.svelte";
 
 
     let { data } = $props()
@@ -34,14 +35,27 @@
             goBack()
         }
 
-        error_message = "An error occured while tring to save the book"
+        error_message = "An error occurred while trying to save the book"
+    }
+
+
+    async function deleteBook()
+    {
+        const is_deleted = await book_store.deleteBook()
+
+        if (is_deleted)
+        {
+            goBack()
+        }
+
+        error_message = "An error occurred while trying to delete the book"
     }
 </script>
 
 
 
 <TopbarConfirmCancel
-    title     = "Add Book"
+    title     = { book_store.is_new_book === undefined ? "" : book_store.is_new_book === true ? "Add Book" : "Edit Book"}
     onCancel  = { goBack }
     onConfirm = { save }
 />
@@ -177,6 +191,14 @@
             <span>{ book_store.edition_message }</span>
         </div>
     </ListSingleItemEntry>
+
+    {#if book_store.is_new_book === false}
+        <Button 
+            text = "Delete book"
+            type = "secondary"
+            onClick = { deleteBook }
+        />
+    {/if}
 </div>
 
 
