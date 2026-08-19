@@ -97,16 +97,17 @@
     .cover-observer
     {
         aspect-ratio: 2/3;
-        object-fit: cover;
         border-radius: 8px;
         overflow: hidden;
         width: var(--width);
+        height: fit-content;
     }
-
+    
     img 
     {
-        width: 100%;
         aspect-ratio: 2/3;
+        object-fit: cover;
+        width: 100%;
     }
 
     .image-placeholder 
