@@ -1,4 +1,6 @@
 <script lang="ts">
+    import DatePicker from "./DatePicker.svelte";
+
     let {
         key = "Key",
         value = $bindable()
@@ -11,13 +13,18 @@
 
 <div class="entry">
     <span class="key">{key}</span>
-    <input 
+    <div class = "picker">
+        <DatePicker 
+            bind:value={value}
+        />
+    </div>
+    <!-- <input 
         class="value"
         class:none-set={!value}
         type="date"
         required
         bind:value={value}
-    >
+    > -->
 </div>
 
 
@@ -36,7 +43,13 @@
         min-width: 128px;
     }
 
-    input[type="date"] {
+    .picker
+    {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* input[type="date"] {
         all: unset;
         background-color: var(--input-fill);
         padding: 4px 8px;
@@ -57,5 +70,5 @@
     .value.none-set {
         font-style: italic;
         color: var(--text-secondary);
-    }
+    } */
 </style>
