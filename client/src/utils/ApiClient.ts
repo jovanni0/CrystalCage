@@ -36,6 +36,8 @@ import      { ServerNotConfiguredError }       from "@root/errors/ServerNotConfi
 import      { UnauthorizedError }              from "@root/errors/UnauthorizedError";
 import      { toFormData }                     from "@dtos/BookCreateRequest";
 import      { ConflictError }                  from "@root/errors/ConflictError";
+import      { InternalServerError }            from "@root/errors/InternalServerError";
+import      { ApiError }                       from "@root/errors/ApiError";
 
 
 
@@ -72,15 +74,16 @@ export class ApiClient
 
         const response = await fetch(`${context.base_url}${path}`, { ...options, headers })
 
-        switch (response.status)
+        if (response.status === 401)
         {
-            case 401:
-                this.onUnauthorized?.()
-                throw new UnauthorizedError(`request ${path} returned 401 Unauthorized`)
-            case 404:
-                throw new NotFoundError(`request ${path} returned 404 Not Found`)
-            case 409:
-                throw new ConflictError(response.statusText)
+            this.onUnauthorized?.()
+            throw new UnauthorizedError(`request ${path} returned 401 Unauthorized`)
+        }
+
+        if (!response.ok)
+        {
+            const message = await response.text()
+            throw new ApiError(response.status, message)
         }
 
         return response
@@ -632,4 +635,18 @@ export class ApiClient
         )
     }
 
+
+    public async fetchImageFromUrl(url: string): Promise<Blob>
+    {
+        this.logger.debug(`send GET /image-proxy?url=${url}`)
+
+        const response = await this.request(
+            `/image-proxy?url=${url}`,
+            {
+                method: "GET",
+            }
+        )
+
+        return response.blob()
+    }
 }
