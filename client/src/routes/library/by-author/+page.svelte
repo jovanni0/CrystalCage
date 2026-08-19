@@ -50,11 +50,15 @@
 
     .covers {
         display: grid;
-        grid-template-columns: repeat(
-            auto-fill,
-            minmax(120px, 130px)
-        );
-        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        column-gap: 0.5rem;
+        row-gap: 1rem;
         justify-content: center;
+
+        & > *
+        {
+            width: 100%;
+            max-width: calc((100% - 2 * 0.5rem) / 3);
+        }
     }
 </style>
