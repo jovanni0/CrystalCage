@@ -11,6 +11,9 @@ import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.*
 import dev.jovanni0.routes.*
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
@@ -74,7 +77,8 @@ fun Application.configureRouting(
     tag_repository: TagRepository,
     edition_repository: EditionRepository,
     cover_repository: CoverRepository,
-    read_record_repository: ReadRecordRepository
+    read_record_repository: ReadRecordRepository,
+    http_client: HttpClient,
 ) {
     routing {
         serverRoutes()
@@ -87,6 +91,7 @@ fun Application.configureRouting(
         seriesRoutes(author_repository, universe_repository, series_repository)
         tagRoutes(tag_repository)
         universeRoutes(universe_repository)
+        imageProxy(http_client)
     }
 }
 
@@ -226,6 +231,17 @@ fun Application.module() {
     val book_repository = BookRepository(author_repository, cover_repository, edition_repository)
     val read_record_repository = ReadRecordRepository()
 
+    val http_client = HttpClient(CIO)
+    {
+        expectSuccess = true
+
+        install(HttpTimeout)
+        {
+            connectTimeoutMillis = 5000
+            requestTimeoutMillis = 15000
+        }
+    }
+
     configureRouting(
         jwt_config,
         data_source,
@@ -238,5 +254,6 @@ fun Application.module() {
         edition_repository,
         cover_repository,
         read_record_repository,
+        http_client,
     )
 }
