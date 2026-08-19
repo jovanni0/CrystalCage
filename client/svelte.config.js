@@ -5,7 +5,23 @@ import adapter from "@sveltejs/adapter-static";
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
-    preprocess: vitePreprocess(),
+    preprocess: [
+        vitePreprocess(),
+        {
+            name: 'strip-announcer',
+            markup: ({ content: code }) => 
+            {
+                if (process.env.NODE_ENV !== 'development') 
+                {
+                    return { code }
+                }
+
+                code = code.replace(/<div id="svelte-announcer" [\s\S]*?<\/div>/, '')
+
+                return { code }
+            }
+        },
+    ],
     compilerOptions: {
         runes: ({ filename }) => (filename.includes("node_modules") ? undefined : true)
     },
