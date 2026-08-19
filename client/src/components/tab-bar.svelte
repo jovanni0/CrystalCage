@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import { page } from '$app/stores'
 
     type Tab = {
@@ -18,6 +19,7 @@
         <a 
             href={tab.href}
             class:active={active_tab === tab.href}
+            onclick={(e) => { e.preventDefault(); goto(tab.href, { replaceState: true }) }}
         >{tab.label}</a>
     {/each}
 
@@ -60,7 +62,7 @@
         left: anchor(left);
         right: anchor(right);
         transition: all 0.2s ease;
-        will-change: left, right; /* remove motion artefacts by promote the element to its own layer before the transition starts, 
+        will-change: left, right; /* remove motion artifacts by promote the element to its own layer before the transition starts, 
                                      so it composites cleanly without touching the pixels behind it. */
     }
 </style>
