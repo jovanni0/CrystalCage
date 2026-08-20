@@ -2,9 +2,9 @@
 	import { session_manager } from "@root/CompositionRoot";
 	import { page }            from "$app/state";
 	import { goto }            from "$app/navigation";
-    import { onMount } from "svelte";
-    import { Capacitor } from "@capacitor/core";
-    import { App } from "@capacitor/app"
+    import { onMount }         from "svelte";
+    import { Capacitor }       from "@capacitor/core";
+    import { App }             from "@capacitor/app"
 
 
 
@@ -19,7 +19,7 @@
 
         if (status === "AUTHENTICATED" && path.startsWith("/login")) 
         {
-            goto("/library");
+            goto("/");
         } 
         else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
         {
@@ -31,6 +31,7 @@
         }
 	})
 
+
     onMount( () =>
     {
         if (!Capacitor.isNativePlatform())
@@ -38,7 +39,8 @@
             return
         }
 
-        App.addListener("backButton", ({ canGoBack }) => {
+        App.addListener("backButton", ({ canGoBack }) => 
+        {
             if (canGoBack)
             {
                 window.history.back()
@@ -53,17 +55,4 @@
 
 
 
-<main>
-    {@render children()}
-</main>
-
-
-
-<style>
-    main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-    }
-</style>
+{@render children()}

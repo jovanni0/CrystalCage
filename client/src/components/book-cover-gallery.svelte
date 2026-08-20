@@ -15,7 +15,7 @@
 
 
 
-<div class="gallery-cover">
+<div class="book-cover-gallery">
     <a href  = { href } >
         <CoverImage
             source = { cover_id ? { kind: "REMOTE", id: cover_id} : null }
@@ -29,7 +29,7 @@
 
 
 <style>
-    .gallery-cover 
+    .book-cover-gallery 
     {
         display: flex;
         flex-direction: column;

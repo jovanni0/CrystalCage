@@ -8,6 +8,7 @@ import type { LibraryAsSeries }     from "@root/types/LibraryAsSeries";
 import type { LibraryItem }         from "@root/types/LibraryItem";
 import type { ApiClient }           from "@root/utils/ApiClient";
 import { groupAsSeries, groupByAuthor } from "@root/utils/LibraryGroupings";
+import type { LibraryViews } from "@root/types/LibraryViews";
 
 
 
@@ -17,6 +18,8 @@ export class LibraryStore
     private authors:   AuthorResponse[]      = $state([])
     private universes: UniverseResponse[]    = $state([])
     private series:    SeriesResponse[]      = $state([])
+
+    public view: LibraryViews = $state("GALLERY")
 
     public gallery:   LibraryItem[]     = $derived(this.books.map(it => ({ name: it.title, cover_id: it.cover_id, number_of_volumes: 0, id: it.id })))
     public by_author: LibraryByAuthor[] = $derived(groupByAuthor(this.authors, this.books))

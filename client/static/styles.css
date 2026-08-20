@@ -86,35 +86,12 @@
     --teal-secondary: hsl(var(--teal-secondary-hsl));
 }
 
-
-body {
+html, body 
+{
     margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--base);
-    color: var(--text);
-    overflow: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-}
-
-html, body {
-    scrollbar-width: none;
-}
-
-html, body {
-    -ms-overflow-style: none;
-}
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-    display: none;
-}
-
-html, body {
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
 button {
