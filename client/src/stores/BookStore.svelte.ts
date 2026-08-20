@@ -49,7 +49,7 @@ export class BookStore
     public total_read_time: number            = $derived(this.reads.map(it => getIntervalInDays(it.start_date, it.end_date)).filter(it => it !== null).reduce( (total, it) => total + it, 0))
 
     public can_start_read: boolean = $derived(this.reads.find(it => it.start_date !== null && it.end_date === null) === undefined)
-
+    public has_historical: boolean = $derived(this.reads.find(it => it.is_historical === true) !== undefined)
 
     constructor(public book_id: string, private logger: Logger, private api: ApiClient)
     {
@@ -131,24 +131,40 @@ export class BookStore
     }
 
 
-    public async startRead(edition_id: string | null): Promise<void>
+    public async startRead(edition_id: string | null, start_date: string | null, end_date: string | null, did_not_finish: boolean, is_historical: boolean): Promise<boolean>
     {
         if (!this.can_start_read)
         {
-            this.logger.error("another read is alredy started")
-            return
+            this.logger.error("another read is already started")
+            return false
+        }
+
+        if (did_not_finish)
+        {
+            if (is_historical && (start_date || end_date))
+            {
+                this.logger.error("a historical record cannot have start or end dates")
+                return false
+            }
+
+            if (!is_historical && (!start_date || !end_date))
+            {
+                this.logger.error("a DNF record has to have start and end dates")
+                return false
+            }
         }
 
         const read_record: ReadRecordCreateRequest = {
             book_id: this.book_id,
             edition_id: edition_id,
-            start_date: new Date().toISOString().slice(0, 10),
-            end_date: null,
-            did_not_finish: false,
-            is_historical: false,
+            start_date: start_date,
+            end_date: end_date,
+            did_not_finish: did_not_finish,
+            is_historical: is_historical,
             stop_position: null,
             notes: null
         }
+        console.log(read_record)
 
         try
         {
@@ -162,8 +178,10 @@ export class BookStore
         catch (e)
         {
             this.logger.error("failed to create a new record", { error: e })
+            return false
         }
 
+        return true
     }
 
 

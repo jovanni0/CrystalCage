@@ -7,7 +7,7 @@
         value?: string | null 
     } = $props()
 
-    let text_value = $state(value ? isoToDisplay(value) : "")
+    let text_value = $derived(value ? isoToDisplay(value) : "")
     let error: string | null = $state(null)
     let native_input: HTMLInputElement
 

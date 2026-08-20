@@ -3,35 +3,69 @@
     import      ReadListItem         from "./ReadListItem.svelte";
     import      Button               from "@root/components/button.svelte";
     import      EditionSelectorSheet from "./EditionSelectorSheet.svelte";
+    import      ReadDataSheet        from "./ReadDataSheet.svelte";
 
     
     let { data } = $props()
 
     const { book_store }: { book_store: BookStore } = $derived(data)
-    let dialog: ReturnType<typeof EditionSelectorSheet>
+    let data_dialog: ReturnType<typeof ReadDataSheet>
+    let editions_dialog: ReturnType<typeof EditionSelectorSheet>
+
     let selected_edition_id: string | null = $state(null)
+    let start_date: string | null = $state("")
+    let end_date:   string | null = $state("")
+    let is_historical: boolean = $state(false)
+    let did_not_finish: boolean = $state(false)
 
 
     function initializeStartRead()
     {
-        if (book_store.editions.length > 0)
-        {
-            dialog.open()
-            return
-        }
-
-        book_store.startRead(null)
+        clearFields()
+        data_dialog.open()
     }
 
 
-    async function confirmStartRead()
+    async function finishCollectingData()
     {
-        if (selected_edition_id === null) 
+        if (book_store.editions.length > 0)
+        {
+            editions_dialog.open()
+            return
+        }
+
+        const is_good = await book_store.startRead(null, start_date, end_date, did_not_finish, is_historical)
+
+        if (is_good) 
+        {
+            data_dialog.close()
+            clearFields()
+        }
+    }
+
+
+    async function finishSelectingEdition()
+    {
+        if (selected_edition_id === null)
             return
 
-        await book_store.startRead(selected_edition_id)
+        const is_good = await book_store.startRead(selected_edition_id, start_date, end_date, did_not_finish, is_historical)
+
+        if (is_good)
+        {
+            editions_dialog.close()
+            clearFields()
+        }
+    }
+
+
+    function clearFields()
+    {
         selected_edition_id = null
-        dialog.close()
+        start_date = ""
+        end_date = ""
+        is_historical = false
+        did_not_finish = false
     }
 </script>
 
@@ -58,7 +92,7 @@
 
                 <Button 
                     text    = "Start Reading"
-                    onClick = { () => dialog.open() }
+                    onClick = { initializeStartRead }
                 />
             </div>
         {/if}
@@ -80,11 +114,23 @@
     {/if}
 </div>
 
+
+<ReadDataSheet 
+    bind:this = { data_dialog }
+    bind:start_date = { start_date }
+    bind:end_date = { end_date }
+    bind:is_historical = { is_historical }
+    bind:did_not_finish = { did_not_finish }
+    allow_historical = { !book_store.has_historical }
+    onConfirm = { finishCollectingData }
+/>
+
 <EditionSelectorSheet
-    bind:this        = { dialog }
+    bind:this        = { editions_dialog }
     editions         = { book_store.editions }
     bind:selected_id = { selected_edition_id }
-    onConfirm        = { confirmStartRead }
+    onConfirm        = { finishSelectingEdition }
+    button_text      = { book_store.editions.length > 0 ? "Continue" : "Start reading" }
 />
 
 

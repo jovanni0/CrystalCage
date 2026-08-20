@@ -5,9 +5,15 @@
     import type { DisplayEdition } from "@root/types/DisplayEdition";
     import { formatColor } from "@root/utils/formatColor";
 
-    let { editions, selected_id = $bindable(null), onConfirm }: {
+    let { 
+        editions, 
+        selected_id = $bindable(null), 
+        button_text,
+        onConfirm 
+    } : {
         editions: DisplayEdition[]
         selected_id?: string | null
+        button_text: string
         onConfirm: () => void
     } = $props()
 
@@ -50,7 +56,7 @@
     </ul>
 
     <Button 
-        text = "Confirm"
+        text = { button_text }
         onClick = { onConfirm }
         fill = { true }
     />
