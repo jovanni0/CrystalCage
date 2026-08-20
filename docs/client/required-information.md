@@ -51,9 +51,6 @@ information stored locally:
   - edition label
   - edition format
 
-endpoints:
-- `POST /books`
-
 ## AddBook/ManageCovers
 
 data rendered (for each cover):
@@ -80,10 +77,6 @@ actions:
 - select an author
 - filter the list for an author (done locally)
 
-endpoints:
-- `GET /authors`
-- `POST /authors`
-
 ## Add-EditBook/SelectUniverse
 
 data rendered:
@@ -93,10 +86,6 @@ actions:
 - create a new universe
 - select an universe
 - filter the list for an universe (done locally)
-
-endpoints:
-- `GET /universes?author_id=...`
-- `POST /universes`
 
 ## Add-EditBook/SelectSeries
 
@@ -108,10 +97,6 @@ actions:
 - select an series
 - filter the list for an series (done locally)
 
-endpoints:
-- `GET /series?author_id=...&universe_id=...`
-- `POST /series`
-
 ## Add-EditBook/SelectTags
 
 data rendered:
@@ -121,10 +106,6 @@ actions:
 - create a new tag
 - select a tag
 - filter the list for a tag (done locally)
-
-endpoints:
-- `GET /tags`
-- `POST /tags`
 
 ## AddBook/Opinion
 
@@ -171,11 +152,6 @@ navigation:
 - [Library/bySeries](#librarybyseries)
 - book page
 
-endpoints:
-- `GET /books?view=summary`
-- `GET /cover/{id}`
-- `GET /library?query=...`
-
 > because the `GET /cover/{id}` will not work with `<img src>`, a wrapper should be implemented that creates an object URL and revokes it when unmounting. an `InteractionObserver` needs to be built to achieve the lazy-loading natively handled by `img`, and the HTTP-level cache needs to be implemented by the caching layer of the app.
 
 ## Library/byAuthor
@@ -195,9 +171,6 @@ navigation:
 - author page
 - book page
 
-endpoints:
-- `GET /books?view=by-author`
-
 ## Library/bySeries
 
 data rendered (for each author):
@@ -216,9 +189,6 @@ navigation:
 - author page
 - series page
 
-endpoints:
-- `GET /series?projection=full`
-
 ## Author/Gallery
 
 data rendered (for each book):
@@ -230,10 +200,6 @@ navigation:
 - [Add Book](#addbook)
 - back
 - book page
-
-endpoints:
-- `GET /books?view=ungrouped&author_id=...`
-- `GET /covers/{id}`
 
 ## Author/bySeries
 
@@ -249,10 +215,6 @@ navigation:
 - back
 - series page
 - book page
-
-endpoints:
-- `GET /books?view=by-series?author_id=...`
-- `GET /covers/{id}`
 
 ## SeriesProfile
 
@@ -270,9 +232,6 @@ navigation:
 - author page
 - book page
 - back
-
-endpoints:
-- `GET /series/{id}`
 
 ## Book/Details
 
@@ -298,10 +257,6 @@ navigation:
 - series page
 - tag info page (for each tag)
 
-endpoints:
-- `GET /books/{id}?projection=details`
-- `GET /covers/{id}`
-
 ## Book/Covers
 
 data rendered (for each cover):
@@ -319,11 +274,6 @@ navigation:
 
 actions:
 - set cover as favorite
-
-endpoints:
-- `GET /books/{id}/covers`
-- `GET /covers/{id}`
-- `PATCH /books/{id}` (for setting default cover)
 
 ## Book/Reads
 
@@ -348,9 +298,6 @@ actions:
 - start read
 - finish read (if read in progress)
 
-endpoints:
-- `GET /read-records?book_id=...`
-
 ## TagProfile
 
 data rendered:
@@ -366,10 +313,6 @@ navigation:
 - [Edit Tag](#edittag)
 - back
 - book page
-
-endpoints:
-- `GET /tags/{id}?projection=usage`
-- `GET /covers/{id}`
 
 ## EditTag
 
@@ -393,12 +336,6 @@ actions:
 
 > because the page uses the cancel/save pattern, the modifications need to be stored locally and committed all at once to the server.
 
-endpoints:
-- `GET /tags/{id}?projection=usage`
-- `GET /covers/{id}`
-- `PATCH /tag/{id}`
-- `DELETE /tag/{id}`
-
 ## ReadInfo
 
 data rendered:
@@ -417,9 +354,6 @@ data rendered:
 navigation:
 - [Edit Read](#editread)
 - back
-
-endpoints:
-- `GET /read-records/{id}`
 
 ## EditRead
 
@@ -449,11 +383,6 @@ actions:
 
 > because the page uses the cancel/save pattern, the modifications need to be stored locally and committed all at once to the server.
 
-endpoints:
-- `GET /editions?projection=summary&book_id=...`
-- `PATCH /read-records/{id}`
-- `DELETE /read-records/{id}`
-
 ## EditRead/Notes
 
 data rendered:
@@ -480,11 +409,6 @@ navigation:
 - [TagProfile](#tagprofile)
 - [AddTag](#addtag)
 
-endpoints:
-- `GET /tags?projection=links`
-
-> the sorting alphabetically is done client-side.
-
 ## Tags/byUsage
 
 > ordering in done locally
@@ -497,11 +421,6 @@ navigation:
 - [Tags/byName](#tagsbyname)
 - [TagProfile](#tagprofile)
 - [AddTag](#addtag)
-
-endpoints:
-- `GET /tag`
-
-> the sorting by number of books that use it is done client-side.
 
 ## AddTag
 
@@ -516,9 +435,6 @@ actions:
 - edit description
 
 > the data is set to the server when the user choses to save the tag.
-
-endpoints:
-- `POST /tag`
 
 ## EditBook
 
@@ -555,9 +471,6 @@ actions:
 - change release date
 - change word count
 
-endpoints:
-- `GET /books/{id}?projection=full`
-
 ## EditBook/ManageCovers
 
 data rendered (for each cover):
@@ -571,14 +484,6 @@ actions:
 - change default cover
 - edit cover label (for each cover)
 - delete cover (for each cover)
-
-endpoints:
-- `GET /books/{id}/covers`
-- `GET /covers/{id}`
-- `POST /covers`
-- `PATCH /books/{id}` (for setting default cover)
-- `PATCH /covers/{id}` (for setting cover label)
-- `DELETE /covers/{id}`
 
 ## EditBook/ManageEditions
 
@@ -597,12 +502,6 @@ actions:
 - delete edition (for each edition)
 - add edition
 
-endpoints:
-- `GET /editions?projection=full&book_id=...`
-- `PATCH /editions/{id}` (for setting edition label)
-- `DELETE /editions/{id}`
-- `POST /editions`
-
 ## EditBook/Opinion
 
 data rendered:
@@ -611,9 +510,6 @@ data rendered:
 actions:
 - modify the opinion
 
-endpoints:
-- `PATCH /books/{id}`
-
 ## Blurb page
 
 data rendered:
@@ -621,6 +517,3 @@ data rendered:
 
 actions:
 - modify the blurb
-
-endpoints:
-- `PATCH /books/{id}`
