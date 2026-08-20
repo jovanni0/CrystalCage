@@ -8,19 +8,24 @@
 
 `POST /auth/login`
 logs in the user and returns the token and user info. this should be the only endpoint that does not require a token.
-- request:  `AuthLoginRequest`
-- response: `AuthLoginResponse`
+- request:  `LoginRequest`
+- response: `LoginResponse`
 ```ts
 AuthLoginRequest {
-  username: string
-  password: string
+    username: string
+    password: string
 }
 
 AuthLoginResponse {
-  token: string
-  user: UserProfileResponse
+    token: string
+    user:  UserProfileResponse
 }
 ```
+
+`POST /auth/signup`
+creates a new user account.
+- request:  `LoginRequest`
+- response: `LoginResponse`
 
 `GET /auth/me`
 retrieves the user details, based on the token in the header of the request.
@@ -28,10 +33,10 @@ retrieves the user details, based on the token in the header of the request.
 - response: `UserProfileResponse`
 ```ts
 UserProfileResponse {
-  id: string
-  username: string
-  role: string
-  created_at: string
+    id:         string
+    username:   string
+    role:       string
+    created_at: string
 }
 ```
 
@@ -43,10 +48,10 @@ retrieve a list of responses based on a query - can be books, series, authors - 
 - response: `LibrarySearchResponse[]`
 ```ts
 LibrarySearchResponse {
-  id: string
-  type: "book" | "author" | "series"
-  label: string
-  image_id: string | null
+    id:       string
+    type:     "BOOK" | "AUTHOR" | "SERIES"
+    label:    string
+    image_id: string | null
 }
 ```
 
@@ -58,11 +63,16 @@ retrieve a list of all existing authors, sorted alphabetically by last_name-firs
 - response: `AuthorResponse[]`
 ```ts
 AuthorResponse {
-  id: string
-  first_name: string | null
-  last_name: string
+    id:         string
+    first_name: string | null
+    last_name:  string
 }
 ```
+
+`GET /authors/{id}`
+retrieve the specified author record by ID.
+- request:  none
+- response: `AuthorResponse`
 
 `POST /authors`
 create a new author.
@@ -70,22 +80,22 @@ create a new author.
 - response: `AuthorResponse`
 ```ts
 AuthorCreateRequest {
-  first_name?: string
-  last_name: string
+    first_name: string | null
+    last_name:  string
 }
 ```
 
 ## /universes
 
-`GET /universes?author_id=...`
-retrieve all universes associated with an author, sorted alphabetically by name.
+`GET /universes(?author_id=...)`
+retrieve all universes (maybe) associated with an author, sorted alphabetically by name.
 - request:  none
 - response: `UniverseResponse[]`
 ```ts
 UniverseResponse {
-  id: string
-  author_id: string
-  name: string
+    id:        string
+    author_id: string
+    name:      string
 }
 ```
 
@@ -96,7 +106,7 @@ create a new universe.
 ```ts
 UniverseCreateRequest {
   author_id: string
-  name: string
+  name:      string
 }
 ```
 
@@ -108,11 +118,11 @@ retrieve all series filtered by author and/or universe, sorted alphabetically by
 - response: `SeriesResponse[]`
 ```ts
 SeriesResponse {
-  id: string
-  author_id: string
-  universe_id: string | null
-  name: string
-  is_finished: boolean
+    id:          string
+    author_id:   string
+    universe_id: string | null
+    name:        string
+    is_finished: boolean
 }
 ```
 
@@ -122,12 +132,24 @@ retrieve series info (including info about books in the series).
 - response: `SeriesDetailResponse`
 ```ts
 SeriesDetailResponse {
-  id: string
-  author_id: string
-  universe_id: string | null
-  name: string
-  is_finished: boolean
-  books: BookSummaryResponse[]
+    id:          string
+    author_id:   string
+    universe_id: string | null
+    name:        string
+    is_finished: boolean
+    books:       SeriesBookItem[]
+}
+
+
+SeriesBookItem {
+    id:            string
+    cover_id:      string | null
+    volume_number: number | null
+    title:         string
+    launch_date:   string | null
+    word_count:    number | null
+    read_status:   "UNREAD" | "IN_PROGRESS" | "DNF" | "READ"
+    reread_count:  number
 }
 ```
 
@@ -137,10 +159,10 @@ create a new series.
 - response: `SeriesResponse`
 ```ts
 SeriesCreateRequest {
-  author_id: string
-  universe_id?: string
-  name: string
-  is_finished?: boolean
+    author_id:   string
+    universe_id: string | null
+    name:        string
+    is_finished: boolean | null
 }
 ```
 
@@ -152,10 +174,10 @@ retrieve a list of all existing tags, sorted alphabetically by name.
 - response: `TagResponse[]`
 ```ts
 TagResponse {
-  id: string
-  name: string
-  description: string | null
-  book_count: number
+    id:          string
+    name:        string
+    description: string | null
+    book_count:  number
 }
 ```
 
@@ -164,17 +186,17 @@ TagResponse {
 - response: `TagDetailResponse`
 ```ts
 TagDetailResponse {
-  id: string
-  name: string
-  description: string | null
-  books: TagBookItem[]
+    id:          string
+    name:        string
+    description: string | null
+    books:       TagBookItem[]
 }
 
 TagBookItem {
-  id: string
-  title: string
-  series_id: string | null
-  cover_id: string | null
+    id:        string
+    title:     string
+    series_id: string | null
+    cover_id:  string | null
 }
 ```
 
@@ -184,19 +206,21 @@ creates a new tag.
 - response: `TagResponse`
 ```ts
 TagCreateRequest {
-  name: string
-  description?: string
+    name:        string
+    description: string | null
 }
 ```
 
 `PATCH /tags/{id}`
 updates the tag data. the server has to add/remove links between tags and books based on the ID arrays.
+- request:  `TagUpdateRequest`
+- response: `TagDetailResponse`
 ```ts
 TagUpdateRequest {
-  name?: string
-  description?: string | null
-  added_book_ids?: string[]
-  removed_book_ids?: string[]
+    name?:             undefined | string
+    description?:      undefined | string | null
+    added_book_ids?:   undefined | string[]
+    removed_book_ids?: undefined | string[]
 }
 ```
 
@@ -213,15 +237,15 @@ retrieves all books filtered by author/universe/series/tag, ordered by last_name
 - response: `BookSummaryResponse[]`
 ```ts
 BookSummaryResponse {
-  id: string
-  author_id: string
-  universe_id: string | null
-  series_id: string | null
-  cover_id: string | null
-  volume_number: number | null
-  title: string
-  read_status: "UNREAD" | "IN_PROGRESS" | "DNF" | "READ"
-  reread_count: number
+    id:            string
+    author_id:     string
+    universe_id:   string | null
+    series_id:     string | null
+    cover_id:      string | null
+    volume_number: number | null
+    title:         string
+    read_status:   "UNREAD" | "IN_PROGRESS" | "DNF" | "READ"
+    reread_count:  number
 }
 ```
 
@@ -231,20 +255,20 @@ retrieve data about a book.
 - response: `BookDetailResponse`
 ```ts
 BookDetailResponse {
-  id: string
-  author_id: string
-  series_id: string | null
-  universe_id: string | null
-  cover_id: string | null
-  volume_number: number | null
-  title: string
-  launch_date: string | null
-  word_count: number | null
-  blurb: string | null
-  notes: string | null
-  tag_ids: string[]
-  read_status: "UNREAD" | "IN_PROGRESS" | "DNF" | "READ"
-  reread_count: number
+    id:            string
+    author_id:     string
+    series_id:     string | null
+    universe_id:   string | null
+    cover_id:      string | null
+    volume_number: number | null
+    title:         string
+    launch_date:   string | null
+    word_count:    number | null
+    blurb:         string | null
+    notes:         string | null
+    tag_ids:       string[]
+    read_status:   "UNREAD" | "IN_PROGRESS" | "DNF" | "READ"
+    reread_count:  number
 }
 ```
 
@@ -253,30 +277,38 @@ create a new book entry based on the block of data collected in the app.
 - request:  `BookCreateRequest`
 - response: `BookSummaryResponse`
 ```ts
-BookCreateRequest {
-  author_id: string
-  universe_id?: string
-  series_id?: string
-  volume_number?: number
-  title: string
-  launch_date?: string
-  word_count?: number
-  blurb?: string
-  notes?: string
-  tag_ids?: string[]
-  covers?: {
-    file: File
-    label?: string
+BookCreateRequest
+{
+    author_id:     string
+    universe_id:   string | null
+    series_id:     string | null
+    volume_number: number | null
+    title:         string
+    launch_date:   string | null
+    word_count:    number | null
+    blurb:         string | null
+    notes:         string | null
+    tag_ids:       string[] | null
+    covers:        EmbeddedCover[] | null
+    editions:      EmbeddedEdition[] | null
+}
+
+EmbeddedCover = {
+    file:       File
+    label?:     string
     is_default: boolean
-  }[]
-  editions?: {
-    file: File
-    label?: string
-    format: string
+}
+
+EmbeddedEdition = {
+    file:          File
+    label?:        string
+    format:        string
     release_date?: string
-  }[]
 }
 ```
+> for `covers[]` and `editions[]`, each array entry's fields are sent as separate multipart parts named `covers[N].field` (e.g. `covers[0].label`, `covers[0].file`, `covers[0].is_default`), where N is the zero-based index of the entry.
+
+> at most one cover can be set as default. if more then one is set, the server return `400 Bad Request`.
 
 `PATCH /books/{id}`
 update book information.
@@ -284,17 +316,17 @@ update book information.
 - response: none
 ```ts
 BookUpdateRequest {
-  author_id?: string
-  universe_id?: string | null
-  series_id?: string | null
-  cover_id?: string | null
-  volume_number?: number | null
-  title?: string
-  launch_date?: string | null
-  word_count?: number | null
-  blurb?: string | null
-  notes?: string | null
-  tag_ids?: string[]
+    author_id?:     undefined | string
+    universe_id?:   undefined | string | null
+    series_id?:     undefined | string | null
+    cover_id?:      undefined | string | null
+    volume_number?: undefined | number | null
+    title?:         undefined | string
+    launch_date?:   undefined | string | null
+    word_count?:    undefined | number | null
+    blurb?:         undefined | string | null
+    notes?:         undefined | string | null
+    tag_ids?:       undefined | string[]
 }
 ```
 
@@ -311,11 +343,11 @@ retrieves information about all covers of a book. the cover image has to be load
 - response: `CoverResponse[]`
 ```ts
 CoverResponse {
-  id: string
-  book_id: string
-  label: string | null
-  added_at: string
-  is_default: boolean
+    id:         string
+    book_id:    string
+    label:      string | null
+    added_at:   string
+    is_default: boolean
 }
 ```
 
@@ -330,9 +362,9 @@ add a new cover to a book.
 - response: `CoverResponse`
 ```ts
 CoverCreateRequest {
-  book_id: string
-  label?: string
-  file: File
+    book_id: string
+    label:   string | null
+    file:    File
 }
 ```
 
@@ -342,7 +374,7 @@ update cover information.
 - response: `CoverResponse`
 ```ts
 CoverUpdateRequest {
-  label?: string | null
+    label?: undefined | string | null
 }
 ```
 
@@ -359,12 +391,12 @@ retrieve list of all editions for the book, ordered by `added_at` asc.
 - response: `EditionResponse[]`
 ```ts
 EditionResponse {
-  id: string
-  book_id: string
-  label: string | null
-  release_date: string | null
-  format: string
-  added_at: string
+    id:           string
+    book_id:      string
+    label:        string | null
+    release_date: string | null
+    format:       string
+    added_at:     string
 }
 ```
 
@@ -374,11 +406,11 @@ create a new edition.
 - response: `EditionResponse`
 ```ts
 EditionCreateRequest {
-  book_id: string
-  label?: string
-  release_date?: string
-  format: string
-  file: File
+    book_id:      string
+    label:        string | null
+    release_date: string | null
+    format:       string
+    file:         File
 }
 ```
 
@@ -388,9 +420,9 @@ update edition information.
 - response: `EditionResponse`
 ```ts
 EditionUpdateRequest {
-  label?: string | null
-  release_date?: string | null
-  format?: string
+    label?:        undefined | string | null
+    release_date?: undefined | string | null
+    format?:       undefined | string
 }
 ```
 
@@ -407,15 +439,15 @@ retrieves all read records for the book, ordered from newest to oldest.
 - response: `ReadRecordResponse[]`
 ```ts
 ReadRecordResponse {
-  id: string
-  book_id: string
-  edition_id: string | null
-  start_date: string | null
-  end_date: string | null
-  did_not_finish: boolean
-  is_historical: boolean
-  stop_position: string | null
-  notes: string | null
+    id:             string
+    book_id:        string
+    edition_id:     string | null
+    start_date:     string | null
+    end_date:       string | null
+    did_not_finish: boolean
+    is_historical:  boolean
+    stop_position:  string | null
+    notes:          string | null
 }
 ```
 
@@ -430,14 +462,14 @@ create a new read record.
 - response: `ReadRecordResponse`
 ```ts
 ReadRecordCreateRequest {
-    book_id: string,
-    edition_id: string|null,
-    start_date: string | null
-    end_date: string | null
+    book_id:        string,
+    edition_id:     string|null,
+    start_date:     string | null
+    end_date:       string | null
     did_not_finish: boolean
-    is_historical: boolean
-    stop_position?: string | null
-    notes?: string | null
+    is_historical:  boolean
+    stop_position:  string | null
+    notes:          string | null
 }
 ```
 
@@ -447,17 +479,24 @@ ReadRecordCreateRequest {
 - response: `ReadRecordResponse`
 ```ts
 ReadRecordUpdateRequest {
-  edition_id?: string | null
-  start_date?: string | null
-  end_date?: string | null
-  did_not_finish?: boolean
-  is_historical?: boolean
-  stop_position?: string | null
-  notes?: string | null
+    edition_id?:     undefined | string | null
+    start_date?:     undefined | LocalDate | null
+    end_date?:       undefined | LocalDate | null
+    did_not_finish?: undefined | boolean
+    is_historical?:  undefined | boolean
+    stop_position?:  undefined | string | null
+    notes?:          undefined | string | null
 }
 ```
 
 `DELETE /read-records/{id}`
 delete a read record.
+- request:  none
+- response: none
+
+## /image-proxy
+
+`GET /image-proxy?url=...`
+download the image from the specified URL and return it as a blob.
 - request:  none
 - response: none
