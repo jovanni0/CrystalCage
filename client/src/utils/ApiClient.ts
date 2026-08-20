@@ -31,12 +31,9 @@ import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreate
 import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
 import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
 import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
-import      { NotFoundError }                  from "@root/errors/NotFoundError";
 import      { ServerNotConfiguredError }       from "@root/errors/ServerNotConfiguredError";
 import      { UnauthorizedError }              from "@root/errors/UnauthorizedError";
 import      { toFormData }                     from "@dtos/BookCreateRequest";
-import      { ConflictError }                  from "@root/errors/ConflictError";
-import      { InternalServerError }            from "@root/errors/InternalServerError";
 import      { ApiError }                       from "@root/errors/ApiError";
 
 
@@ -570,6 +567,19 @@ export class ApiClient
         )
 
         return response.json()
+    }
+
+
+    public async deleteReadRecord(id: string): Promise<void>
+    {
+        this.logger.debug(`sending DELETE /read-records/${id}`,)
+
+        await this.request(
+            `/read-records/${id}`,
+            {
+                method: "DELETE",
+            }
+        )
     }
 
 

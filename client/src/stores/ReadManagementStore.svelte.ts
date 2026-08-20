@@ -1,13 +1,13 @@
-import type { AuthorResponse }     from "@root/dtos/AuthorResponse"
-import type { BookDetailResponse } from "@root/dtos/BookDetailResponse"
-import type { EditionResponse }    from "@root/dtos/EditionResponse"
-import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
+import type { AuthorResponse }          from "@root/dtos/AuthorResponse"
+import type { BookDetailResponse }      from "@root/dtos/BookDetailResponse"
+import type { EditionResponse }         from "@root/dtos/EditionResponse"
+import type { ReadRecordResponse }      from "@root/dtos/ReadRecordResponse"
 import type { ReadRecordUpdateRequest } from "@root/dtos/ReadRecordUpdateRequest"
-import type { Logger }             from "@root/loggers/Logger"
-import type { ApiClient }          from "@root/utils/ApiClient"
-import { toLocalDateString } from "@root/utils/DataConversion"
-import      { formatAuthorName }   from "@root/utils/LibraryGroupings"
-import { getIntervalInDays } from "@root/utils/ReadRecordUtils"
+import type { Logger }                  from "@root/loggers/Logger"
+import type { ApiClient }               from "@root/utils/ApiClient"
+import      { toLocalDateString }       from "@root/utils/DataConversion"
+import      { formatAuthorName }        from "@root/utils/LibraryGroupings"
+import      { getIntervalInDays }       from "@root/utils/ReadRecordUtils"
 
 
 
@@ -110,6 +110,27 @@ export class ReadManagementStore
         {
             this.logger.error("failed to update read info", { error: e })
 
+            return false
+        }
+    }
+
+
+    public async deleteRecord(): Promise<boolean>
+    {
+        if (!this.id)
+        {
+            this.logger.warn("cannot delete record with no record ID", { id: this.id })
+            return false
+        }
+
+        try
+        {
+            this.api.deleteReadRecord(this.id)
+            return true
+        }
+        catch (e)
+        {
+            this.logger.error("cannot delete read record", { id: this.id, error: e })
             return false
         }
     }

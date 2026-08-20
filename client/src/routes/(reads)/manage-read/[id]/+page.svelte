@@ -1,12 +1,15 @@
 <script lang="ts">
     import type { ReadManagementStore } from "@root/stores/ReadManagementStore.svelte";
-    import ListEntryDate from "@root/components/list-entry-date.svelte";
-    import TopbarConfirmCancel from "@root/components/topbar-confirm-cancel.svelte";
-    import ListEntryDropdown from "@components/list-entry-dropdown.svelte"
-    import ListSingleItemEntry from "@root/components/list-single-item-entry.svelte";
-    import { goBack } from "@root/utils/go-back";
-    import { marked } from "marked";
+    import      { goBack }              from "@root/utils/go-back";
+    import      { marked }              from "marked";
+    import      ListEntryDate           from "@root/components/list-entry-date.svelte";
+    import      TopbarConfirmCancel     from "@root/components/topbar-confirm-cancel.svelte";
+    import      ListSingleItemEntry     from "@root/components/list-single-item-entry.svelte";
+    import      Button                  from "@root/components/button.svelte";
+    import      ListEntryDropdown       from "@root/components/list-entry-dropdown.svelte";
 
+
+    
     let { data } = $props()
         const { 
         read_store, 
@@ -22,6 +25,17 @@
         const has_saved = await read_store.save()
 
         if (has_saved)
+        {
+            goBack()
+        }
+    }
+
+
+    async function deleteRecord()
+    {
+        const is_deleted = await read_store.deleteRecord()
+
+        if (is_deleted)
         {
             goBack()
         }
@@ -74,6 +88,15 @@
         >
             {@html marked(read_store.notes)}
         </ListSingleItemEntry>
+    {/if}
+
+    {#if id}
+        <Button 
+            text = "Delete record"
+            type = "secondary"
+            fill = { true }
+            onClick = { deleteRecord }
+        />
     {/if}
 </div>
 
