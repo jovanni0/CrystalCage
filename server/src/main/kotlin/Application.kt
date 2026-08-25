@@ -219,7 +219,8 @@ fun Application.module() {
     configureStatusPages()
     configureCors()
 
-    val storage = AssetStorage(Path("./crystalcage"))
+    val storage_path = Path(environment.config.property("storage.baseDirectory").getString())
+    val storage = AssetStorage(storage_path)
 
     val user_repository = UserRepository()
     val author_repository = AuthorRepository()
