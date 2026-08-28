@@ -80,15 +80,17 @@
         />
     </div>
 
-    {#if read_store.notes}
-        <ListSingleItemEntry
+    <ListSingleItemEntry
             key         = "NOTES"
-            href        = { `/manage-reads/${id}/notes` }
+            href        = { `/manage-read/${id}/notes` }
             hasContent  = { true }
         >
-            {@html marked(read_store.notes)}
+            {#if read_store.notes}
+                {@html marked(read_store.notes)}
+            {:else}
+                <p class = "placeholder">No notes yet. Tap to add one.</p>
+            {/if}
         </ListSingleItemEntry>
-    {/if}
 
     {#if id}
         <Button 
@@ -139,5 +141,11 @@
     .list {
         display: flex;
         flex-direction: column;
+    }
+
+    .placeholder
+    {
+        color: var(--text-secondary);
+        padding-left: 8px;
     }
 </style>

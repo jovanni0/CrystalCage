@@ -34,7 +34,7 @@
             return
         }
 
-        const is_good = await book_store.startRead(null, start_date, end_date, did_not_finish, is_historical)
+        const is_good = await book_store.startRead(null, start_date || null, end_date || null, did_not_finish, is_historical)
 
         if (is_good) 
         {
@@ -49,7 +49,7 @@
         if (selected_edition_id === null)
             return
 
-        const is_good = await book_store.startRead(selected_edition_id, start_date, end_date, did_not_finish, is_historical)
+        const is_good = await book_store.startRead(selected_edition_id, start_date || null, end_date || null, did_not_finish, is_historical)
 
         if (is_good)
         {
