@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PingResponse(
-    val server_name: String
+    val server_name: String,
+    val type: String = "Sanctum"
 )
