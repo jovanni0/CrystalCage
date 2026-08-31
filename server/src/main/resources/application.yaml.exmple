@@ -1,6 +1,7 @@
 ktor:
     deployment:
-        port: 8080
+        port: 7489
+        discovery_port: 7490
     application:
         modules:
             - dev.jovanni0.ApplicationKt.module
@@ -15,3 +16,11 @@ database:
     password: "postgres"
 storage:
   baseDirectory: "./crystalcage-fs"
+
+server:
+    # the name of the server that will be shown in the client app.
+    name: Sanctum Example Server
+
+    # indicates the server is behind a secure connection, required for client-side auto-discovery.
+    # if wrong, the server will be detected but the users will not be able to log in because of a SSL_PROTOCOL_ERROR.
+    https: true
