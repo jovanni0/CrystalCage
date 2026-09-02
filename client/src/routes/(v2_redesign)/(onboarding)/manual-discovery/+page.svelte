@@ -6,6 +6,8 @@
     import Button            from "@root/components/v2_redesign/Button.svelte";
     import InputField        from "@root/components/v2_redesign/InputField.svelte";
     import Logo              from "@root/components/v2_redesign/Logo.svelte";
+    import { toSearchParams } from "@root/utils/SearchParams";
+    import { Capacitor } from "@capacitor/core";
 
 
 
@@ -18,8 +20,9 @@
     let server_name:   string | null = $state(null)
     let is_checking:   boolean       = $state(false)
     
-    const navigaion_reason = $derived(page.url.searchParams.get("reason") === "action")
-    const data_as_params   = $derived(new URLSearchParams({ address: resolved_url ?? "", name: server_name ?? "" }))
+    const data_as_params:        string  = $derived(toSearchParams({ address: resolved_url, name: server_name }))
+    const is_navigation_active:  boolean = $derived(page.url.searchParams.get("reason") === "action")
+    const is_descovery_possible: boolean = $derived(Capacitor.isNativePlatform())
 
 
     $effect( () =>
@@ -92,7 +95,7 @@
         <Logo style = "fill:var(--bg-brand-secondary); width:58px;" />
 
         <div class = "info">
-            <h1 class = "heading">{ navigaion_reason ? "Manual search" : "Library not found" }</h1>
+            <h1 class = "heading">{ is_navigation_active ? "Manual search" : "Library not found" }</h1>
             <p class = "subheading">Check that you are connected to the same network and the API port is exposed.</p>
         </div>
         
@@ -110,17 +113,22 @@
         <Button 
             variant = "PRIMARY"
             state   = { resolved_url === null ? "DISABLED" : "DEFAULT" }
-            href    = "/v2-login?{data_as_params.toString()}"
+            href    = "/login?{data_as_params.toString()}"
         >
             Continue
         </Button>
 
-        <Button 
-            variant = "GHOST-ACCENT"
-            href    = "/auto-discovery"
-        >
-            Retry auto-discovery
-        </Button>
+        {#if is_descovery_possible}
+            <Button 
+                variant = "GHOST-ACCENT"
+                href    = "/auto-discovery"
+            >
+                Retry auto-discovery
+            </Button>
+        {:else}
+            <p class = "button-placeholder">Auto-discovery is unavailable on web.</p>
+        {/if}
+
     </div>
 </div>
 
@@ -183,5 +191,11 @@
     {
         display: flex;
         flex-direction: column;
+    }
+
+    .button-placeholder
+    {
+        text-align: center;
+        padding: 16px 32px;
     }
 </style>

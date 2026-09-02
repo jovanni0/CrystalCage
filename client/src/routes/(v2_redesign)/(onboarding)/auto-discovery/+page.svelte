@@ -60,7 +60,7 @@
                     <NavListItem 
                         title = { server.name }
                         note  = { server.host   }
-                        href  = "/v2-login?{resultToSearchParams(server)}"
+                        href  = "/login?{resultToSearchParams(server)}"
                     />
                 </li>
             {/each}

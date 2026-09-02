@@ -5,31 +5,44 @@
     import { onMount }         from "svelte";
     import { Capacitor }       from "@capacitor/core";
     import { App }             from "@capacitor/app"
+    import { toSearchParams }  from "@root/utils/SearchParams";
 
 
 
 	let { children } = $props();
 
 
-	// $effect( () =>
-	// {
-	// 	const status = session_manager.status
-	// 	const path = page.url.pathname
+	$effect( () =>
+	{
+		const status = session_manager.status
+		const is_onboarding = page.route.id?.includes("onboarding") ?? "false"
 
 
-    //     if (status === "AUTHENTICATED" && path.startsWith("/login")) 
-    //     {
-    //         goto("/");
-    //     } 
-    //     else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
-    //     {
-    //         goto("/login/select-account");
-    //     } 
-    //     else if (status === "NO_SERVER" && !path.startsWith("/login")) 
-    //     {
-    //         goto("/login/select-server");
-    //     }
-	// })
+        if (status === "AUTHENTICATED" && is_onboarding) 
+        {
+            goto("/")
+        } 
+        else if (status === "NEEDS_LOGIN" && !is_onboarding) 
+        {
+            const search_params = toSearchParams({ 
+                address: session_manager.server_address, 
+                name:    session_manager.server_name,
+            })
+
+            if (search_params)
+            {
+                goto(`/login?${search_params}`)
+            }
+            else
+            {
+                goto("/auto-discovery")
+            }
+        } 
+        else if (status === "NO_SERVER" && !is_onboarding) 
+        {
+            goto("/welcome")
+        }
+	})
 
 
     onMount( () =>

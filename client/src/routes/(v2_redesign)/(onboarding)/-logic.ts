@@ -1,3 +1,4 @@
+import { session_manager } from "@root/CompositionRoot"
 import type { AuthLoginResponse } from "@root/dtos/AuthLoginResponse"
 
 
@@ -21,9 +22,7 @@ export async function logIn(username: string, password: string, server_address: 
         {
             const data = await response.json() as AuthLoginResponse
     
-            // this data along with the server address should be stored inside the session manager upon integration.
-            const session_token = data.token
-            const current_user = data.user
+            session_manager.login(server_address, data.token, data.user)
 
             return ""
         }
@@ -41,7 +40,6 @@ export async function logIn(username: string, password: string, server_address: 
         return "Something went wrong."
     }
 }
-
 
 
 export async function isInviteCodeValid(code: string, server_address: string): Promise<boolean>

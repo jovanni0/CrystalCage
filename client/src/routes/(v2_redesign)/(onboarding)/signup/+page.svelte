@@ -113,7 +113,7 @@
         server_address   = { server_address }
         error_message    = { access_code_error }
         bind:access_code = { access_code }
-        login_url        = "/v2-login?{search_params.toString()}"
+        login_url        = "/login?{search_params.toString()}"
         is_loading       = { is_checking_code }
         onContinue       = { checkCode }
     />
@@ -125,7 +125,7 @@
         signup_error   = { signup_error }
         bind:username  = { username }
         bind:password  = { password }
-        login_url      = "/v2-login?{search_params.toString()}"
+        login_url      = "/login?{search_params.toString()}"
         is_loading     = { is_signing_up }
         onSignUp       = { signup }
     />

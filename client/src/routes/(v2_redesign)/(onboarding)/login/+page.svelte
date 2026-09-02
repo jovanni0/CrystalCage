@@ -49,7 +49,7 @@
         error_message  = { error }
         bind:username  = { username }
         bind:password  = { password }
-        signup_url     = "/v2-signup?{search_params.toString()}"
+        signup_url     = "/signup?{search_params.toString()}"
         is_loading     = { loading }
         onlogin        = { log_in }
     />
