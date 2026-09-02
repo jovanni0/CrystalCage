@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.kotlin.serialization)
     alias(ktorLibs.plugins.ktor)
+    id("com.gradleup.shadow") version "8.3.5"
 }
 
 group = "dev.jovanni0"
@@ -38,8 +39,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:1.3.0")
 
 
-    implementation("org.flywaydb:flyway-core:12.10.0")
-    implementation("org.flywaydb:flyway-database-postgresql:12.10.0")
+    implementation("org.flywaydb:flyway-core:12.11.0")
+    implementation("org.flywaydb:flyway-database-postgresql:12.11.0")
 
     implementation("at.favre.lib:bcrypt:0.10.2")
 
@@ -54,4 +55,12 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     jvmArgs("-XX:+EnableDynamicAgentLoading", "-Djdk.instrument.traceUsage")
+}
+
+tasks {
+    shadowJar {
+        archiveFileName.set("app-all.jar")
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        mergeServiceFiles()
+    }
 }

@@ -8,6 +8,7 @@ import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.auth.PasswordHasher
 import dev.jovanni0.data_types.UserRole
 import dev.jovanni0.database.DbConfig
+import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
@@ -214,8 +215,10 @@ fun Application.configureCors() {
 }
 
 
-fun Application.seedAdminIfMissing(adminUsername: String)
+fun Application.seedAdminIfMissing(adminUsername: String, data_source: DataSource)
 {
+    var admin_id: String? = null
+
     transaction {
         val adminExists = User
             .selectAll()
@@ -226,11 +229,18 @@ fun Application.seedAdminIfMissing(adminUsername: String)
 
         val plainPassword = environment.config.property("server.seed_admin_password").getString()
 
-        User.insert {
+        val insert_statement = User.insert {
             it[username] = adminUsername
             it[password_hash] = PasswordHasher.hash(plainPassword)
             it[role] = UserRole.ADMIN.toString()
         }
+
+        admin_id = insert_statement[User.id].toString()
+    }
+
+    if (admin_id != null)
+    {
+        provisionTenantSchema(data_source, admin_id)
     }
 }
 
@@ -248,7 +258,7 @@ fun Application.module() {
     jwt_config.validate()
 
     val data_source = configureDatabase()
-    seedAdminIfMissing("admin")
+    seedAdminIfMissing("admin", data_source)
     configureSerializer()
     configureAuth(jwt_config)
     configureStatusPages()
