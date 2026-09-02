@@ -5,12 +5,16 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.jovanni0.auth.AuthConfig
+import dev.jovanni0.auth.PasswordHasher
+import dev.jovanni0.data_types.UserRole
 import dev.jovanni0.database.DbConfig
 import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
 import dev.jovanni0.repositories.*
 import dev.jovanni0.routes.*
+import dev.jovanni0.tables.User
+import dev.jovanni0.tables.User.password_hash
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -25,8 +29,12 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.exceptions.ExposedSQLException
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import javax.sql.DataSource
 import kotlin.io.path.Path
 
@@ -69,6 +77,7 @@ fun Application.configureAuth(jwt_config: AuthConfig) {
 fun Application.configureRouting(
     jwt_config: AuthConfig,
     data_source: DataSource,
+    invite_code_repository: InviteCodeRepository,
     user_repository: UserRepository,
     author_repository: AuthorRepository,
     universe_repository: UniverseRepository,
@@ -82,7 +91,7 @@ fun Application.configureRouting(
 ) {
     routing {
         serverRoutes()
-        authRoutes(user_repository, jwt_config, data_source)
+        authRoutes(user_repository, invite_code_repository, jwt_config, data_source)
         authorRoutes(author_repository)
         bookRoutes(book_repository)
         coverRoutes(book_repository, cover_repository)
@@ -171,6 +180,10 @@ fun Application.configureStatusPages() {
             call.respond(HttpStatusCode.InternalServerError, cause.message)
         }
 
+        exception<InvalidInviteCodeException> { call, cause ->
+            call.respond(HttpStatusCode.BadRequest)
+        }
+
         exception<ExposedSQLException> { call, cause ->
             when (cause.sqlState) {
                 "23503" -> call.respond(HttpStatusCode.BadRequest, "referenced entity does not exist")
@@ -201,6 +214,27 @@ fun Application.configureCors() {
 }
 
 
+fun Application.seedAdminIfMissing(adminUsername: String)
+{
+    transaction {
+        val adminExists = User
+            .selectAll()
+            .where { User.role eq UserRole.ADMIN.toString() }
+            .any()
+
+        if (adminExists) return@transaction
+
+        val plainPassword = environment.config.property("server.seed_admin_password").getString()
+
+        User.insert {
+            it[username] = adminUsername
+            it[password_hash] = PasswordHasher.hash(plainPassword)
+            it[role] = UserRole.ADMIN.toString()
+        }
+    }
+}
+
+
 /**
  * application entry point.
  */
@@ -214,6 +248,7 @@ fun Application.module() {
     jwt_config.validate()
 
     val data_source = configureDatabase()
+    seedAdminIfMissing("admin")
     configureSerializer()
     configureAuth(jwt_config)
     configureStatusPages()
@@ -222,7 +257,8 @@ fun Application.module() {
     val storage_path = Path(environment.config.property("storage.baseDirectory").getString())
     val storage = AssetStorage(storage_path)
 
-    val user_repository = UserRepository()
+    val invite_code_repository = InviteCodeRepository()
+    val user_repository = UserRepository(invite_code_repository)
     val author_repository = AuthorRepository()
     val universe_repository = UniverseRepository()
     val series_repository = SeriesRepository()
@@ -246,6 +282,7 @@ fun Application.module() {
     configureRouting(
         jwt_config,
         data_source,
+        invite_code_repository,
         user_repository,
         author_repository,
         universe_repository,
