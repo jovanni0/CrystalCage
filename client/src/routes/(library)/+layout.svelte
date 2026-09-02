@@ -5,6 +5,7 @@
     import      Searchbar         from "@root/components/searchbar.svelte";
     import      TabBar            from "@root/components/TabBar.svelte";
     import      TopbarShell       from "@root/components/topbar-shell.svelte";
+    import { goto } from "$app/navigation";
 
     
     let { children } = $props()
@@ -15,11 +16,12 @@
 <main>
     <TopbarShell>
         {#snippet left()}
-            <img 
-                class="avatar"
-                src="/avatar.jpg" 
-                alt="avatar"
-            >
+            <button class = "avatar" onclick={ () => goto("/generate-code")}>
+                <img 
+                    src="/avatar.jpg" 
+                    alt="avatar"
+                >
+            </button>
         {/snippet}
 
         {#snippet center()}
@@ -76,9 +78,16 @@
     }
 
     .avatar {
-        aspect-ratio: 1/1;
-        width: 48px;
-        border-radius: 100px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img
+        {
+            aspect-ratio: 1/1;
+            width: 48px;
+            border-radius: 100px;
+        }
     }
 
     .placeholder {

@@ -11,25 +11,25 @@
 	let { children } = $props();
 
 
-	$effect( () =>
-	{
-		const status = session_manager.status
-		const path = page.url.pathname
+	// $effect( () =>
+	// {
+	// 	const status = session_manager.status
+	// 	const path = page.url.pathname
 
 
-        if (status === "AUTHENTICATED" && path.startsWith("/login")) 
-        {
-            goto("/");
-        } 
-        else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
-        {
-            goto("/login/select-account");
-        } 
-        else if (status === "NO_SERVER" && !path.startsWith("/login")) 
-        {
-            goto("/login/select-server");
-        }
-	})
+    //     if (status === "AUTHENTICATED" && path.startsWith("/login")) 
+    //     {
+    //         goto("/");
+    //     } 
+    //     else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
+    //     {
+    //         goto("/login/select-account");
+    //     } 
+    //     else if (status === "NO_SERVER" && !path.startsWith("/login")) 
+    //     {
+    //         goto("/login/select-server");
+    //     }
+	// })
 
 
     onMount( () =>
