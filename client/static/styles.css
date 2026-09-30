@@ -125,7 +125,7 @@
     --bg-brand-disabled:   hsl(117, 15%, 70%);
     --bg-brand-secondary:  hsl(30, 42%, 39%);
     --text:                hsl(33, 15%, 15%);
-    --text-brand-primary:  var(--bg-brand);
+    --text-brand:          var(--bg-brand);
     --text-muted:          hsl(34, 5%, 40%);
     --text-placeholder:    hsl(36, 5%, 60%);
     --text-error:          hsl(6, 59%, 30%);
@@ -203,4 +203,21 @@ h1, h2, h3, h4, h5, h6, p
     {
         background-color: var(--scrollbar-thumb-hover);
     }
+}
+
+
+.visually-hidden
+{
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+.hidden
+{
+    display: none;
 }
