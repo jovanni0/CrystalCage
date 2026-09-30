@@ -1,0 +1,35 @@
+ktor:
+    deployment:
+        # used for API
+        port: "$PORT:7489"
+
+        # used for LAN discovery by native clients (Android)
+        discovery_port: "$DISCOVERY_PORT:7490"
+    application:
+        modules:
+            - dev.jovanni0.ApplicationKt.module
+
+jwt:
+    secret: "$JWT_SECRET:replace-with-a-real-secret-from-env"
+    issuer: "$JWT_ISSUER:sanctum-server"
+    audience: "$JWT_AUDIENCE:sanctum-client"
+    realm: "$JWT_REALM:sanctum"
+
+database:
+    jdbc_url: "$DB_JDBC_URL:jdbc:postgresql://localhost:5432/sanctum"
+    username: "$POSTGRES_USER:postgres"
+    password: "$POSTGRES_PASSWORD:postgres"
+
+storage:
+    baseDirectory: "$STORAGE_BASE_DIR:/home/jovanni/sanctum-fs"
+
+server:
+    # the name of the server that will be shown in the client app.
+    name: "$SERVER_NAME:Sanctum Server"
+
+    # indicates the server is behind a secure connection, required for client-side auto-discovery.
+    # if wrong, the server will be detected but the users will not be able to log in because of SSL_PROTOCOL_ERROR.
+    https: "$SERVER_HTTPS:false"
+
+    # the password for the seed admin account created when the DB is first created.
+    seed_admin_password: "$SEED_ADMIN_PASSWORD:password"

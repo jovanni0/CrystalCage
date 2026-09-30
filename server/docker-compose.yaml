@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_JDBC_URL: ${DB_JDBC_URL}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_REALM: ${JWT_REALM}
+      STORAGE_BASE_DIR: ${STORAGE_BASE_DIR}
+      SERVER_NAME: ${SERVER_NAME}
+      SERVER_HTTPS: ${SERVER_HTTPS}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
+      PORT: ${PORT}
+      DISCOVERY_PORT: ${DISCOVERY_PORT}
+    ports:
+      - "${PORT}:${PORT}"
+      - "${DISCOVERY_PORT}:${DISCOVERY_PORT}"
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  db_data:
