@@ -28,6 +28,7 @@ import type { CoverUpdateRequest }             from "@root/dtos/CoverUpdateReque
 import type { EditionCreateRequest }           from "@root/dtos/EditionCreateRequest";
 import type { EditionUpdateRequest }           from "@root/dtos/EditionUpdateRequest";
 import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreateRequest";
+import type { InviteCreateResponse }           from "@root/dtos/InviteCreateResponse";
 import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
 import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
 import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
@@ -658,5 +659,18 @@ export class ApiClient
         )
 
         return response.blob()
+    }
+
+
+    public async generateInviteCode(): Promise<InviteCreateResponse>
+    {
+        const response = await this.request(
+            `/auth/invite-code`,
+            {
+                method: "POST",
+            }
+        )
+
+        return response.json()
     }
 }

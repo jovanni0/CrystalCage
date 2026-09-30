@@ -1,46 +1,35 @@
 import type { UserProfileResponse } from "../dtos/UserProfileResponse";
 import type { SessionStorage }      from "./SessionStorage";
 import type { AuthContext }         from "@data-types/AuthContext";
-import type { LoginResult }         from "@data-types/LoginResult";
 import type { SessionStatus }       from "@root/types/SessionStatus";
 import type { Logger }              from "@loggers/Logger";
 import      { ApiClient }           from "./ApiClient"
-import      { isNotNull, isNull }   from "@root/utils/NullishChecks";
-import      { NotFoundError }       from "@root/errors/NotFoundError";
-import      { UnauthorizedError }   from "@root/errors/UnauthorizedError";
 
 
 
 export class SessionManager
 {
-    private base_url: string | null = null
-    private session_token: string | null = null
-    private server_name: string | null = null
-    private current_user: UserProfileResponse | null = null
+    public user:           UserProfileResponse | null = $state(null)
+    public status:         SessionStatus              = $state("UNKNOWN")
+    public server_address: string | null              = $state(null)
+    public server_name:    string | null              = $state(null )
+    public session_token:  string | null              = $state(null)
 
-    status = $state<SessionStatus>("UNKNOWN")
+
+    public has_sever_context: boolean = $derived(this.server_address !== null)
 
 
     private getAuthContext(): AuthContext | null
     {
-        if (this.base_url === null)
+        if (this.server_address === null)
         {
             return null
         }
 
         return {
-            base_url: this.base_url,
+            base_url:      this.server_address,
             session_token: this.session_token
         }
-    }
-
-
-    private handleInvalidSession()
-    {
-        this.session_token = null
-        this.current_user = null
-        this.storage.clear()
-        this.status = isNull(this.base_url) ? "NO_SERVER" : "NEEDS_LOGIN"
     }
 
 
@@ -52,22 +41,10 @@ export class SessionManager
     {
         this.api.configureAuth(
             () => this.getAuthContext(),
-            () => this.handleInvalidSession()
+            () => this.logout()
         )
 
         this.logger.info("set auth context")
-    }
-
-
-    getServerName()
-    {
-        return this.server_name
-    }
-
-
-    hasServerContext(): boolean
-    {
-        return isNotNull(this.base_url)
     }
 
 
@@ -75,17 +52,18 @@ export class SessionManager
     {
         const persisted_session = await this.storage.load()
 
-        if (isNull(persisted_session))
+        if (persisted_session === null)
         {
             this.status = "NO_SERVER"
 
             return
         }
 
-        this.base_url = persisted_session.base_url
+        this.server_address = persisted_session.base_url
+        this.server_name = persisted_session.server_name
         this.session_token = persisted_session.session_token
 
-        if (isNull(this.session_token))
+        if (this.session_token === null)
         {
             this.status = "NEEDS_LOGIN"
 
@@ -94,7 +72,7 @@ export class SessionManager
 
         try
         {
-            this.current_user = await this.api.getMe()
+            this.user = await this.api.getMe()
             this.status = "AUTHENTICATED"
 
             return
@@ -108,79 +86,20 @@ export class SessionManager
     }
 
 
-    /**
-     * checks the connection with the server. returns `true` if the server was successfully pinged, else `false`
-     * @param url
-     */
-    async connectToServer(url: string): Promise<boolean>
+    public login(address: string, token: string, user: UserProfileResponse)
     {
-        this.base_url = url
-
-        try
-        {
-            const response = await this.api.ping()
-
-            this.server_name = response.server_name
-
-            await this.storage.save({
-                base_url: this.base_url,
-                server_name: this.server_name,
-                session_token: null
-            })
-
-            this.status = "NEEDS_LOGIN"
-
-            return true
-        }
-        catch (e)
-        {
-            this.logger.error("caught error while trying to ping server", { error: e })
-
-            return false
-        }
+        this.server_address = address
+        this.session_token = token
+        this.status = "AUTHENTICATED"
     }
 
 
-    /**
-     * performs the login process.
-     * @param username
-     * @param password
-     */
-    async login(username: string, password: string): Promise<LoginResult>
+    public logout()
     {
-        try
-        {
-            const response = await this.api.login({ username, password })
+        this.storage.clear()
 
-            this.session_token = response.token
-            this.current_user = response.user
-
-            await this.storage.save({
-                base_url: this.base_url!,
-                server_name: this.server_name!,
-                session_token: this.session_token
-            })
-
-            this.status = "AUTHENTICATED"
-
-            this.logger.info("received /login response", { response: response })
-        }
-        catch (e)
-        {
-            switch (true)
-            {
-                case e instanceof NotFoundError:        return { success: false, error_reason: "NETWORK_ERROR" }
-                case e instanceof UnauthorizedError:    return { success: false, error_reason: "INVALID_CREDENTIALS" }
-                default:                                return { success: false, error_reason: "UNKNOWN_ERROR" }
-            }
-        }
-
-        return { success: true }
-    }
-
-
-    logout()
-    {
-        this.handleInvalidSession()
+        this.session_token = null
+        this.user = null
+        this.status = this.server_address === null ? "NO_SERVER" : "NEEDS_LOGIN"
     }
 }

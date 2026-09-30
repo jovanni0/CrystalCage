@@ -5,6 +5,7 @@
     import { onMount }         from "svelte";
     import { Capacitor }       from "@capacitor/core";
     import { App }             from "@capacitor/app"
+    import { toSearchParams }  from "@root/utils/SearchParams";
 
 
 
@@ -14,20 +15,32 @@
 	$effect( () =>
 	{
 		const status = session_manager.status
-		const path = page.url.pathname
+		const is_onboarding = page.route.id?.includes("onboarding") ?? false
 
 
-        if (status === "AUTHENTICATED" && path.startsWith("/login")) 
+        if (status === "AUTHENTICATED" && is_onboarding) 
         {
-            goto("/");
+            goto("/")
         } 
-        else if (status === "NEEDS_LOGIN" && !path.startsWith("/login")) 
+        else if (status === "NEEDS_LOGIN" && !is_onboarding) 
         {
-            goto("/login/select-account");
+            const search_params = toSearchParams({ 
+                address: session_manager.server_address, 
+                name:    session_manager.server_name,
+            })
+
+            if (search_params)
+            {
+                goto(`/login?${search_params}`)
+            }
+            else
+            {
+                goto("/auto-discovery")
+            }
         } 
-        else if (status === "NO_SERVER" && !path.startsWith("/login")) 
+        else if (status === "NO_SERVER" && !is_onboarding) 
         {
-            goto("/login/select-server");
+            goto("/welcome")
         }
 	})
 

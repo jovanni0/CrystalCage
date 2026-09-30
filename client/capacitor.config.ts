@@ -1,26 +1,17 @@
 import type { CapacitorConfig } from '@capacitor/cli';
-import os from 'os';
 
 
-
-const ifaces = os.networkInterfaces();
-const localIp = Object.values(ifaces)
-    .flat()
-    .find(i => i?.family === 'IPv4' && !i.internal)?.address;
 
 const config: CapacitorConfig = {
-    appId: 'com.example.myapp',
-    appName: 'my-app',
-    webDir: 'build',
-    server: {
-        androidScheme: 'https',
-        ...(process.env.NODE_ENV === 'development' && {
-          url: `http://${localIp}:5173`,
-          cleartext: true
-        })
-    }
-};
+    appId:   "dev.jovanni0.sanctum",
+    appName: "Sanctum",
+    webDir:  "build",
+    plugins: 
+    {
+        CapacitorHttp: { enabled: true },
+        SplashScreen: { launchAutoHide: false }, // the splash scrren is done native via android/app/src/main/res/values/styles.xml
+    },
+}
 
 
-
-export default config;
+export default config

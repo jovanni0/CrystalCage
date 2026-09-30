@@ -1,19 +1,19 @@
 {
     "files.exclude": {
-        ".idea": true,
-        ".svelte-kit": true,
-        ".vscode": true,
-        "node_modules": true,
-        "android": true,
-        "build": true,
-        ".gitignore": true,
-        ".npmrc": true,
-        "capacitor.config.ts": true,
-        "package.json": true,
-        "pnpm-lock.yaml": true,
-        "pnpm-workspace.yaml": true,
-        "svelte.config.js": true,
-        "tsconfig.json": true,
-        "vite.config.ts": true
+        ".idea": false,
+        ".svelte-kit": false,
+        ".vscode": false,
+        "node_modules": false,
+        "android": false,
+        "build": false,
+        ".gitignore": false,
+        ".npmrc": false,
+        "capacitor.config.ts": false,
+        "package.json": false,
+        "pnpm-lock.yaml": false,
+        "pnpm-workspace.yaml": false,
+        "svelte.config.js": false,
+        "tsconfig.json": false,
+        "vite.config.ts": false
     }
 }
