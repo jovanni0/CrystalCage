@@ -5,7 +5,7 @@ import { redirect }  from "@sveltejs/kit"
 
 export const load = () => 
 {
-    if (Capacitor.isNativePlatform())
+    if (!Capacitor.isNativePlatform())
     {
         redirect(307, "/manual-discovery")
     }

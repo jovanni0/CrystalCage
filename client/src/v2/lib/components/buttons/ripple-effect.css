@@ -1,0 +1,43 @@
+.ripple-container::before
+{
+    --ripple-color: rgba(0, 0, 0, 10%);
+
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--ripple-color);
+    pointer-events: none;
+
+    clip-path: circle(0% at 50% 50%);
+    opacity: 0;
+    transition: clip-path 0s 250ms, opacity 250ms ease;
+}
+
+
+.ripple-container[ripple-effect]::before
+{
+    animation: ripple 500ms ease-out;
+}
+
+
+@keyframes ripple
+{
+    0%
+    {
+        clip-path: circle(0% at 50% 50%);
+        opacity: 1;
+    }
+    
+    60%
+    {
+        clip-path: circle(100% at 50% 50%);
+        opacity: 1;
+    }
+
+    100%
+    {
+        clip-path: circle(100% at 50% 50%);
+        opacity: 0;
+    }
+}

@@ -1,0 +1,22 @@
+.category-list-item
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    
+    & > top-wrapper
+    {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+
+.category
+{
+    flex: 1;
+    color: var(--text-brand-secondary);
+    letter-spacing: 0.1rem;
+    font-weight: 600;
+}

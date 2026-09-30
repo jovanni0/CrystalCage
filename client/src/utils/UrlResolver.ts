@@ -43,21 +43,24 @@ export class UrlResolver
     }
 
 
+    // SHOULD BE IMPROVED TO TRY TO INSERT THE STANDARD PORT AND DO NOT WAIT UNTILL ALL FETCH SUCCES, BECAUSE WAITING AFTER A FIREWALL/REVERSE PROXY MAY TAKE
+    // UP TO 30 SEC.
     private static buildCandidates(raw: string): string[]
     {
-        const input = raw.trim()
-        const protocol_match = input.match(/^(https?):\/\//i)
-        const address = protocol_match ? input.slice(protocol_match[0].length) : input
-        const host_part = address.split("/")[0]
-        const has_port = /:\d+$/.test(host_part.replace(/^\[.*\]/, ""))
-        const host_with_port = has_port ? host_part : `${host_part}:${this.DEFAULT_PORT}`
-
+        const input = raw.trim();
+        const protocol_match = input.match(/^(https?):\/\//i);
+        const without_protocol = protocol_match ? input.slice(protocol_match[0].length) : input;
+        const host_and_port = without_protocol.split("/")[0];
+        // 1. If user already typed the protocol (e.g. "https://example.com" or "http://192.168.1.5:9710")
         if (protocol_match)
         {
-            return [`${protocol_match[1].toLowerCase()}://${host_with_port}`]
+            return [`${protocol_match[1].toLowerCase()}://${host_and_port}`];
         }
-
-        return [`http://${host_with_port}`, `https://${host_with_port}`]
+        // 2. If no protocol was typed, try HTTPS first, then HTTP
+        return [
+            `https://${host_and_port}`,
+            `http://${host_and_port}`
+        ];
     }
 
 

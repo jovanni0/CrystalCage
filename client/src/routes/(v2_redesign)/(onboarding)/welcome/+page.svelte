@@ -6,7 +6,7 @@
 
 
 <div class = "page">
-    <img src="/welcome-background.png" alt="welcome background">
+    <img src="/welcome-background.webp" alt="welcome background">
 
     <div class = "logo-container">
         <Logo 

@@ -37,6 +37,7 @@ export default {
 			handleUnseenRoutes: "ignore"
 		},
         alias: {
+            "@v2": "./src/v2",
             "@root": "./src",
             "@components": "./src/components",
             "@icons": "./src/icons",

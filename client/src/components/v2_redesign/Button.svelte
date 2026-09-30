@@ -100,6 +100,6 @@
     .ghost-accent
     {
         background-color: transparent;
-        color: var(--text-brand-primary);
+        color: var(--text-brand);
     }
 </style>

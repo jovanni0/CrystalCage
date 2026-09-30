@@ -15,7 +15,7 @@
 	$effect( () =>
 	{
 		const status = session_manager.status
-		const is_onboarding = page.route.id?.includes("onboarding") ?? "false"
+		const is_onboarding = page.route.id?.includes("onboarding") ?? false
 
 
         if (status === "AUTHENTICATED" && is_onboarding) 

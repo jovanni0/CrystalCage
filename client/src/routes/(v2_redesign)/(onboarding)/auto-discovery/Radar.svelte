@@ -77,7 +77,7 @@
         ></div>
     {/each}
 
-    <Logo class = "logo" style = "width: 20%; height: 20%" />
+    <Logo class = "logo" style = "width: 16%; height: 16%" />
 </div>
 
 
@@ -154,6 +154,8 @@
         position: absolute;
         top: 50%;
         left: 50%;
+
+        color: var(--bg-brand-secondary);
 
         transform: translate(-50%, -50%);
     }
