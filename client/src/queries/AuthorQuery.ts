@@ -13,11 +13,11 @@ export class AuthorQuery
             return authors
         }
 
-        return authors.filter(it => `${it.last_name, it.first_name ?? ""}`.toLowerCase().includes(query_lowercase))
+        return authors.filter(it => this.nameOf(it).toLowerCase().includes(query_lowercase))
     }
 
 
-    public nameOf(authors: AuthorResponse[], id: string | null): string | null
+    public nameOfId(authors: AuthorResponse[], id: string | null): string | null
     {
         if (!id)
         {
@@ -31,17 +31,53 @@ export class AuthorQuery
             return null
         }
 
-        return `${target.last_name}, ${target.first_name}`
+        return this.nameOf(target)
     }
 
 
-    public splitName(full_name: string): {first_name: string | null, last_name: string}
+    public nameOf(author: AuthorResponse)
     {
-        const [last_name, first_name] = full_name.split(",").map(it => it.trim())
+        if (author.first_name)
+        {
+            return `${author.last_name}, ${author.first_name}`
+        }
+        
+        return author.last_name
+    }
 
-        return {
-            first_name: first_name || null,
-            last_name: last_name ?? ""
+
+    public splitName(full_name: string): { first_name: string | null, last_name: string }
+    {
+        if (full_name.includes(','))
+        {
+            const parts = full_name.split(',').map(it => it.trim())
+            const last_name = parts[0]
+            const first_name = parts.slice(1).join(', ')
+
+            return {
+                first_name: first_name || null,
+                last_name: last_name ?? ""
+            }
+        }
+        else
+        {
+            const parts = full_name.split(' ').map(it => it.trim())
+
+            if (parts.length > 1)
+            {
+                const last_name = parts[0]
+                const first_name = parts.slice(1).join(', ')
+    
+                return {
+                    first_name: first_name || null,
+                    last_name: last_name ?? ""
+                }
+            }
+            
+            return {
+                first_name: null,
+                last_name: parts[0]
+            }
         }
     }
 }

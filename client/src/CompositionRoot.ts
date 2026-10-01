@@ -4,12 +4,16 @@ import { SessionManager }     from "./utils/SessionManager.svelte.ts";
 import { ConsoleLogger }      from "@loggers/ConsoleLogger";
 import { LibraryStore }       from "./stores/LibraryStore.svelte.ts";
 import { VisibilityObserver } from "./utils/VisibilityObserver.ts";
+import { MockApi }            from "./v2/lib/clients/mock-api.ts";
+import { EditionFormatColorRegistry } from "@v2/lib/utils/format-color-registry.svelte";
 
 
 
 export const logger              = new ConsoleLogger("DEBUG")
 export const api_client          = new ApiClient(logger)
+export const mock_api            = new MockApi()
 export const session_storage     = new SessionStorage()
 export const session_manager     = new SessionManager(api_client, session_storage, logger)
 export const library_store       = new LibraryStore(logger, api_client)
 export const visibility_observer = new VisibilityObserver()
+export const edition_format_color_registry = new EditionFormatColorRegistry()

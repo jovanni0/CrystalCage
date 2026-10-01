@@ -4,11 +4,11 @@
     import { Dates } from "../utils/dates";
     import ArrowLeft from "../components/icons/arrow-left.svelte";
     import EditionListItem from "../components/list-items/edition-list-item.svelte";
-    import { FormatColorRegistry } from "../utils/format-color-registry";
     import type { PickableEdition } from "../types/pickable-edition.type";
     import Sheet from "../components/_other/bottom-sheet.svelte";
     import Button       from "@v2/lib/components/buttons/button.svelte";
     import IconButton   from "@v2/lib/components/buttons/icon-button.svelte";
+    import { edition_format_color_registry } from "@root/CompositionRoot";
 
 
 
@@ -87,7 +87,7 @@
         <list>
             {#each editions as edition (edition.id)}
                 <EditionListItem 
-                    variant     = { FormatColorRegistry.getVariant(edition.variant_id) }
+                    variant     = { edition_format_color_registry.resolve(edition.variant_id) }
                     is_checked  = { edition_id === edition.id }
                     is_disabled = { dont_have }
                     onChange    = { () => edition_id = edition.id }

@@ -48,5 +48,6 @@
 
 
         display: contents;
+        font-family: Manrope;
     }
 </style>

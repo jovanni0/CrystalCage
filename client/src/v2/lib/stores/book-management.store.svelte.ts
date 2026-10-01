@@ -1,52 +1,49 @@
 import type { AuthorResponse }          from "@root/dtos/AuthorResponse"
 import type { SeriesResponse }          from "@root/dtos/SeriesResponse"
-import type { TagResponse }             from "@root/dtos/TagResponse"
 import type { UniverseResponse }        from "@root/dtos/UniverseResponse"
-import type { ApiClient }               from "@root/utils/ApiClient"
 import type { Logger }                  from "@loggers/Logger"
-import type { CoverManager }            from "@root/queries/CoverManager.interface"
-import type { DisplayCover }            from "@root/types/DisplayCover"
 import type { BookUpdateRequest }       from "@root/dtos/BookUpdateRequest"
 import type { BookDetailResponse }      from "@root/dtos/BookDetailResponse"
-import type { EditionManager }          from "@root/queries/EditionManager.interface"
-import type { DisplayEdition }          from "@root/types/DisplayEdition"
 import      { AuthorQuery }             from "@root/queries/AuthorQuery"
 import      { SeriesQuery }             from "@root/queries/SeriesQuery"
-import      { TagQuery }                from "@root/queries/TagQuery"
 import      { UniverseQuery }           from "@root/queries/UniverseQuery"
 import      { isNullOrUndefined }       from "@root/utils/NullishChecks"
 import      { toBookCreateRequest2 }    from "@root/dtos/BookCreateRequest"
-import      { PersistedCoverManager }   from "@root/queries/PersistedCoverManager.svelte"
-import      { DraftCoverManager }       from "@root/queries/DraftCoverManager.svelte"
-import      { PersistedEditionManager } from "@root/queries/PersistedEditionManager.svelte"
-import      { DraftEditionManager }     from "@root/queries/DraftEditionManager.svelte"
+import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
+import type { EditionResponse } from "@root/dtos/EditionResponse"
+import type { TagCategoryResponse } from "../dtos/tag-category.dto"
+import type { TagResponse } from "../dtos/tag.dto"
+import type { MockApi } from "../clients/mock-api"
+import { TagQuery } from "../utils/tag-quert"
 
 
 
-export class BookManagementStore
+export class CreateBookStore
 {
     private author_query   = new AuthorQuery()
     private universe_query = new UniverseQuery()
     private series_query   = new SeriesQuery()
     private tag_query      = new TagQuery()
 
-    private cover_manager:   CoverManager | null       = $state(null)
-    private edition_manager: EditionManager | null     = $state(null)
-    private book:            BookDetailResponse | null = $state(null)
+    private book: BookDetailResponse | null = $state(null)
     
-    private authors:   AuthorResponse[]   = $state([])
-    private universes: UniverseResponse[] = $state([])
-    private series:    SeriesResponse[]   = $state([])
-    private tags:      TagResponse[]      = $state([])
+    private authors:        AuthorResponse[]      = $state([])
+    private universes:      UniverseResponse[]    = $state([])
+    private series:         SeriesResponse[]      = $state([])
+    private volumes:        BookSummaryResponse[] = $state([])
+    private editions:       EditionResponse[]     = $state([])
+    private tags:           TagResponse[]         = $state([])
+    private tag_categories: TagCategoryResponse[] = $state([])
 
     public is_initialized: boolean = false
 
+    // stuff filled/selected for the current book
     public author_id:        string | null  = $state(null)
     public universe_id:      string | null  = $state(null)
     public series_id:        string | null  = $state(null)
     public volume_number:    number | null  = $state(null)
     public title:            string | null  = $state(null)
-    public launch_date:      Date | null    = $state(null)
+    public launch_date:      string         = $state("")
     public word_count:       number | null  = $state(null)
     public blurb:            string | null  = $state(null)
     public notes:            string | null  = $state(null)
@@ -57,36 +54,57 @@ export class BookManagementStore
     public series_search:   string = $state("")
     public tag_search:      string = $state("")
     
-    public author_results:   AuthorResponse[]     = $derived(this.author_query.filter(this.authors, this.author_search))
-    public author_name:      string | null        = $derived(this.author_query.nameOf(this.authors, this.author_id))
-    public universe_results: UniverseResponse[]   = $derived(this.universe_query.filter(this.universes, this.universe_search))
-    public universe_name:    string | null        = $derived(this.universe_query.nameOf(this.universes, this.universe_id))
-    public series_results:   SeriesResponse[]     = $derived(this.series_query.filter(this.series, this.series_search))
-    public series_name:      string | null        = $derived(this.series_query.nameOf(this.series, this.series_id))
-    public default_cover_id: string | null        = $derived(this.cover_manager?.default_id ?? null)
-    public tag_results:      TagResponse[]        = $derived(this.tag_query.filter(this.tags, this.tag_search))
-    public tag_names:        string[]             = $derived(this.tag_ids.map(it => this.tag_query.nameOf(this.tags, it)).filter(it => it !== null))
-    public covers:           DisplayCover[]       = $derived(this.cover_manager?.covers ?? [])
-    public default_cover:    DisplayCover | null  = $derived(this.default_cover_id !== null ? this.covers.find(it => it.id === this.default_cover_id) ?? null : null)
-    public cover_count:      number               = $derived(this.covers.length)
-    public cover_message:    string               = $derived(`${this.cover_count == 1 ? "No other options" : `${this.cover_count - 1} other option${this.cover_count == 2 ? "" : "s"}`} available. Tap to configure`)
-    public editions:         DisplayEdition[]     = $derived(this.edition_manager?.editions ?? [])
-    public edition_types:    string[]             = $derived([...new Set(this.editions.map(it => it.format))])
-    public edition_count:    number               = $derived(this.editions.length)
-    public edition_message:  string               = $derived(`${this.edition_count === 1 ? "1 type" : `${this.edition_count} types`} available`)
+    public author_results:      { id: string, label: string}[] = $derived(this.author_query.filter(this.authors, this.author_search).map(it => ({ id: it.id, label: this.author_query.nameOf(it) })))
+    public author_create_label: string | undefined             = $derived(this.author_results.length === 0 ? this.getNameFromQuery() : undefined)
+    public author_name:         string | null                  = $derived(this.author_query.nameOfId(this.authors, this.author_id))
+    
+    public universe_results:      { id: string, label: string}[] = $derived(this.universe_query.filter(this.universes, this.universe_search).map(it => ({ id: it.id, label: it.name }) ))
+    public universe_create_label: string | undefined             = $derived(this.universe_results.length === 0 ? this.universe_search : undefined)
+    public universe_name:         string | null                  = $derived(this.universe_query.nameOfId(this.universes, this.universe_id))
+    
+    public series_results:      { id: string, label: string}[] = $derived(this.series_query.filter(this.series, this.series_search).map(it => ({ id: it.id, label: it.name }) ))
+    public series_create_label: string | undefined             = $derived(this.series_results.length === 0 ? this.series_search : undefined)
+    public series_name:         string | null                  = $derived(this.series_query.nameOf(this.series, this.series_id))
+
+    public other_volumes: { id: string, title: string, volume: number }[] = $derived(this.volumes.map(it => ({ id: it.id, title: it.title, volume: it.volume_number ?? 0 }) ))
+    public next_volume:   number                                          = $derived(Math.floor(Math.max(...this.other_volumes.map(it => it.volume), 0)) + 1)
+    
+    public editions_wc: { id: string, label: string, format: string, added_at: string }[] = $derived(this.editions.toSorted((a, b) => b.added_at.localeCompare(a.added_at)).map(it => ({ id: it.id, label: it.label ?? "Unknown", format: it.format, added_at: it.added_at }) ))
+
+    public tag_results:   TagResponse[]                  = $derived(this.tag_query.filter(this.tags, this.tag_search))
+    public tag_groups:    { id: string, name: string, tags: TagResponse[] }[] = $derived(this.groupTagsByCategory())
+    public selected_tags: { id: string, name: string, tags: TagResponse[] }[] = $derived(this.tag_groups.map(it => ({...it, tags: it.tags.filter(tag => this.tag_ids.includes(tag.id))})).filter(it => it.tags.length > 0) )
+    public should_create_tag: boolean = $derived(this.tag_results.length === 0)
 
     public is_new_book:          boolean | undefined = $derived(this.is_initialized ? this.book === null : undefined)
     public is_author_selected:   boolean             = $derived(!isNullOrUndefined(this.author_id))
     public is_universe_selected: boolean             = $derived(!isNullOrUndefined(this.universe_id))
+    public is_series_selected:   boolean             = $derived(!isNullOrUndefined(this.series_id))
     public has_notes:            boolean             = $derived(!isNullOrUndefined(this.notes))
     public has_blurb:            boolean             = $derived(!isNullOrUndefined(this.blurb))
-    public has_covers:           boolean             = $derived(this.covers.length > 0)
-    public has_editions:         boolean             = $derived(this.editions.length > 0)
 
+
+    private getNameFromQuery(): string | undefined
+    {
+        const name = this.author_query.splitName(this.author_search)
+        const target = this.authors.find(it => it.first_name === name.first_name && it.last_name === name.last_name)
+        
+        if (target)
+        {
+            return undefined
+        }
+
+        if (name.first_name)
+        {
+            return `${name.last_name}, ${name.first_name}`
+        }
+        
+        return name.last_name
+    }
 
     constructor(
         private logger: Logger,
-        private api: ApiClient,
+        private api: MockApi,
     ) 
     { }
 
@@ -97,7 +115,9 @@ export class BookManagementStore
 
         await Promise.all([
             this.fetchAuthors(), 
-            this.fetchTags()
+            this.fetchTags(),
+            this.fetchTagCategories(),
+            this.fetchEditions("book-1"),    // TODO: remove after testing
         ])
 
         if (book_id !== null)
@@ -109,7 +129,7 @@ export class BookManagementStore
             this.series_id = this.book.series_id
             this.volume_number = this.book.volume_number
             this.title = this.book.title
-            this.launch_date = this.book.launch_date ? new Date(this.book.launch_date) : null
+            this.launch_date = this.book.launch_date ?? ""
             this.word_count = this.book.word_count
             this.blurb = this.book.blurb
             this.notes = this.book.notes
@@ -118,20 +138,8 @@ export class BookManagementStore
             await Promise.all([
                 this.fetchUniverses(this.book.author_id),
                 this.fetchSeries(this.book.author_id, this.book.universe_id),
+                this.fetchEditions(book_id)
             ])
-
-            const persisted_covers = new PersistedCoverManager(book_id, this.api)
-            await persisted_covers.initialize()
-            this.cover_manager = persisted_covers
-
-            const persisted_editions = new PersistedEditionManager(book_id, this.api)
-            await persisted_editions.initialize()
-            this.edition_manager = persisted_editions
-        }
-        else
-        {
-            this.cover_manager = new DraftCoverManager()
-            this.edition_manager = new DraftEditionManager()
         }
 
         this.is_initialized = true
@@ -165,18 +173,6 @@ export class BookManagementStore
 
     private async createBook()
     {
-        if (!(this.cover_manager instanceof DraftCoverManager))
-        {
-            this.logger.error("createBook called without a DraftCoverManager")
-            return
-        }
-
-        if (!(this.edition_manager instanceof DraftEditionManager))
-        {
-            this.logger.error("createBook called without a DraftEditionManager")
-            return
-        }
-
         try
         {
             this.logger.debug("preparing the book create request")
@@ -193,10 +189,10 @@ export class BookManagementStore
                     blurb: this.blurb,
                     notes: this.notes,
                     tag_ids: this.tag_ids,
-                    default_cover_id: this.default_cover_id,
+                    default_cover_id: null,
                 }, 
-                this.cover_manager.getDrafts(), 
-                this.edition_manager.getDrafts()
+                [], 
+                []
             )
 
             await this.api.createBook(request)
@@ -216,12 +212,6 @@ export class BookManagementStore
 
     private async updateBook()
     {
-        if (!(this.cover_manager instanceof PersistedCoverManager))
-        {
-            this.logger.error("createBook called without a PersistedCoverManager")
-            return
-        }
-
         if (this.book === null)
         {
             this.logger.error("cannot update book if no original book was fetched")
@@ -231,13 +221,13 @@ export class BookManagementStore
         try
         {
             const tag_ids_changed = this.tag_ids.length !== this.book.tag_ids.length || !this.tag_ids.every(id => this.book!.tag_ids.includes(id))
-            const new_date_str = this.launch_date ? this.launch_date.toISOString().slice(0, 10) : null
+            const new_date_str = this.launch_date ? this.launch_date.slice(0, 10) : null
 
             const request: BookUpdateRequest = {
                 author_id: this.author_id !== this.book.author_id ? this.author_id! : undefined,
                 universe_id: this.universe_id !== this.book.universe_id ? this.universe_id : undefined,
                 series_id: this.series_id !== this.book.series_id ? this.series_id : undefined,
-                cover_id: this.default_cover_id !== this.book.cover_id ? this.default_cover_id : undefined,
+                cover_id: undefined,
                 volume_number: this.volume_number !== this.book.volume_number ? this.volume_number : undefined,
                 title: this.title !== this.book.title ? this.title! : undefined,
                 launch_date: new_date_str !== this.book.launch_date ? new_date_str : undefined,
@@ -309,15 +299,33 @@ export class BookManagementStore
     }
 
 
+    private async fetchBooksInSeries(series_id: string): Promise<void>
+    {
+        this.volumes = await this.api.getBooks(null, null, series_id, null)
+    }
+
+
     private async fetchTags(): Promise<void>
     {
         this.tags = await this.api.getTags()
     }
 
 
-    public async createAuthor(full_name: string): Promise<boolean>
+    private async fetchTagCategories(): Promise<void>
     {
-        const { first_name, last_name } = this.author_query.splitName(full_name)
+        this.tag_categories = await this.api.getTagCategories()
+    }
+
+    
+    private async fetchEditions(book_id: string): Promise<void>
+    {
+        this.editions = await this.api.getEditions(book_id)
+    }
+
+
+    public async createAuthor(): Promise<boolean>
+    {
+        const { first_name, last_name } = this.author_query.splitName(this.author_search)
 
         try
         {
@@ -345,11 +353,16 @@ export class BookManagementStore
     }
 
 
-    public async createUniverse(author_id: string, name: string): Promise<boolean>
+    public async createUniverse(): Promise<boolean>
     {
+        if (!this.author_id || !this.universe_query)
+        {
+            return false
+        }
+
         try
         {
-            const universe = await this.api.createUniverse({ name, author_id })
+            const universe = await this.api.createUniverse({ name: this.universe_search, author_id: this.author_id })
             
             this.logger.info(`created new universe`, universe)
 
@@ -381,11 +394,21 @@ export class BookManagementStore
     }
 
 
-    public async createSeries(name: string, author_id: string, universe_id: string | null, is_finished: boolean = false): Promise<boolean>
+    public async createSeriesFromSearch(): Promise<boolean>
     {
+        if (!this.author_id || !this.series_search)
+        {
+            return false
+        }
+
         try
         {
-            const series = await this.api.createSeries({ name, author_id, universe_id, is_finished })
+            const series = await this.api.createSeries({ 
+                name: this.series_search, 
+                author_id: this.author_id, 
+                universe_id: this.universe_id, 
+                is_finished: false,
+            })
             
             this.logger.info(`created new series`, series)
 
@@ -406,14 +429,24 @@ export class BookManagementStore
     public setSeriesId(id: string): void
     {
         this.series_id = id
+        this.fetchBooksInSeries(id)
     }
 
 
-    public async createTag(name: string, description: string | null): Promise<boolean>
+    public async createTag(): Promise<boolean>
     {
+        if (!this.tag_search.trim())
+        {
+            return false
+        }
+
         try
         {
-            const tag = await this.api.createTag({ name, description })
+            const tag = await this.api.createTag({ 
+                name: this.tag_search.trim(), 
+                description: null,
+                category_id: null,
+            })
             
             this.logger.info(`created new tag`, tag)
 
@@ -444,44 +477,25 @@ export class BookManagementStore
     }
 
 
-    public addCover(file: File): void
+    private groupTagsByCategory()
     {
-        this.cover_manager?.addCover(file)
-    }
+        const categories = new Set(this.tag_categories.map(it => it.id))
 
+        // tags with no category, or a category that no longer exists, go to the fallback group
+        const by_category = Map.groupBy(
+            this.tag_results,
+            tag => tag.category_id && categories.has(tag.category_id) ? tag.category_id : null
+        )
 
-    public removeCover(id: string): void
-    {
-        this.cover_manager?.removeCover(id)
-    }
+        const groups = this.tag_categories.map(category => ({
+            id:   category.id,
+            name: category.name,
+            tags: by_category.get(category.id) ?? [],
+        }))
 
+        groups.push({ id: "uncategorized", name: "", tags: by_category.get(null) ?? [] })
+        groups.sort((a, b) => a.name.localeCompare(b.name))
 
-    public setCoverLabel(id: string, label: string): void
-    {
-        this.cover_manager?.setCoverLabel(id, label)
-    }
-
-
-    public setDefaultCoverId(id: string): void
-    {
-        this.cover_manager?.setDefaultCoverId(id)
-    }
-
-
-    public addEdition(file: File): void
-    {
-        this.edition_manager?.addEdition(file)
-    }
-
-
-    public removeEdition(id: string): void
-    {
-        this.edition_manager?.removeEdition(id)
-    }
-
-
-    public setEditionLabel(id: string, label: string): void
-    {
-        this.edition_manager?.setEditionLabel(id, label)
+        return groups.filter(group => group.tags.length > 0)
     }
 }

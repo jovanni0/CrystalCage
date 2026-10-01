@@ -71,7 +71,7 @@
 
         &:has(input:focus-visible)
         {
-            border: 2px solid var(--text-brand-secondary-muted);
+            border: 2px solid var(--text-brand);
             margin: 0px;
         }
     }

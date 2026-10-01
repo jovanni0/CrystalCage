@@ -6,14 +6,14 @@
 
     let {
         key,
-        value,
+        label,
         disabled_message,
         is_required = false,
         onclick,
         ...rest
     }: HTMLButtonAttributes & {
         key:          string
-        value:        string
+        label:        string
         disabled_message?: string
         is_required?: boolean
     } = $props()
@@ -27,6 +27,7 @@
 
 <button
     onclick = { onclick }
+    disabled = { disabled_message !== "" && disabled_message !== undefined }
     { ...rest }
 >
     <p class = "key">
@@ -39,7 +40,7 @@
 
     {#if !disabled_message}
         <value-wrapper>
-            <p>{ value }</p>
+            <p>{ label }</p>
             <ChevronRight />
         </value-wrapper>
     {:else}
@@ -62,6 +63,11 @@
         padding: 12px 0 12px 8px;
 
         border-bottom: 1px solid var(--text-placeholder);
+
+        &:disabled
+        {
+            cursor: auto;
+        }
     }
 
     span.required

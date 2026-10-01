@@ -12,12 +12,14 @@
         header,
         footer,
         lock_to_fit = false,
+        class: className
     }: {
         is_open?:     boolean
         children?:    Snippet   // scrolling content
         header?:      Snippet   // fixed above the scrolling content (e.g. a search field)
         footer?:      Snippet   // fixed below the scrolling content (e.g. the action button)
         lock_to_fit?: boolean
+        class?:       string
     } = $props()
 
 
@@ -441,7 +443,7 @@
         {/if}
 
         <div
-            class="body"
+            class = {[ "body", className ]}
             class:scrollable  = { body_overflows }
             bind:clientHeight = { body_height }
         >
@@ -561,6 +563,7 @@
     .body
     {
         flex: 1;
+        align-self: stretch;
         min-height: 0;
         overflow-y: auto;
         overscroll-behavior: contain;
@@ -575,6 +578,7 @@
     {
         display: flex;
         flex-direction: column;
+        align-self: stretch;
     }
 
     .footer

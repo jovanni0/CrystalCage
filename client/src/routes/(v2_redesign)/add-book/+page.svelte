@@ -1,5 +1,5 @@
 <script lang="ts">
-    import ExternalCategoryListItem from "@v2/lib/components/list-items/external-category-list-item.svelte";
+    import ExternalCategoryListItem from "@v2/lib/components/list-items/category-button-list-item.svelte";
     import DateListItem             from "@v2/lib/components/list-items/date-list-item.svelte";
     import ExternalPickerListItem   from "@v2/lib/components/list-items/external-picker-list-item.svelte";
     import CategoryListItem         from "@v2/lib/components/list-items/category-list-item.svelte";
@@ -9,28 +9,62 @@
     import IconButton               from "@v2/lib/components/buttons/icon-button.svelte";
     import Ex                       from "@v2/lib/components/icons/ex.svelte";
     import Button                   from "@v2/lib/components/buttons/button.svelte";
-    import SelectAuthorSheet        from "@v2/lib/elements/select-author-sheet.svelte";
+    import SelectAuthorSheet        from "@v2/lib/elements/select-or-create-from-searchable-list-sheet.svelte";
+    import { CreateBookStore }      from "@v2/lib/stores/book-management.store.svelte";
+    import { goBack } from "@root/utils/go-back.js";
+    import SelectOrCreateFromSearchableListSheet from "@v2/lib/elements/select-or-create-from-searchable-list-sheet.svelte";
+    import SelectVolumeNumberSheet from "@v2/lib/elements/select-volume-number-sheet.svelte";
+    import SetWordCountSheet from "@v2/lib/elements/set-word-count-sheet.svelte";
+    import SelectOrCreateTagsSheet from "@v2/lib/elements/select-or-create-tags-sheet.svelte";
+    import GenericPill from "@v2/lib/components/_other/generic-pill.svelte";
+    import CategoryLinkListItem from "@v2/lib/components/list-items/category-link-list-item.svelte";
+    import { marked } from "marked";
+    import TopbarCancelAction from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
 
 
-    let author = $state("")
-    let author_sheet = $state(true)
+    let { data } = $props()
+    const { 
+        book_store,
+        id
+    } : { 
+        book_store: CreateBookStore
+        id:         string | null 
+    } = $derived(data)
 
-    let universe = $state("")
-    let universe_sheet = $state(false)
-
-    let series = $state("")
-    let series_sheet = $state(false)
-
-    let volume = $state("")
-    let volume_sheet = $state(false)
-
-    let word_count = $state("")
+    let author_sheet     = $state(false)
+    let universe_sheet   = $state(false)
+    let series_sheet     = $state(false)
+    let volume_sheet     = $state(false)
     let word_count_sheet = $state(false)
+    let tags_sheet       = $state(false)
 
-    let release_date = $state("")
-    let tags: string[] = $state([])
-    let blurb = $state("")
-    let thoughts = $state("")
+    let error_message = $state<string|null>(null)
+    const current_path = $derived(`/manage-book${id ? `/${id}` : ""}`)
+
+    async function save()
+    {
+        const result = await book_store.save()
+
+        if (result)
+        {
+            goBack()
+        }
+
+        error_message = "An error occurred while trying to save the book"
+    }
+
+
+    async function deleteBook()
+    {
+        const is_deleted = await book_store.deleteBook()
+
+        if (is_deleted)
+        {
+            goBack()
+        }
+
+        error_message = "An error occurred while trying to delete the book"
+    }
 </script>
 
 
@@ -41,25 +75,7 @@
 
 <Page class = "page-content">
     {#snippet topbar()}
-        <tb-cancel-action>
-            <IconButton 
-                shape = "square"
-
-                label = "back"
-                onclick = { () => {} }
-            >
-                <Ex />
-            </IconButton>
-
-            <p>New Book</p>
-
-            <Button
-                size = "slim"
-                onclick = { () => {} }
-            >
-                Save
-            </Button>
-        </tb-cancel-action>
+        <TopbarCancelAction title = "Add Book" />
     {/snippet}
 
 
@@ -71,30 +87,30 @@
         <list>
             <ExternalPickerListItem 
                 key = "Author"
-                value = { author }
+                label = { book_store.author_name ?? "" }
                 is_required = { true }
                 onclick = { () => author_sheet = true }
             />
 
             <ExternalPickerListItem 
                 key = "Universe"
-                value = { universe }
-                disabled_message = { !author ? "Needs author" : undefined }
+                label = { book_store.universe_name ?? "" }
+                disabled_message = { !book_store.is_author_selected ? "Needs author" : undefined }
                 onclick = { () => universe_sheet = true }
             />
 
             <ExternalPickerListItem 
                 key = "Series"
-                value = { series }
-                disabled_message = { !author ? "Needs author" : undefined }
+                label = { book_store.series_name ?? "" }
+                disabled_message = { !book_store.is_author_selected ? "Needs author" : undefined }
                 onclick = { () => series_sheet = true }
             />
 
             <ExternalPickerListItem 
                 key = "Volume"
-                value = { volume }
-                disabled_message = { !series ? "Needs series" : undefined }
-                is_required = { series ? true : false }
+                label = { book_store.volume_number?.toString() ?? "" }
+                disabled_message = { !book_store.is_series_selected ? "Needs series" : undefined }
+                is_required = { book_store.is_series_selected ? true : false }
                 onclick = { () => volume_sheet = true }
             />
         </list>
@@ -107,54 +123,123 @@
         <list>
             <ExternalPickerListItem 
                 key = "Word count"
-                value = { word_count }
+                label = { book_store.word_count ? `~ ${book_store.word_count.toString()} K` : "" }
                 onclick = { () => word_count_sheet = true }
             />
 
             <DateListItem 
                 key = "Release date"
-                bind:ISO_date = { release_date }
+                bind:ISO_date = { book_store.launch_date }
             />
         </list>
     </CategoryListItem>
 
 
     <ExternalCategoryListItem
-        title = "tags"
+        title   = "tags"
+        onclick = { () => tags_sheet = true }
     >
-        {#if tags.length === 0}
-            <p class = "category-text-content">No tags yet. Choose from your list or create a new one.</p>
+        {#if book_store.selected_tags.length === 0}
+            <p class = "category-placeholder-text">No tags yet. Choose from your list or create a new one.</p>
         {:else}
-            <list>
-            </list>
+            <tags-list>
+                {#each book_store.selected_tags as category (category.id)}
+                    {#each category.tags as tag (tag.id)}
+                        <GenericPill 
+                            label = { tag.name }
+                        />
+                    {/each}
+                {/each}
+            </tags-list>
         {/if}
     </ExternalCategoryListItem> 
 
 
-    <ExternalCategoryListItem
+    <CategoryLinkListItem
         title = "blurb"
+        href  = "/add-book/blurb"
     >
-        <p class = "category-text-content">
-            { blurb ? blurb : "No blurb yet. Add a summary to describe what this book is about." }
-        </p>
-    </ExternalCategoryListItem> 
+        {#if book_store.blurb}
+            {@html marked(book_store.blurb)}
+        {:else}
+            <p class = "category-placeholder-text">No blurb yet. Add a summary to describe what this book is about.</p>
+        {/if}
+    </CategoryLinkListItem> 
 
 
-    <ExternalCategoryListItem
+    <CategoryLinkListItem
         title = "thoughts"
+        href  = "/add-book/thoughts"
     >
-        <p class = "category-text-content">
-            { thoughts ? thoughts : "No thoughts yet. Tap to write whatever you'd like." }
-        </p>
-    </ExternalCategoryListItem>
+        {#if book_store.notes}
+            {@html marked(book_store.notes)}
+        {:else}
+            <p class = "category-placeholder-text">No thoughts yet. Tap to write whatever you'd like.</p>
+        {/if}
+    </CategoryLinkListItem>
 
 
     {#snippet sheets()}
-        <SelectAuthorSheet bind:is_open = { author_sheet} />
-        <BottomSheet bind:is_open = { universe_sheet }></BottomSheet>
-        <BottomSheet bind:is_open = { series_sheet }></BottomSheet>
-        <BottomSheet bind:is_open = { volume_sheet }></BottomSheet>
-        <BottomSheet bind:is_open = { word_count_sheet }></BottomSheet>
+        <SelectOrCreateFromSearchableListSheet 
+            bind:is_open      = { author_sheet} 
+            bind:search       = { book_store.author_search }
+            bind:selected_id  = { () => book_store.author_id ?? "", 
+                                  (value: string) => { book_store.setAuthorId(value); author_sheet = false } }
+            search_placeholder = "Type a name to search or add"
+            items             = { book_store.author_results }
+            create_label      = { book_store.author_create_label }
+            button_label      = "Set author"
+            onCreate          = { () => book_store.createAuthor() }
+        />
+
+        <SelectOrCreateFromSearchableListSheet 
+            bind:is_open     = { universe_sheet } 
+            bind:search      = { book_store.universe_search }
+            items            = { book_store.universe_results }
+            bind:selected_id = { () => book_store.universe_id ?? "", 
+                                 (value: string) => { book_store.setUniverseId(value); universe_sheet = false } }
+            search_placeholder = "Type a universe to search or add"
+            create_label     = { book_store.universe_create_label }
+            button_label     = "Set universe"
+            onCreate         = { () => book_store.createUniverse() }
+        />
+
+        <SelectOrCreateFromSearchableListSheet 
+            bind:is_open     = { series_sheet } 
+            bind:search      = { book_store.series_search }
+            items            = { book_store.series_results }
+            bind:selected_id = { () => book_store.series_id ?? "", 
+                                 (value: string) => { book_store.setSeriesId(value); series_sheet = false } }
+            search_placeholder = "Type a series to search or add"
+            create_label     = { book_store.series_create_label }
+            button_label     = "Set series"
+            onCreate         = { () => book_store.createSeriesFromSearch() }
+        />
+        
+        <SelectVolumeNumberSheet 
+            bind:is_open = { volume_sheet }
+            bind:volume  = { book_store.volume_number }
+            volumes      = { book_store.other_volumes }
+            next_volume  = { book_store.next_volume }
+        />
+
+        <SetWordCountSheet 
+            bind:is_open   = { word_count_sheet }
+            bind:value     = { book_store.word_count }
+            slider_min     = { 0 }
+            slider_max     = { 300 }
+            wpp_coeficient = { 0.3 }
+            editions       = { book_store.editions_wc }
+        />
+
+        <SelectOrCreateTagsSheet 
+            bind:is_open      = { tags_sheet }
+            bind:search       = { book_store.tag_search }
+            bind:selected_ids = { book_store.tag_ids }
+            tag_groups        = { book_store.tag_groups }
+            show_create       = { book_store.should_create_tag }
+            onCreate          = { () => book_store.createTag() }
+        />
     {/snippet}
 </Page>
 
@@ -186,29 +271,18 @@
         flex-direction: column;
     }
 
-    .category-text-content
+    tags-list
+    {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .category-placeholder-text
     {
         padding: 0 8px 0 8px;
         color: var(--text-muted);
         text-justify: distribute;
-    }
-
-    tb-cancel-action
-    {
-        position: relative;
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        padding: 8px 16px;
-
-        & > p
-        {
-            font-size: var(--text-heading-sm);
-            font-weight: 500;
-            position: absolute;
-            inset: 50% 50% auto auto;
-            transform: translate(50%, -50%);
-        }
     }
 </style>

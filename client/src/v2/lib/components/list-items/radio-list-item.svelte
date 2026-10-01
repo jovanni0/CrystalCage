@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { generateEphemeralId } from "@root/utils/IdGenerator";
     import Radiobox from "../boxes/radiobox.svelte";
 
 
@@ -14,7 +15,7 @@
     } = $props()
 
 
-    let radio_id = Math.random().toString(36).slice(2, 10)
+    let radio_id = generateEphemeralId()
 </script>
 
 
@@ -43,7 +44,7 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        padding: 12px 8px;
+        padding: 16px 8px;
         border-bottom: 1px solid var(--text-placeholder);
         cursor: pointer;
 

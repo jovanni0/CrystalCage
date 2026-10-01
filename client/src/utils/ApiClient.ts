@@ -29,6 +29,7 @@ import type { EditionCreateRequest }           from "@root/dtos/EditionCreateReq
 import type { EditionUpdateRequest }           from "@root/dtos/EditionUpdateRequest";
 import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreateRequest";
 import type { InviteCreateResponse }           from "@root/dtos/InviteCreateResponse";
+import type { APIClient }                      from "@root/v2/lib/clients/api-client.interface";
 import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
 import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
 import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
@@ -39,7 +40,7 @@ import      { ApiError }                       from "@root/errors/ApiError";
 
 
 
-export class ApiClient
+export class ApiClient implements APIClient
 {
     private getAuthContext: (() => AuthContext | null) | null = null
     private onUnauthorized: (() => void) | null = null

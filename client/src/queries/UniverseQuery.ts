@@ -17,7 +17,7 @@ export class UniverseQuery
     }
 
 
-    public nameOf(universes: UniverseResponse[], id: string | null): string | null
+    public nameOfId(universes: UniverseResponse[], id: string | null): string | null
     {
         if (!id)
         {
