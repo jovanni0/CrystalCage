@@ -35,7 +35,7 @@
     let tags_sheet       = $state(false)
 
     let error_message = $state<string|null>(null)
-    const current_path = $derived(`/manage-book${id ? `/${id}` : ""}`)
+    const current_path = $derived(`/add-book${id ? `/${id}` : ""}`)
 
     const rendered_thoughts:  string = $derived(book_store.thoughts ? renderMarkdown(book_store.thoughts) : "")
     const rendered_blurb:     string = $derived(book_store.blurb ? renderMarkdown(book_store.blurb) : "")
@@ -80,8 +80,10 @@
 <Page class = "page-content">
     {#snippet topbar()}
         <TopbarCancelAction 
-            title = "Add Book" 
+            title              = "Add Book" 
             is_action_disabled = { !book_store.can_submit }
+            onCancel           = { goBack }
+            onAction           = { save }
         />
     {/snippet}
 

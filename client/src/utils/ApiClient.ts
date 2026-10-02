@@ -30,6 +30,7 @@ import type { EditionUpdateRequest }           from "@root/dtos/EditionUpdateReq
 import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreateRequest";
 import type { InviteCreateResponse }           from "@root/dtos/InviteCreateResponse";
 import type { APIClient }                      from "@root/v2/lib/clients/api-client.interface";
+import type { TagCategoryResponse }            from "@v2/lib/dtos/tag-category.dto";
 import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
 import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
 import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
@@ -667,6 +668,19 @@ export class ApiClient implements APIClient
     {
         const response = await this.request(
             `/auth/invite-code`,
+            {
+                method: "POST",
+            }
+        )
+
+        return response.json()
+    }
+
+
+    public async getTagCategories(): Promise<TagCategoryResponse[]>
+    {
+        const response = await this.request(
+            `/tags/categories`,
             {
                 method: "POST",
             }

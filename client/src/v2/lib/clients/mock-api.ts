@@ -15,11 +15,10 @@ import type { EditionCreateRequest } from "@root/dtos/EditionCreateRequest";
 import type { EditionUpdateRequest } from "@root/dtos/EditionUpdateRequest";
 import type { TagCreateRequest, TagResponse } from "../dtos/tag.dto";
 import type { TagCategoryResponse } from "../dtos/tag-category.dto";
-import type { ApiClientV2 } from "./api-client-v2.interface";
 
 
 
-export class MockApi implements APIClient, ApiClientV2
+export class MockApi implements APIClient
 {
     private AUTHORS = [
         { id: "author-1", first_name: "Morton" , last_name: "Bird" },

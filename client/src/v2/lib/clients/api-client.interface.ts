@@ -15,6 +15,7 @@ import type { TagDetailResponse } from "@root/dtos/TagDetailResponse";
 import type { TagResponse } from "@root/dtos/TagResponse";
 import type { UniverseCreateRequest } from "@root/dtos/UniverseCreateRequest";
 import type { UniverseResponse } from "@root/dtos/UniverseResponse";
+import type { TagCategoryResponse } from "../dtos/tag-category.dto";
 
 
 
@@ -34,6 +35,7 @@ export interface APIClient
     getTags():                            Promise<TagResponse[]>
     // getTagById(id: string):               Promise<TagDetailResponse>
     createTag(request: TagCreateRequest): Promise<TagResponse>
+    getTagCategories(): Promise<TagCategoryResponse[]>
 
     getBook(id: string): Promise<BookDetailResponse>
     getBooks(author_id: string | null, universe_id: string | null,series_id: string | null, tag_id: string | null): Promise<BookSummaryResponse[]>

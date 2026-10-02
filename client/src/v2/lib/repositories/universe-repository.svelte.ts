@@ -1,43 +1,24 @@
+import type { APIClient }             from "../clients/api-client.interface"
+import type { AsyncResult }           from "../utils/result"
 import type { UniverseCreateRequest } from "@root/dtos/UniverseCreateRequest"
-import type { UniverseResponse } from "@root/dtos/UniverseResponse"
-import type { Logger } from "@root/loggers/Logger"
-import { attempt, type AsyncResult } from "../utils/result"
-import type { APIClient } from "../clients/api-client.interface"
+import type { UniverseResponse }      from "@root/dtos/UniverseResponse"
+import type { Logger }                from "@root/loggers/Logger"
+import      { attempt }               from "../utils/result"
+import      { ListCache }             from "./_list-cache.svelte"
 
 
 
-export class UniverseRepository
+export class UniverseRepository extends ListCache<UniverseResponse>
 {
-    private loaded_at: number = 0
-
-    public all: UniverseResponse[] = $state([])
-
-
-    constructor(
-        private api: APIClient, 
-        private logger: Logger
-    ) {}
-
-
-    public async load(max_age_ms = 60_000)
+    constructor(private api: APIClient, logger: Logger) 
     {
-        if (Date.now() - this.loaded_at < max_age_ms) return
-
-        this.all = await this.api.getUniverses(null)
-        this.loaded_at = Date.now()
+        super(logger, "universes")
     }
 
 
-    public invalidate() 
-    { 
-        this.loaded_at = 0 
-    }
-    
-
-    public reset()
-    { 
-        this.all = []
-        this.loaded_at = 0 
+    protected fetchAll(): Promise<UniverseResponse[]> 
+    {
+        return this.api.getUniverses(null)
     }
 
 
@@ -47,7 +28,7 @@ export class UniverseRepository
         {
             const universe = await this.api.createUniverse(request)
 
-            this.all.push(universe)
+            this.add(universe)
             
             return universe
         })

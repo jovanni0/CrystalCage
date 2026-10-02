@@ -26,9 +26,10 @@ export const edition_format_color_registry = new EditionFormatColorRegistry()
 
 
 // repositories
-export const author_repository = new AuthorRepository(mock_api, logger)
-export const universe_repository = new UniverseRepository(mock_api, logger)
-export const series_repository = new SeriesRepository(mock_api, logger)
-export const tag_repository = new TagRepository(mock_api, logger)
-export const edition_repository = new EditionRepository(mock_api, logger)
-export const book_repository = new BookRepository(mock_api, logger)
+const repo_api = api_client
+export const author_repository = new AuthorRepository(repo_api, logger)
+export const universe_repository = new UniverseRepository(repo_api, logger)
+export const series_repository = new SeriesRepository(repo_api, logger)
+export const tag_repository = new TagRepository(repo_api, logger)
+export const edition_repository = new EditionRepository(repo_api, logger)
+export const book_repository = new BookRepository(repo_api, logger)

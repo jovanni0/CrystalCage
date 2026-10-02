@@ -17,7 +17,7 @@
 
         <Button 
             text="Add book" 
-            href="/manage-book"
+            href="/add-book"
         />
 
     {:else if library_store.view === "GALLERY"}

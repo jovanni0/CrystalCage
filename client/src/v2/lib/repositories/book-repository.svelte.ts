@@ -1,42 +1,26 @@
-import type { BookCreateRequest } from "@root/dtos/BookCreateRequest"
+import type { APIClient }           from "../clients/api-client.interface"
+import type { AsyncResult }         from "../utils/result"
+import type { BookCreateRequest }   from "@root/dtos/BookCreateRequest"
+import type { BookDetailResponse }  from "@root/dtos/BookDetailResponse"
 import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
-import { attempt, type AsyncResult } from "../utils/result"
-import type { Logger } from "@root/loggers/Logger"
-import type { BookUpdateRequest } from "@root/dtos/BookUpdateRequest"
-import type { APIClient } from "../clients/api-client.interface"
+import type { BookUpdateRequest }   from "@root/dtos/BookUpdateRequest"
+import type { Logger }              from "@root/loggers/Logger"
+import      { attempt }             from "../utils/result"
+import      { ListCache }           from "./_list-cache.svelte"
 
 
 
-export class BookRepository
+export class BookRepository extends ListCache<BookSummaryResponse>
 {
-    private loaded_at: number = 0
-
-    public all: BookSummaryResponse[] = $state([])
-
-
-    constructor(private api: APIClient, private logger: Logger) 
-    {}
-
-
-    public async load(max_age_ms = 60_000)
+    constructor(private api: APIClient, logger: Logger) 
     {
-        if (Date.now() - this.loaded_at < max_age_ms) return
-
-        this.all = await this.api.getBooks(null, null, null, null)
-        this.loaded_at = Date.now()
+        super(logger, "books")
     }
 
 
-    public invalidate() 
-    { 
-        this.loaded_at = 0 
-    }
-    
-
-    public reset()
-    { 
-        this.all = []
-        this.loaded_at = 0 
+    protected fetchAll(): Promise<BookSummaryResponse[]> 
+    {
+        return this.api.getBooks(null, null, null, null)
     }
 
 
@@ -46,7 +30,7 @@ export class BookRepository
         {
             const book_summary = await this.api.createBook(request)
             
-            this.all.push(book_summary)
+            this.add(book_summary)
             
             return book_summary
         })
@@ -59,8 +43,7 @@ export class BookRepository
         {
             const book_summary = await this.api.updateBook(id, request)
 
-            this.all = this.all.filter(it => it.id !== id)
-            this.all.push(book_summary)
+            this.replace(book_summary)
 
             return book_summary
         })
@@ -73,9 +56,20 @@ export class BookRepository
         {
             await this.api.deleteBook(id)
 
-            this.all = this.all.filter(it => it.id !== id)
+            this.remove(id)
 
             return true
+        })
+    }
+
+
+    public async details(id: string): AsyncResult<BookDetailResponse>
+    {
+        return attempt(this.logger, "book details", async () =>
+        {
+            const book_details = await this.api.getBook(id)
+
+            return book_details
         })
     }
 }

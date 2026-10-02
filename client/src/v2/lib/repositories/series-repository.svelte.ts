@@ -1,43 +1,24 @@
+import type { APIClient }           from "../clients/api-client.interface"
+import type { AsyncResult }         from "../utils/result"
+import type { Logger }              from "@root/loggers/Logger"
 import type { SeriesCreateRequest } from "@root/dtos/SeriesCreateRequest"
-import type { SeriesResponse } from "@root/dtos/SeriesResponse"
-import type { Logger } from "@root/loggers/Logger"
-import { attempt, type AsyncResult } from "../utils/result"
-import type { APIClient } from "../clients/api-client.interface"
+import type { SeriesResponse }      from "@root/dtos/SeriesResponse"
+import      { attempt }             from "../utils/result"
+import      { ListCache }           from "./_list-cache.svelte"
 
 
 
-export class SeriesRepository
+export class SeriesRepository extends ListCache<SeriesResponse>
 {
-    private loaded_at: number = 0
-
-    public all: SeriesResponse[] = $state([])
-
-
-    constructor(
-        private api: APIClient, 
-        private logger: Logger
-    ) {}
-
-
-    public async load(max_age_ms = 60_000)
+    constructor(private api: APIClient, logger: Logger) 
     {
-        if (Date.now() - this.loaded_at < max_age_ms) return
-
-        this.all = await this.api.getSeries(null, null)
-        this.loaded_at = Date.now()
+        super(logger, "series")
     }
 
 
-    public invalidate() 
-    { 
-        this.loaded_at = 0 
-    }
-    
-
-    public reset()
-    { 
-        this.all = []
-        this.loaded_at = 0 
+    protected fetchAll(): Promise<SeriesResponse[]> 
+    {
+        return this.api.getSeries(null, null)
     }
 
 
@@ -47,7 +28,7 @@ export class SeriesRepository
         {
             const series = await this.api.createSeries(request)
 
-            this.all.push(series)
+            this.add(series)
             
             return series
         })

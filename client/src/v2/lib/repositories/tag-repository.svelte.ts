@@ -1,46 +1,65 @@
-import type { TagCreateRequest } from "@root/dtos/TagCreateRequest"
-import type { Logger } from "@root/loggers/Logger"
-import { attempt, type AsyncResult } from "../utils/result"
-import type { TagResponse } from "../dtos/tag.dto"
+import type { Logger }              from "@root/loggers/Logger"
+import type { AsyncResult }         from "../utils/result"
+import type { APIClient }           from "../clients/api-client.interface"
 import type { TagCategoryResponse } from "../dtos/tag-category.dto"
-import type { APIClient } from "../clients/api-client.interface"
+import type { TagCreateRequest, 
+              TagResponse }         from "../dtos/tag.dto"
+import      { attempt }             from "../utils/result"
+import      { ListCache }           from "./_list-cache.svelte"
 
 
 
-export class TagRepository
+class TagCategoryCache extends ListCache<TagCategoryResponse>
 {
-    private loaded_at: number = 0
-
-    public all:        TagResponse[]         = $state([])
-    public categories: TagCategoryResponse[] = $state([])
-
-
-    constructor(
-        private api: APIClient, 
-        private logger: Logger
-    ) {}
+    constructor(private api: APIClient, logger: Logger) 
+    { 
+        super(logger, "tag categories") 
+    }
 
 
-    public async load(max_age_ms = 60_000)
+    protected fetchAll(): Promise<TagCategoryResponse[]>
+    { 
+        // return this.api.getTagCategories() 
+        return Promise.resolve([])
+    }
+}
+
+
+
+export class TagRepository extends ListCache<TagResponse>
+{
+    public readonly categories: TagCategoryCache
+
+
+    constructor(private api: APIClient, logger: Logger)
     {
-        if (Date.now() - this.loaded_at < max_age_ms) return
+        super(logger, "tags")
 
-        // this.all = await this.api.getTags()
-        // this.categories = await this.api.getTagCategories()
-        this.loaded_at = Date.now()
+        this.categories = new TagCategoryCache(api, logger)
     }
 
 
-    public invalidate() 
+    protected fetchAll(): Promise<TagResponse[]> 
     { 
-        this.loaded_at = 0 
+        return this.api.getTags() 
     }
+
     
+    public override async load(max_age_ms = 60_000): AsyncResult<TagResponse[]>
+    {
+        const [tags, categories] = await Promise.all([
+            super.load(max_age_ms), 
+            this.categories.load(max_age_ms)
+        ])
 
-    public reset()
-    { 
-        this.all = []
-        this.loaded_at = 0 
+        return categories.ok ? tags : categories
+    }
+
+
+    public override reset()
+    {
+        super.reset()
+        this.categories.reset()
     }
 
 
@@ -51,7 +70,7 @@ export class TagRepository
             const tag = await this.api.createTag(request)
             const amended_tag = { ...tag, category_id: null }
 
-            this.all.push(amended_tag)
+            this.add(amended_tag)
             
             return amended_tag
         })

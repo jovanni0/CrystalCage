@@ -1,43 +1,24 @@
 import type { AuthorCreateRequest } from "@root/dtos/AuthorCreateRequest"
-import type { AuthorResponse } from "@root/dtos/AuthorResponse"
-import type { Logger } from "@root/loggers/Logger"
-import      { attempt, type AsyncResult } from "../utils/result"
-import type { APIClient } from "../clients/api-client.interface"
+import type { AuthorResponse }      from "@root/dtos/AuthorResponse"
+import type { Logger }              from "@root/loggers/Logger"
+import type { APIClient }           from "../clients/api-client.interface"
+import type { AsyncResult }         from "../utils/result"
+import      { attempt, }            from "../utils/result"
+import      { ListCache }           from "./_list-cache.svelte"
 
 
 
-export class AuthorRepository
+export class AuthorRepository extends ListCache<AuthorResponse>
 {
-    private loaded_at: number = 0
-
-    public all: AuthorResponse[] = $state([])
-
-
-    constructor(
-        private api: APIClient, 
-        private logger: Logger
-    ) {}
-
-
-    public async load(max_age_ms = 60_000)
+    constructor(private api: APIClient, logger: Logger) 
     {
-        if (Date.now() - this.loaded_at < max_age_ms) return
-
-        this.all = await this.api.getAuthors()
-        this.loaded_at = Date.now()
+        super(logger, "authors")
     }
 
 
-    public invalidate() 
-    { 
-        this.loaded_at = 0 
-    }
-    
-
-    public reset()
-    { 
-        this.all = []
-        this.loaded_at = 0 
+    protected fetchAll(): Promise<AuthorResponse[]> 
+    {
+        return this.api.getAuthors()
     }
 
 
@@ -47,7 +28,7 @@ export class AuthorRepository
         {
             const author = await this.api.createAuthor(request)
             
-            this.all.push(author)
+            this.add(author)
             
             return author
         })

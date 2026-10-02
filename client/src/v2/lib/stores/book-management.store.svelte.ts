@@ -53,20 +53,20 @@ export class CreateBookStore
     public universe_create_label: string | undefined             = $derived(UniverseRules.getCreatableUniverse(this.universe_search, this.universe_options))
     public universe_name:         string | null                  = $derived(UniverseRules.nameOfId(this.universe_options, this.universe_id))
     
-    public series_options:      SeriesResponse[]               = $derived(series_repository.all.filter(it => it.author_id === this.author_id && it.universe_id === this.universe_id))
+    public series_options:      SeriesResponse[]               = $derived(series_repository.all.filter(it => it.author_id === this.author_id && (this.universe_id === null || it.universe_id === this.universe_id)))
     public series_results:      { id: string, label: string}[] = $derived(SeriesRules.filterByQuery(this.series_options, this.series_search).map(it => ({ id: it.id, label: it.name }) ))
     public series_create_label: string | undefined             = $derived(SeriesRules.getCreatableSeries(this.series_search, this.series_options))
     public series_name:         string | null                  = $derived(SeriesRules.nameOf(this.series_options, this.series_id))
 
-    public other_volumes: { id: string, title: string, volume: number }[] = $derived(book_repository.all.map(it => ({ id: it.id, title: it.title, volume: it.volume_number ?? 0 }) ))
+    public other_volumes: { id: string, title: string, volume: number }[] = $derived(book_repository.all.filter(it => it.series_id === this.series_id && it.id !== this.book?.id).map(it => ({ id: it.id, title: it.title, volume: it.volume_number ?? 0 }) ))
     public next_volume:   number                                          = $derived(Math.floor(Math.max(...this.other_volumes.map(it => it.volume), 0)) + 1)
     
-    public edition_options: EditionResponse[] = $derived(this.book ? edition_repository.forBook(this.book.id) : [])
+    public edition_options: EditionResponse[] = $derived(this.book ? edition_repository.get(this.book.id) : [])
     public editions_wc: { id: string, label: string, format: string, added_at: string }[] = $derived(this.edition_options.toSorted((a, b) => b.added_at.localeCompare(a.added_at)).map(it => ({ id: it.id, label: it.label ?? "Unknown", format: it.format, added_at: it.added_at }) ))
 
     public tag_results:   TagResponse[]                                       = $derived(TagRules.filterByQuery(tag_repository.all, this.tag_search))
-    public tag_groups:    { id: string, name: string, tags: TagResponse[] }[] = $derived(TagRules.groupTags(this.tag_results, tag_repository.categories))
-    public selected_tags: { id: string, name: string, tags: TagResponse[] }[] = $derived(TagRules.groupTags(tag_repository.all.filter(t => this.tag_ids.includes(t.id)), tag_repository.categories))
+    public tag_groups:    { id: string, name: string, tags: TagResponse[] }[] = $derived(TagRules.groupTags(this.tag_results, tag_repository.categories.all))
+    public selected_tags: { id: string, name: string, tags: TagResponse[] }[] = $derived(TagRules.groupTags(tag_repository.all.filter(t => this.tag_ids.includes(t.id)), tag_repository.categories.all))
     public should_create_tag: boolean = $derived(this.tag_search !== "" && this.tag_results.length === 0)
 
     public is_author_selected:   boolean = $derived(!isNullOrUndefined(this.author_id))
@@ -74,7 +74,7 @@ export class CreateBookStore
     public is_series_selected:   boolean = $derived(!isNullOrUndefined(this.series_id))
     public has_notes:            boolean = $derived(!isNullOrUndefined(this.thoughts))
     public has_blurb:            boolean = $derived(!isNullOrUndefined(this.blurb))
-    public can_submit:           boolean = $derived(!!this.author_id && this.title.trim() !== "")
+    public can_submit:           boolean = $derived(!!this.author_id && this.title.trim() !== "" && (!this.universe_id || this.volume_number !== null))
 
 
     // SETTERE
@@ -115,20 +115,14 @@ export class CreateBookStore
     }
 
 
-    constructor(
-        private logger: Logger,
-        private api: MockApi,
-        book_id: string | null,
-    ) 
-    {
-        this.is_new_book = book_id === null
-
-        this.initialize(book_id)
-    }
+    constructor(private logger: Logger) 
+    { }
 
 
     public async initialize(book_id: string | null)
     {
+        this.is_new_book = book_id === null
+
         await Promise.all([
             author_repository.load(), 
             universe_repository.load(),
@@ -139,7 +133,14 @@ export class CreateBookStore
 
         if (book_id !== null)
         {
-            this.book = await this.api.getBook(book_id)
+            const result = await book_repository.details(book_id)
+
+            if (!result.ok)
+            {
+                return
+            }
+
+            this.book = result.value
 
             this.author_id     = this.book.author_id
             this.universe_id   = this.book.universe_id
