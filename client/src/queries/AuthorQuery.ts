@@ -46,38 +46,51 @@ export class AuthorQuery
     }
 
 
+    /**
+     * Splits a name info First and Last name, based on the following 2 cases:
+     * - "Last, First": everything before the first comma is the last name.
+     * - "First Middle Last": the last word is the last name.
+     */
     public splitName(full_name: string): { first_name: string | null, last_name: string }
     {
-        if (full_name.includes(','))
+        if (full_name.includes(","))
         {
-            const parts = full_name.split(',').map(it => it.trim())
-            const last_name = parts[0]
-            const first_name = parts.slice(1).join(', ')
+            const [last, ...rest] = full_name.split(",").map(it => it.trim())
 
-            return {
-                first_name: first_name || null,
-                last_name: last_name ?? ""
+            return { 
+                first_name: rest.join(", ") || null, 
+                last_name: last 
             }
         }
-        else
-        {
-            const parts = full_name.split(' ').map(it => it.trim())
 
-            if (parts.length > 1)
-            {
-                const last_name = parts[0]
-                const first_name = parts.slice(1).join(', ')
-    
-                return {
-                    first_name: first_name || null,
-                    last_name: last_name ?? ""
-                }
-            }
-            
-            return {
-                first_name: null,
-                last_name: parts[0]
-            }
+        const words = full_name.trim().split(/\s+/).filter(Boolean)
+        const last  = words.pop() ?? ""
+
+        return { 
+            first_name: words.join(" ") || null, 
+            last_name: last 
         }
+    }
+
+
+    /**
+     * Interprets the search text and returns the author name (as Last, First) if there is no exact match, otherwise `undefined`.
+     */
+    public getCreatableAuthorName(search: string, authors: AuthorResponse[]): string | undefined
+    {
+        const name_from_search = this.splitName(search)
+        const target = authors.find(it => it.first_name === name_from_search.first_name && it.last_name === name_from_search.last_name)
+        
+        if (target)
+        {
+            return undefined
+        }
+
+        if (name_from_search.first_name)
+        {
+            return `${name_from_search.last_name}, ${name_from_search.first_name}`
+        }
+        
+        return name_from_search.last_name
     }
 }

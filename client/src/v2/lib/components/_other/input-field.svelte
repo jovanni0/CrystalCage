@@ -5,20 +5,22 @@
 
 
     let {
+        value        = $bindable(),
+        preallocate  = false,
+        loading      = false,
+        is_mandatory = false,
         label,
-        value = $bindable(),
         error,
-        preallocate = false,
-        loading = false,
         style,
         ...rest
     }: HTMLInputAttributes & {
-        label:        string
-        value?:       string
-        error?:       string
-        preallocate?: boolean
-        loading?:     boolean
-        style?:       string
+        value?:        string
+        error?:        string
+        preallocate?:  boolean
+        loading?:      boolean
+        is_mandatory?: boolean
+        label:         string
+        style?:        string
     } = $props()
 </script>
 
@@ -28,7 +30,12 @@
     style = { style }
 >
     <fieldset>
-        <legend>{ label }</legend>
+        <legend>
+            { label }
+            {#if is_mandatory}
+                <span class = "mandatory-mark">*</span>
+            {/if}
+        </legend>
         <input
             bind:value
             { ...rest }
@@ -114,5 +121,10 @@
         {
             color: var(--text-muted);
         }
+    }
+
+    .mandatory-mark
+    {
+        color: var(--text-error);
     }
 </style>

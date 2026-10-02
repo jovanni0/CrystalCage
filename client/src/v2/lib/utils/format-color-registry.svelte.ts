@@ -32,7 +32,7 @@ export class EditionFormatColorRegistry
     public resolve(id: string): EditionFileFormatDefinition
     {
         const key = id.toLowerCase()
-        const result = this.formats.find(it => it.id === key) ?? { id: key, label: id.toUpperCase(), hue: hashHue(key), chroma: 0.2 }
+        const result = this.formats.find(it => it.id === key) ?? { id: key, label: id.toUpperCase(), hue: hashHue(key), chroma: 0.02 }
 
         return result
     }

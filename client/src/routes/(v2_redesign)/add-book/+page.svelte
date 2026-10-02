@@ -4,12 +4,7 @@
     import ExternalPickerListItem   from "@v2/lib/components/list-items/external-picker-list-item.svelte";
     import CategoryListItem         from "@v2/lib/components/list-items/category-list-item.svelte";
     import InputField               from "@v2/lib/components/_other/input-field.svelte";
-    import BottomSheet              from "@v2/lib/components/_other/bottom-sheet.svelte";
     import Page                     from "@v2/lib/components/_other/page.svelte"
-    import IconButton               from "@v2/lib/components/buttons/icon-button.svelte";
-    import Ex                       from "@v2/lib/components/icons/ex.svelte";
-    import Button                   from "@v2/lib/components/buttons/button.svelte";
-    import SelectAuthorSheet        from "@v2/lib/elements/select-or-create-from-searchable-list-sheet.svelte";
     import { CreateBookStore }      from "@v2/lib/stores/book-management.store.svelte";
     import { goBack } from "@root/utils/go-back.js";
     import SelectOrCreateFromSearchableListSheet from "@v2/lib/elements/select-or-create-from-searchable-list-sheet.svelte";
@@ -18,8 +13,9 @@
     import SelectOrCreateTagsSheet from "@v2/lib/elements/select-or-create-tags-sheet.svelte";
     import GenericPill from "@v2/lib/components/_other/generic-pill.svelte";
     import CategoryLinkListItem from "@v2/lib/components/list-items/category-link-list-item.svelte";
-    import { marked } from "marked";
     import TopbarCancelAction from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
+    import { renderMarkdown } from "@v2/lib/utils/markdown.js";
+    import { tag_repository } from "@root/CompositionRoot.js";
 
 
     let { data } = $props()
@@ -41,6 +37,10 @@
     let error_message = $state<string|null>(null)
     const current_path = $derived(`/manage-book${id ? `/${id}` : ""}`)
 
+    const rendered_thoughts:  string = $derived(book_store.thoughts ? renderMarkdown(book_store.thoughts) : "")
+    const rendered_blurb:     string = $derived(book_store.blurb ? renderMarkdown(book_store.blurb) : "")
+
+
     async function save()
     {
         const result = await book_store.save()
@@ -48,6 +48,8 @@
         if (result)
         {
             goBack()
+
+            return
         }
 
         error_message = "An error occurred while trying to save the book"
@@ -56,11 +58,13 @@
 
     async function deleteBook()
     {
-        const is_deleted = await book_store.deleteBook()
+        const is_deleted = await book_store.delete()
 
         if (is_deleted)
         {
             goBack()
+
+            return
         }
 
         error_message = "An error occurred while trying to delete the book"
@@ -75,13 +79,18 @@
 
 <Page class = "page-content">
     {#snippet topbar()}
-        <TopbarCancelAction title = "Add Book" />
+        <TopbarCancelAction 
+            title = "Add Book" 
+            is_action_disabled = { !book_store.can_submit }
+        />
     {/snippet}
 
 
     <wrapper>
         <InputField 
-            label = "Title"
+            label        = "Title"
+            bind:value   = { book_store.title }
+            is_mandatory = { true }
         />
 
         <list>
@@ -160,7 +169,7 @@
         href  = "/add-book/blurb"
     >
         {#if book_store.blurb}
-            {@html marked(book_store.blurb)}
+            {@html rendered_blurb}
         {:else}
             <p class = "category-placeholder-text">No blurb yet. Add a summary to describe what this book is about.</p>
         {/if}
@@ -171,8 +180,8 @@
         title = "thoughts"
         href  = "/add-book/thoughts"
     >
-        {#if book_store.notes}
-            {@html marked(book_store.notes)}
+        {#if book_store.thoughts}
+            {@html rendered_thoughts}
         {:else}
             <p class = "category-placeholder-text">No thoughts yet. Tap to write whatever you'd like.</p>
         {/if}
@@ -189,7 +198,7 @@
             items             = { book_store.author_results }
             create_label      = { book_store.author_create_label }
             button_label      = "Set author"
-            onCreate          = { () => book_store.createAuthor() }
+            onCreate          = { () => { book_store.createAndSetAuthor(); author_sheet = false } }
         />
 
         <SelectOrCreateFromSearchableListSheet 
@@ -201,7 +210,7 @@
             search_placeholder = "Type a universe to search or add"
             create_label     = { book_store.universe_create_label }
             button_label     = "Set universe"
-            onCreate         = { () => book_store.createUniverse() }
+            onCreate         = { () => { book_store.createAndSetUniverse(); universe_sheet = false } }
         />
 
         <SelectOrCreateFromSearchableListSheet 
@@ -213,7 +222,7 @@
             search_placeholder = "Type a series to search or add"
             create_label     = { book_store.series_create_label }
             button_label     = "Set series"
-            onCreate         = { () => book_store.createSeriesFromSearch() }
+            onCreate         = { () => { book_store.createAndSetSeries(); series_sheet = false } }
         />
         
         <SelectVolumeNumberSheet 
@@ -238,6 +247,7 @@
             bind:selected_ids = { book_store.tag_ids }
             tag_groups        = { book_store.tag_groups }
             show_create       = { book_store.should_create_tag }
+            is_empty          = { tag_repository.all.length === 0 }
             onCreate          = { () => book_store.createTag() }
         />
     {/snippet}

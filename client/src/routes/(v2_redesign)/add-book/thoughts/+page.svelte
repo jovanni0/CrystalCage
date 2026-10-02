@@ -22,7 +22,7 @@
     onMount( () => 
     {
         view = new EditorView({
-            doc: book_store.notes ?? undefined,
+            doc: book_store.thoughts ?? undefined,
             extensions: [
                 minimalSetup,
                 markdown(),
@@ -30,7 +30,7 @@
                 {
                     if (update.docChanged)
                     {
-                        book_store.notes = update.state.doc.toString()
+                        book_store.thoughts = update.state.doc.toString()
                     }
                 }),
                 EditorView.theme({

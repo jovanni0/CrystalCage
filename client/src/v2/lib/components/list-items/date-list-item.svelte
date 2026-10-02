@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Dates } from "../../utils/dates";
+    import { DateRules } from "@v2/lib/rules/date-rules";
     import Calendar  from "../icons/calendar.svelte";
 
 
@@ -20,14 +20,14 @@
     
     let native_input: HTMLInputElement
 
-    let RISO_date: string  = $state(Dates.ISOtoRISO(ISO_date))
+    let RISO_date: string  = $state(DateRules.ISOtoRISO(ISO_date))
     let is_valid:  boolean = $state(true)
 
 
     function handleNativeChange(): void
     {
         ISO_date = native_input.value
-        RISO_date = Dates.ISOtoRISO(ISO_date)
+        RISO_date = DateRules.ISOtoRISO(ISO_date)
         is_valid = true
     }
 
@@ -36,17 +36,17 @@
     {
         const target = e.currentTarget as HTMLInputElement
 
-        RISO_date = Dates.RISOinsertDashes(target.value)
-        ISO_date = Dates.RISOtoISO(RISO_date)
+        RISO_date = DateRules.RISOinsertDashes(target.value)
+        ISO_date = DateRules.RISOtoISO(RISO_date)
         target.value = RISO_date
         
         if (RISO_date.length === 10)
         {
-            is_valid = Dates.isRISOdateValid(RISO_date)
+            is_valid = DateRules.isRISOdateValid(RISO_date)
 
             if (is_valid)
             {
-                native_input.value = Dates.RISOtoISO(RISO_date)
+                native_input.value = DateRules.RISOtoISO(RISO_date)
             }
         }
         else

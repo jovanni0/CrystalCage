@@ -14,6 +14,7 @@
         selected_ids = $bindable(),
         show_create = false,
         tag_groups,
+        is_empty = false,
         onCreate,
     }: {
         is_open?:      boolean
@@ -21,6 +22,7 @@
         selected_ids?: string[]
         show_create?:  boolean
         tag_groups:    { id: string, name: string, tags: TagResponse[] }[]
+        is_empty?:     boolean
         onCreate?:     () => void
     } = $props()
 
@@ -33,7 +35,6 @@
         return selected_ids ? [...selected_ids] : []
     })
     
-    const had_tags = $derived((selected_ids?.length ?? 0) > 0)
     const has_changed = $derived(selected_ids?.length !== draft_selected_ids.length || draft_selected_ids.some(id => !selected_ids?.includes(id)))
 
     function toggleId(id: string)
@@ -47,6 +48,14 @@
             draft_selected_ids = [...draft_selected_ids, id]
         }
     }
+
+    $effect( () =>
+    {
+        if (is_open === false)
+        {
+            search = ""
+        }
+    })
 </script>
 
 
@@ -63,22 +72,26 @@
         />  
     {/snippet}
 
-    <category-list>
-        {#each tag_groups as tag_group (tag_group.id)}
-            <TagCategoryListItem
-                label = { tag_group.name }
-            >
-                {#each tag_group.tags as tag (tag.id)}
-                    <PillButton
-                        is_selected = { draft_selected_ids.includes(tag.id) }
-                        onClick     = { () => toggleId(tag.id) }
-                    >
-                        { tag.name }
-                    </PillButton>
-                {/each}
-            </TagCategoryListItem>
-        {/each}
-    </category-list>
+    {#if is_empty && !search}
+        <p class = "empty-message">No tags saved yet.</p>
+    {:else}
+        <category-list>
+            {#each tag_groups as tag_group (tag_group.id)}
+                <TagCategoryListItem
+                    label = { tag_group.name }
+                >
+                    {#each tag_group.tags as tag (tag.id)}
+                        <PillButton
+                            is_selected = { draft_selected_ids.includes(tag.id) }
+                            onClick     = { () => toggleId(tag.id) }
+                        >
+                            { tag.name }
+                        </PillButton>
+                    {/each}
+                </TagCategoryListItem>
+            {/each}
+        </category-list>
+    {/if}
 
     {#snippet footer()}
         <Button 
@@ -102,5 +115,11 @@
         display: flex;
         flex-direction: column;
         gap: 32px;
+    }
+
+    p.empty-message
+    {
+        text-align: center;
+        color: var(--text-muted);
     }
 </style>

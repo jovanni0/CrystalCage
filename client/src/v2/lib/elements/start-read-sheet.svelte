@@ -1,14 +1,14 @@
 <script lang="ts">
     import CheckableMessage from "../components/_other/checkable-message.svelte";
     import DateListItem from "../components/list-items/date-list-item.svelte";
-    import { Dates } from "../utils/dates";
-    import ArrowLeft from "../components/icons/arrow-left.svelte";
+    import { DateRules } from "../rules/date-rules";
     import EditionListItem from "../components/list-items/edition-list-item.svelte";
     import type { PickableEdition } from "../types/pickable-edition.type";
     import Sheet from "../components/_other/bottom-sheet.svelte";
     import Button       from "@v2/lib/components/buttons/button.svelte";
     import IconButton   from "@v2/lib/components/buttons/icon-button.svelte";
     import { edition_format_color_registry } from "@root/CompositionRoot";
+    import ArrowLeft from "../components/icons/arrow-left.svelte";
 
 
 
@@ -38,9 +38,9 @@
     let sheet_step: number = $state(1)
 
     const is_start_date_required: boolean = $derived(!is_historical)
-    const is_start_date_filled:   boolean = $derived(start_date.length === 10 && Dates.isISOdateValid(start_date))
+    const is_start_date_filled:   boolean = $derived(start_date.length === 10 && DateRules.isISOdateValid(start_date))
     const is_end_date_required:   boolean = $derived(is_dnf && !is_historical)
-    const is_end_date_filled:     boolean = $derived(end_date.length === 10 && Dates.isISOdateValid(end_date))
+    const is_end_date_filled:     boolean = $derived(end_date.length === 10 && DateRules.isISOdateValid(end_date))
     const can_continue:           boolean = $derived((!is_start_date_required || is_start_date_filled) && (!is_end_date_required || is_end_date_filled))
 </script>
 
@@ -52,7 +52,7 @@
 >
     {#if sheet_step === 1}
         <list
-            class = "dates"
+            class = "dates"DateRules
         >
             <DateListItem 
                 key           = "Start date"

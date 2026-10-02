@@ -44,7 +44,7 @@ export class MockApi implements APIClient, ApiClientV2
         { id: "tag-3", category_id: "tag-category-genere",  name: "Military", description: null, book_count: 0 },
         { id: "tag-4", category_id: "tag-category-mood",    name: "Cozy",     description: null, book_count: 0 },
         { id: "tag-5", category_id: "tag-category-mood",    name: "Hopeful",  description: null, book_count: 0 },
-        { id: "tag-6", category_id: "tag-category-warning", name: "Violance", description: null, book_count: 0 },
+        { id: "tag-6", category_id: "tag-category-warning", name: "Violence", description: null, book_count: 0 },
         { id: "tag-7", category_id: "tag-category-warning", name: "Gore",     description: null, book_count: 0 },
         { id: "tag-8", category_id: null,                   name: "Custom 1", description: null, book_count: 0 },
         { id: "tag-9", category_id: null,                   name: "Custom 2", description: null, book_count: 0 },
@@ -52,7 +52,7 @@ export class MockApi implements APIClient, ApiClientV2
 
 
     private TAG_CATEGORIES = [
-        { id: "tag-category-genere",  name: "Genere" },
+        { id: "tag-category-genere",  name: "Genre" },
         { id: "tag-category-mood",    name: "Mood" },
         { id: "tag-category-warning", name: "Content Warning" },
     ] as TagCategoryResponse[]
@@ -106,7 +106,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.AUTHORS.push(new_record)
 
-        return Promise.resolve(new_record)
+        return Promise.resolve(structuredClone(new_record))
     }
 
     public getUniverses(author_id: string | null): Promise<UniverseResponse[]>
@@ -124,7 +124,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.UNIVERSES.push(new_record)
 
-        return Promise.resolve(new_record)
+        return Promise.resolve(structuredClone(new_record))
     }
 
     public getSeries(author_id: string | null, universe_id: string | null): Promise<SeriesResponse[]>
@@ -141,7 +141,7 @@ export class MockApi implements APIClient, ApiClientV2
             filtered = filtered.filter(it => it.universe_id === universe_id)
         }
 
-        return Promise.resolve(filtered)
+        return Promise.resolve(structuredClone(filtered))
     }
 
     public createSeries(request: SeriesCreateRequest): Promise<SeriesResponse>
@@ -156,7 +156,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.SERIES.push(new_record)
 
-        return Promise.resolve(new_record)
+        return Promise.resolve(structuredClone(new_record))
     }
 
     public getTags(): Promise<TagResponse[]>
@@ -176,7 +176,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.TAGS.push(new_record)
 
-        return Promise.resolve(new_record)
+        return Promise.resolve(structuredClone(new_record))
     }
 
 
@@ -213,7 +213,7 @@ export class MockApi implements APIClient, ApiClientV2
             reread_count: 0
         }
 
-        return Promise.resolve(new_record)
+        return Promise.resolve(structuredClone(new_record))
     }
 
     public updateBook(id: string, request: BookUpdateRequest): Promise<BookSummaryResponse>
@@ -228,7 +228,7 @@ export class MockApi implements APIClient, ApiClientV2
 
     public getEditions(book_id: string): Promise<EditionResponse[]>
     {
-        return Promise.resolve(this.EDITIONS.filter(it => it.book_id === book_id))
+        return Promise.resolve(structuredClone(this.EDITIONS.filter(it => it.book_id === book_id)))
     }
 
     public createEdition(request: EditionCreateRequest): Promise<EditionResponse>
@@ -244,7 +244,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.EDITIONS.push(new_edition)
 
-        return Promise.resolve(new_edition)
+        return Promise.resolve(structuredClone(new_edition))
     }
 
     public updateEdition(id: string, request: EditionUpdateRequest): Promise<EditionResponse>
@@ -263,7 +263,7 @@ export class MockApi implements APIClient, ApiClientV2
 
         this.EDITIONS = [...this.EDITIONS, updated_edition]
 
-        return Promise.resolve(updated_edition)
+        return Promise.resolve(structuredClone(updated_edition))
     }
 
     public deleteEdition(id: string): Promise<void>
