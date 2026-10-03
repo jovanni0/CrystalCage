@@ -72,6 +72,7 @@ export class TagRules
     {
         return {
             name: name.trim(),
+            category_id: null,
             description
         }
     }

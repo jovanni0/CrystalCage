@@ -15,6 +15,9 @@ import type { EditionCreateRequest } from "@root/dtos/EditionCreateRequest";
 import type { EditionUpdateRequest } from "@root/dtos/EditionUpdateRequest";
 import type { TagCreateRequest, TagResponse } from "../dtos/tag.dto";
 import type { TagCategoryResponse } from "../dtos/tag-category.dto";
+import type { CoverResponse } from "@root/dtos/CoverResponse";
+import type { CoverCreateRequest } from "@root/dtos/CoverCreateRequest";
+import type { CoverUpdateRequest } from "@root/dtos/CoverUpdateRequest";
 
 
 
@@ -63,6 +66,8 @@ export class MockApi implements APIClient
         { id: "book-4", author_id: "author-3", universe_id: "universe-1", series_id: "series-2", cover_id: null, volume_number: 4, title: "The Middle Eight",       read_status: "UNREAD", reread_count: 0 },
         { id: "book-5", author_id: "author-1", universe_id: null, series_id: null, cover_id: null, volume_number: null, title: "Bargans", read_status: "UNREAD", reread_count: 0 },
     ] as BookSummaryResponse[]
+
+    private COVERS: CoverResponse[] = []
 
     private EDITIONS = [
         { id: "edition-1", book_id: "book-1", label: "Tor UK", release_date: null, format: "epub", added_at: "2000-01-01" },
@@ -276,5 +281,60 @@ export class MockApi implements APIClient
     public getTagCategories(): Promise<TagCategoryResponse[]> 
     {
         return Promise.resolve(structuredClone(this.TAG_CATEGORIES))
+    }
+
+
+    public getCovers(book_id: string): Promise<CoverResponse[]>
+    {
+        return Promise.resolve(structuredClone(this.COVERS.filter(it => it.book_id === book_id)))
+    }
+
+
+    public createCover(request: CoverCreateRequest): Promise<CoverResponse>
+    {
+        const has_default = this.COVERS.some(it => it.book_id === request.book_id && it.is_default)
+        const new_cover: CoverResponse = {
+            id:         generateEphemeralId(),
+            book_id:    request.book_id,
+            label:      request.label,
+            added_at:   new Date().toISOString().split("T")[0],
+            is_default: !has_default,
+        }
+
+        this.COVERS.push(new_cover)
+
+        return Promise.resolve(structuredClone(new_cover))
+    }
+
+
+    public updateCover(id: string, request: CoverUpdateRequest): Promise<CoverResponse>
+    {
+        const target_cover = this.COVERS.find(it => it.id === id)
+
+        if (!target_cover)
+        {
+            return Promise.reject(new Error(`cover ${id} not found`))
+        }
+
+        if (request.label !== undefined)
+        {
+            target_cover.label = request.label
+        }
+
+        return Promise.resolve(structuredClone(target_cover))
+    }
+
+
+    public deleteCover(id: string): Promise<void>
+    {
+        this.COVERS = this.COVERS.filter(it => it.id !== id)
+
+        return Promise.resolve()
+    }
+
+
+    public fetchImageFromUrl(url: string): Promise<Blob>
+    {
+        return Promise.reject(new Error(`the mock cannot fetch ${url}`))
     }
 }

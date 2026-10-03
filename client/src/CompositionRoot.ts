@@ -10,6 +10,7 @@ import { SeriesRepository }           from "@v2/lib/repositories/series-reposito
 import { TagRepository }              from "@v2/lib/repositories/tag-repository.svelte";
 import { EditionRepository }          from "@v2/lib/repositories/edition-repository.svelte";
 import { BookRepository }             from "@v2/lib/repositories/book-repository.svelte";
+import { CoverRepository }            from "@v2/lib/repositories/cover-repository.svelte";
 import { Session }                    from "@v2/lib/states/session.svelte";
 import { SessionStorage }             from "@v2/lib/storage/session-storage";
 import { ApiAuth }                    from "@v2/lib/clients/api-auth";
@@ -42,6 +43,7 @@ export const series_repository = new SeriesRepository(repo_api, logger)
 export const tag_repository = new TagRepository(repo_api, logger)
 export const edition_repository = new EditionRepository(repo_api, logger)
 export const book_repository = new BookRepository(repo_api, logger)
+export const cover_repository = new CoverRepository(repo_api, logger)
 
-const repos = [author_repository, universe_repository, series_repository, tag_repository, edition_repository, book_repository]
+const repos = [author_repository, universe_repository, series_repository, tag_repository, edition_repository, book_repository, cover_repository]
 session.onSignOut( () => repos.forEach(it => it.reset()) )

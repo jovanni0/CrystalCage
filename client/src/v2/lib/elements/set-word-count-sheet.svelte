@@ -5,6 +5,7 @@
     import InlineHelpButton from "../components/buttons/inline-help-button.svelte";
     import EditionWordcountListItem from "../components/list-items/edition-wordcount-list-item.svelte";
     import Sheetv2 from "./sheetv2.svelte";
+    import Sheetv3 from "./sheetv3.svelte";
 
 
 
@@ -33,8 +34,9 @@
 </script>
 
 
-<Sheetv2
+<Sheetv3
     bind:is_open
+    policy = "fit-expand"
 >
     <SliderStepper 
         bind:value = { draft_count }
@@ -77,7 +79,7 @@
             { draft_count > 0 ? "Set this length" : "Remove length" }
         </Button>
     {/snippet}
-</Sheetv2>
+</Sheetv3>
 
 
 

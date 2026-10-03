@@ -16,6 +16,7 @@
     import TopbarCancelAction from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
     import { renderMarkdown } from "@v2/lib/utils/markdown.js";
     import { tag_repository } from "@root/CompositionRoot.js";
+    import { goto } from "$app/navigation";
 
 
     let { data } = $props()
@@ -47,7 +48,7 @@
 
         if (result)
         {
-            goBack()
+            goto(`/book/${result}`, { replaceState: true })
 
             return
         }
@@ -168,7 +169,7 @@
 
     <CategoryLinkListItem
         title = "blurb"
-        href  = "/add-book/blurb"
+        href  = { `${current_path}/blurb` }
     >
         {#if book_store.blurb}
             {@html rendered_blurb}
@@ -180,7 +181,7 @@
 
     <CategoryLinkListItem
         title = "thoughts"
-        href  = "/add-book/thoughts"
+        href  = { `${current_path}/thoughts` }
     >
         {#if book_store.thoughts}
             {@html rendered_thoughts}
@@ -200,6 +201,7 @@
             items             = { book_store.author_results }
             create_label      = { book_store.author_create_label }
             button_label      = "Set author"
+            is_resetable      = { false }
             onCreate          = { () => { book_store.createAndSetAuthor(); author_sheet = false } }
         />
 

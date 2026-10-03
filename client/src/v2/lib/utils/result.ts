@@ -76,3 +76,22 @@ export async function attempt<T>(logger: Logger, action: string, fn: () => Promi
         }
     }
 }
+
+
+
+/*
+* A short, user-facing description of an error.
+*/
+export function describeError(error: AppError): string
+{
+    switch (error.kind)
+    {
+        case "network":      return "Can't reach the server."
+        case "unauthorized": return "Your session expired. Log in again."
+        case "not_found":    return "It no longer exists on the server."
+        case "conflict":     return "It already exists."
+        case "invalid":      return "The server rejected the data."
+        case "server":       return "The server had a problem. Try again later."
+        default:             return "Something went wrong."
+    }
+}

@@ -16,6 +16,9 @@ import type { TagResponse } from "@root/dtos/TagResponse";
 import type { UniverseCreateRequest } from "@root/dtos/UniverseCreateRequest";
 import type { UniverseResponse } from "@root/dtos/UniverseResponse";
 import type { TagCategoryResponse } from "../dtos/tag-category.dto";
+import type { CoverResponse } from "@root/dtos/CoverResponse";
+import type { CoverCreateRequest } from "@root/dtos/CoverCreateRequest";
+import type { CoverUpdateRequest } from "@root/dtos/CoverUpdateRequest";
 
 
 
@@ -47,4 +50,10 @@ export interface APIClient
     createEdition(request: EditionCreateRequest): Promise<EditionResponse>
     updateEdition(id: string, request: EditionUpdateRequest): Promise<EditionResponse>
     deleteEdition(id: string): Promise<void>
+
+    getCovers(book_id: string): Promise<CoverResponse[]>
+    createCover(request: CoverCreateRequest): Promise<CoverResponse>
+    updateCover(id: string, request: CoverUpdateRequest): Promise<CoverResponse>
+    deleteCover(id: string): Promise<void>
+    fetchImageFromUrl(url: string): Promise<Blob>
 }

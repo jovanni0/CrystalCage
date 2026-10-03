@@ -5,23 +5,21 @@
     import { onMount }         from "svelte";
     import { Capacitor }       from "@capacitor/core";
     import { App }             from "@capacitor/app"
-    import { toSearchParams }  from "@root/utils/SearchParams";
+    import { SessionRules }    from "@v2/lib/rules/session-rules";
 
 
 
 	let { children } = $props();
 
 
+    // guards every navigation after the first load, and sessions that end while a page is open
     $effect(() =>
     {
-        if (session.status === "NEEDS_LOGIN" && !page.route.id?.includes("onboarding"))
-        {
-            const search_params = toSearchParams({ 
-                address: session.base_url, 
-                name:    session.server_name,
-            })
+        const target = SessionRules.redirectFor(session.status, page.route.id, session.base_url, session.server_name)
 
-            goto(search_params ? `/login?${search_params}`: "/auto-discovery")
+        if (target !== null)
+        {
+            goto(target, { replaceState: true })
         }
     })
 

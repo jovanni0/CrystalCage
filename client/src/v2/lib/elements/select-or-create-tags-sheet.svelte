@@ -4,7 +4,7 @@
     import PillButton from "../components/buttons/pill-button.svelte";
     import TagCategoryListItem from "../components/list-items/tag-category-list-item.svelte";
     import type { TagResponse } from "../dtos/tag.dto";
-    import Sheetv2 from "./sheetv2.svelte";
+    import Sheetv3 from "./sheetv3.svelte";
 
 
 
@@ -60,8 +60,9 @@
 
 
 
-<Sheetv2
+<Sheetv3
     bind:is_open
+    policy = "fit-expand"
 >
     {#snippet header()}
         <SearchBarWithCreate 
@@ -105,7 +106,7 @@
             {/if}
         </Button>
     {/snippet}
-</Sheetv2>
+</Sheetv3>
 
 
 

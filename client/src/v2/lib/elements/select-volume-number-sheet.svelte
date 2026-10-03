@@ -4,6 +4,7 @@
     import KeyValueListItem from "../components/list-items/key-value-list-item.svelte";
     import Sheetv2 from "./sheetv2.svelte";
     import Button from "@v2/lib/components/buttons/button.svelte"
+    import Sheetv3 from "./sheetv3.svelte";
 
 
     let {
@@ -30,26 +31,30 @@
 
 
 
-<Sheetv2 
+<Sheetv3 
     bind:is_open
-    class = "sheet-body"
+    policy = "fit-expand"
 >
-    <sheet-wrapper>
+    {#snippet header()}
         <input-wrapper>
             <NumberInputStepper 
                 bind:value = { draft_volume }
                 min_value  = { 1 }
             />
 
-            {#if already_exists}
-                <p class = "error-message">Volume already exists.</p>
-            {/if}
+            <p 
+                class           = "error-message"
+                class:invisible = { !already_exists }
+            >
+                Volume already exists.
+            </p>
         </input-wrapper>
-    
-        <CategoryListItem
-            title = "other volumes"
-            class = "other-volumes-list"
-        >
+    {/snippet}
+
+    <sheet-wrapper
+        class:center = { volumes.length === 0 }
+    >
+        {#if volumes.length > 0}
             <volume-list>
                 {#each volumes as volume (volume.id)}
                     <KeyValueListItem 
@@ -58,7 +63,9 @@
                     />
                 {/each}
             </volume-list>
-        </CategoryListItem>
+        {:else}
+            <p class = "no-books-message">There are no other books in this series.</p>
+        {/if}
     </sheet-wrapper>
 
     {#snippet footer()}
@@ -69,7 +76,7 @@
             Set volume number
         </Button>
     {/snippet}
-</Sheetv2>
+</Sheetv3>
 
 
 <style>
@@ -77,8 +84,13 @@
     {
         display: flex;
         flex-direction: column;
-        align-items: center;
         gap: 32px;
+        min-height: 128px;
+
+        &.center
+        {
+            justify-content: center;
+        }
     }
 
     input-wrapper
@@ -92,6 +104,12 @@
         {
             font-size: var(--text-caption);
             color: var(--text-error);
+            margin-bottom: -12px;
+
+            &.invisible
+            {
+                visibility: hidden;
+            }
         }
     }
 
@@ -104,5 +122,12 @@
     {
         display: flex;
         flex-direction: column;
+    }
+
+    .no-books-message
+    {
+        color: var(--text-placeholder);
+        text-align: center;
+        margin-bottom: 32px;
     }
 </style>

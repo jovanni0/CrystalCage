@@ -28,7 +28,9 @@
                 {
                     if (update.docChanged)
                     {
-                        book_store.blurb = update.state.doc.toString()
+                        const content = update.state.doc.toString().trim()
+
+                        book_store.blurb = content !== "" ? content : null
                     }
                 }),
                 EditorView.theme({

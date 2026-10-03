@@ -651,7 +651,7 @@ export class ApiClient implements APIClient
         this.logger.debug(`send GET /image-proxy?url=${url}`)
 
         const response = await this.request(
-            `/image-proxy?url=${url}`,
+            `/image-proxy?url=${encodeURIComponent(url)}`,
             {
                 method: "GET",
             }

@@ -140,7 +140,7 @@ export abstract class ListCacheGrouped<type_T extends { id: string }>
     /*
     * Only touch groups that are loaded; an unloaded group fetches fresh data anyway.
     */
-    private change(key: string, fn: (list: type_T[]) => type_T[])
+    protected change(key: string, fn: (list: type_T[]) => type_T[])
     {
         const list = this.groups.get(key)
 
