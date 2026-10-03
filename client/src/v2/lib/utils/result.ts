@@ -3,10 +3,12 @@ import      { ConflictError }       from "@root/errors/ConflictError"
 import      { InternalServerError } from "@root/errors/InternalServerError"
 import      { NotFoundError }       from "@root/errors/NotFoundError"
 import      { UnauthorizedError }   from "@root/errors/UnauthorizedError"
+import { ApiError } from "@root/errors/ApiError"
 
 
 
 export type ErrorKind = 
+    | "invalid"
     | "conflict" 
     | "not_found" 
     | "unauthorized" 
@@ -43,6 +45,8 @@ export function toAppError(e: unknown): AppError
     if (e instanceof UnauthorizedError)   return { kind: "unauthorized", message: e.message, cause: e }
     if (e instanceof InternalServerError) return { kind: "server",       message: e.message, cause: e }
     if (e instanceof TypeError)           return { kind: "network",      message: "Can't reach the server", cause: e }
+    if (e instanceof DOMException && (e.name === "TimeoutError" || e.name === "AbortError")) return { kind: "network", message: "The server took too long to respond", cause: e }
+    if (e instanceof ApiError && e.status === 400) return { kind: "invalid", message: e.message, cause: e }
     return { kind: "unknown", message: String(e), cause: e }
 }
 

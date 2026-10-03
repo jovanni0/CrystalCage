@@ -7,6 +7,7 @@ import kotlin.uuid.Uuid
 
 data class TagRow(
     val id: Uuid,
+    val category_id: Uuid?,
     val name: String,
     val description: String?,
 )
@@ -15,6 +16,7 @@ data class TagRow(
     {
         return TagResponse(
             id = this.id.toString(),
+            category_id = this.category_id?.toString(),
             name = name,
             description = description,
             book_count = book_count

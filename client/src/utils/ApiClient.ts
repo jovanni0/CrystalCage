@@ -31,6 +31,7 @@ import type { ReadRecordCreateRequest }        from "@root/dtos/ReadRecordCreate
 import type { InviteCreateResponse }           from "@root/dtos/InviteCreateResponse";
 import type { APIClient }                      from "@root/v2/lib/clients/api-client.interface";
 import type { TagCategoryResponse }            from "@v2/lib/dtos/tag-category.dto";
+import type { Session }                        from "@v2/lib/states/session.svelte";
 import      { coverCreateRequestToFormData }   from "@root/dtos/CoverCreateRequest";
 import      { editionCreateRequestToFormData } from "@root/dtos/EditionCreateRequest";
 import      { isNullOrUndefined }              from "@root/utils/NullishChecks";
@@ -47,36 +48,31 @@ export class ApiClient implements APIClient
     private onUnauthorized: (() => void) | null = null
 
 
-    constructor(private logger: Logger)
+    constructor(private logger: Logger, private session: Session)
     { }
-
-
-    configureAuth(getAuthContext: () => AuthContext | null, onUnauthorized: () => void)
-    {
-        this.getAuthContext = getAuthContext
-        this.onUnauthorized = onUnauthorized
-    }
 
 
     private async request(path: string, options: RequestInit): Promise<Response>
     {
-        const context = this.getAuthContext?.()
+        const token = this.session.token
+        const base_url = this.session.base_url
 
-        if (isNullOrUndefined(context))
+        if (!base_url)
         {
             throw new ServerNotConfiguredError(`request ${path} cannot be made because no context was configured`)
         }
 
         const headers = {
             ...options.headers,
-            ...(context.session_token ? { Authorization: `Bearer ${context.session_token}`} : {}),
+            ...(token ? { Authorization: `Bearer ${token}`} : {}),
         }
 
-        const response = await fetch(`${context.base_url}${path}`, { ...options, headers })
+        const response = await fetch(`${base_url}${path}`, { ...options, headers })
 
         if (response.status === 401)
         {
-            this.onUnauthorized?.()
+            this.session.signOut()
+
             throw new UnauthorizedError(`request ${path} returned 401 Unauthorized`)
         }
 
@@ -121,6 +117,7 @@ export class ApiClient implements APIClient
             "/auth/me",
             {
                 method: "GET",
+                signal: AbortSignal.timeout(4000),
             }
         )
 

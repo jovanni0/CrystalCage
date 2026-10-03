@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { session_manager } from "@root/CompositionRoot";
+	import { session }         from "@root/CompositionRoot";
 	import { page }            from "$app/state";
 	import { goto }            from "$app/navigation";
     import { onMount }         from "svelte";
@@ -12,39 +12,20 @@
 	let { children } = $props();
 
 
-	$effect( () =>
-	{
-		const status = session_manager.status
-		const is_onboarding = page.route.id?.includes("onboarding") ?? false
-
-
-        if (status === "AUTHENTICATED" && is_onboarding) 
-        {
-            goto("/")
-        } 
-        else if (status === "NEEDS_LOGIN" && !is_onboarding) 
+    $effect(() =>
+    {
+        if (session.status === "NEEDS_LOGIN" && !page.route.id?.includes("onboarding"))
         {
             const search_params = toSearchParams({ 
-                address: session_manager.server_address, 
-                name:    session_manager.server_name,
+                address: session.base_url, 
+                name:    session.server_name,
             })
 
-            if (search_params)
-            {
-                goto(`/login?${search_params}`)
-            }
-            else
-            {
-                goto("/auto-discovery")
-            }
-        } 
-        else if (status === "NO_SERVER" && !is_onboarding) 
-        {
-            goto("/welcome")
+            goto(search_params ? `/login?${search_params}`: "/auto-discovery")
         }
-	})
+    })
 
-
+    
     onMount( () =>
     {
         if (!Capacitor.isNativePlatform())

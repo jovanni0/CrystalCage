@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto, replaceState } from "$app/navigation";
     import      { page }              from "$app/state";
     import      { logIn }             from "../-logic";
     import      AddressMissingPage    from "../AddressMissingPage.svelte";
@@ -27,7 +28,14 @@
 
         try
         {
-            error = await logIn(username, password, server_address)
+            const result = await logIn(server_address, server_name ?? server_address, username, password)
+
+            error = result ?? ""
+
+            if (!result)
+            {
+                goto("/", { replaceState: true })
+            }
         }
         catch
         {

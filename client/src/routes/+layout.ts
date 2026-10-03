@@ -1,15 +1,18 @@
-import { session_manager }  from "@root/CompositionRoot";
 import { browser }          from "$app/environment";
 import { redirect }         from "@sveltejs/kit";
 import { toSearchParams }   from "@root/utils/SearchParams";
+import { api_auth, 
+         logger, 
+         session }          from "@root/CompositionRoot";
+import { attempt }          from "@v2/lib/utils/result";
 
 
 
 export const prerender = true;
 export const ssr = false;
 
-// NOTE: the previous code was triggering all the `load` functions to run when navigating from a page to a child page,
-// so the objects constructed on other `load` functions did not persist. this fixes it, but might create bugs with session management.
+
+
 export const load = async ({ route }) =>
 {
     if (!browser)
@@ -17,36 +20,48 @@ export const load = async ({ route }) =>
         return
     }
 
-    if (session_manager.status === "UNKNOWN")
+    if (session.status === "UNKNOWN")
     {
-        await session_manager.restoreSession()
+        const status = await session.restore()
+
+        if (status === "AUTHENTICATED")
+        {
+            const me = await attempt(logger, "verify session", () => api_auth.me())
+
+            if (me.ok)
+            {
+                session.user = me.value
+            }
+
+            // If the error is 401 `ApiClient` will have called `signOut()`.
+            //
+            // If there are network errors keep the token and do nothing, the app still works with it's cached data.
+        }
     }
 
-    const status = session_manager.status
     const is_onboarding = route.id?.includes("onboarding") ?? false
 
-    if (status === "AUTHENTICATED" && is_onboarding) 
+    if (session.status === "AUTHENTICATED")
     {
-        redirect(303, "/")
-    } 
-    else if (status === "NEEDS_LOGIN" && !is_onboarding) 
+        if (is_onboarding)
+        {
+            redirect(303, "/")
+        }
+
+        return
+    }
+
+    if (is_onboarding) return
+
+    if (session.status === "NEEDS_LOGIN")
     {
         const search_params = toSearchParams({ 
-            address: session_manager.server_address, 
-            name:    session_manager.server_name,
+            address: session.base_url, 
+            name:    session.server_name,
         })
 
-        if (search_params)
-        {
-            redirect(303, `/login?${search_params}`)
-        }
-        else
-        {
-            redirect(303, "/auto-discovery")
-        }
-    } 
-    else if (status === "NO_SERVER" && !is_onboarding) 
-    {
-        redirect(303, "/welcome")
+        redirect(303, search_params ? `/login?${search_params}`: "/auto-discovery")
     }
+
+    redirect(303, "/welcome")
 }

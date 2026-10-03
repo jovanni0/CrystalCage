@@ -1,76 +1,22 @@
-import { session_manager } from "@root/CompositionRoot"
-import type { AuthLoginResponse } from "@root/dtos/AuthLoginResponse"
+import { api_auth, 
+         logger, 
+         session } from "@root/CompositionRoot"
+import { attempt } from "@v2/lib/utils/result"
 
 
 
-export async function logIn(username: string, password: string, server_address: string): Promise<string>
+export async function logIn(base_url: string, server_name: string, username: string, password: string): Promise<string | null>
 {
-    try
+    const result = await attempt(logger, "log in", () => api_auth.login(base_url, { username, password }))
+
+    if (!result.ok)
     {
-        const request = { username, password }
+        return result.error.kind === "unauthorized" ? "Username or password are invalid."
+             : result.error.kind === "network"      ? "Can't reach the server."
+             : "Something went wrong."
+    }
 
-        const response = await fetch(
-            `${server_address}/auth/login`,
-            {
-                method: "POST",
-                body: JSON.stringify(request),
-                headers: { "Content-Type": "application/json" }
-            }
-        )
-
-        if (response.status === 200)
-        {
-            const data = await response.json() as AuthLoginResponse
+    await session.signIn(base_url, server_name, result.value.token, result.value.user)
     
-            session_manager.login(server_address, data.token, data.user)
-
-            return ""
-        }
-        else if (response.status == 401)
-        {
-            return "Username or password are invalid."
-        }
-        else
-        {
-            return "Something went wrong."
-        }
-    }
-    catch (e)
-    {
-        return "Something went wrong."
-    }
-}
-
-
-export async function isInviteCodeValid(code: string, server_address: string): Promise<boolean>
-{
-    const response = await fetch(
-        `${server_address}/auth/invite-code/${code}`,
-        {
-            method: "GET",
-        }
-    )
-
-    return await response.json() as boolean
-}
-
-
-export async function signUp(code: string, username: string, password: string, server_address: string): Promise<number>
-{
-    const request = { 
-        code:     code,
-        username: username,
-        password: password,
-    }
-
-    const response = await fetch(
-        `${server_address}/auth/signup`,
-        {
-            method: "POST",
-            body: JSON.stringify(request),
-            headers: { "Content-Type": "application/json" }
-        }
-    )
-
-    return response.status
+    return null
 }

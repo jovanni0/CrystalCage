@@ -1,8 +1,9 @@
 <script lang="ts">
     import { page }                from "$app/state";
-    import { isInviteCodeValid, 
-             logIn, 
-             signUp }              from "../-logic";
+    import { attempt }             from "@v2/lib/utils/result";
+    import { logIn }               from "../-logic";
+    import { api_auth, 
+             logger }              from "@root/CompositionRoot";
     import AddressMissingPage      from "../AddressMissingPage.svelte";
     import CheckAccessCodePage     from "./CheckAccessCodePage.svelte";
     import RegisterCredentialsPage from "./RegisterCredentialsPage.svelte";
@@ -34,23 +35,26 @@
             return
         }
 
-        is_checking_code = true
+        is_checking_code  = true
+        access_code_error = ""
 
         try
         {
-            is_access_code_valid = await isInviteCodeValid(access_code, server_address)
+            const result = await attempt(logger, "check invite code", () => api_auth.isInviteCodeValid(server_address, access_code))
 
-            if (!is_access_code_valid)
+            if (!result.ok)
             {
-                access_code_error = "This code is not valid."
+                access_code_error = result.error.kind === "network" ? "Can't reach the server." : "Something went wrong."
+                return
             }
-        }
-        catch
-        {
-            access_code_error = "This code is not valid."
-        }
 
-        is_checking_code = false
+            is_access_code_valid = result.value
+            if (!result.value) access_code_error = "This code is not valid."
+        }
+        finally
+        {
+            is_checking_code = false
+        }
     }
 
 
@@ -59,47 +63,44 @@
         if (server_address === null)
         {
             signup_error = "ERROR: server address not set."
-
             return
         }
-        
-        is_signing_up = true
+
+        is_signing_up  = true
+        username_error = ""
+        signup_error   = ""
 
         try
         {
-            const signup_response_status = await signUp(access_code, username, password, server_address)
-    
-            if (signup_response_status === 201)
-            {
-                try
-                {
-                    const login_error = await logIn(username, password, server_address)
-        
-                    if (login_error)
-                    {
-                        signup_error = "Account was created but failed to log in."
-                    }
-                }
-                catch
-                {
-                    signup_error = "Account was created but failed to log in."
-                }
-            }
-            else if (signup_response_status === 400)
-            {
-                username_error = "This username is already taken."
-            }
-            else
-            {
-                signup_error = "Could not create an account."
-            }
-        }
-        catch
-        {
-            signup_error = "Could not create an account."
-        }
+            const created = await attempt(logger, "sign up", () => api_auth.signUp(server_address, { 
+                code: access_code, 
+                username, 
+                password 
+            }))
 
-        is_signing_up = false
+            if (!created.ok)
+            {
+                switch (created.error.kind)
+                {
+                    case "conflict": username_error = "This username is already taken.";                    break
+                    case "invalid":  signup_error   = "Check your details. The password may be too short."; break
+                    case "network":  signup_error   = "Can't reach the server.";                            break
+                    default:         signup_error   = "Could not create an account."
+                }
+                return
+            }
+
+            const login_error = await logIn(server_address, server_name ?? server_address, username, password)
+
+            if (login_error)
+            {
+                signup_error = "Account was created but failed to log in. Try logging in."
+            }
+        }
+        finally
+        {
+            is_signing_up = false
+        }
     }
 </script>
 
