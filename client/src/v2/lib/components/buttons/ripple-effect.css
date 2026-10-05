@@ -15,29 +15,59 @@
 }
 
 
-.ripple-container[ripple-effect]::before
+.ripple-container[ripple-state = "pressed"]::before
 {
-    animation: ripple 500ms ease-out;
+    animation: ripple-grow 300ms ease-out forwards;
 }
 
 
-@keyframes ripple
+.ripple-container[ripple-state = "released"]::before
 {
-    0%
+    clip-path: circle(var(--ripple-radius, 75%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+    animation: ripple-fade 250ms ease-out forwards;
+}
+
+
+.ripple-container[ripple-state = "cancelled"]::before
+{
+    clip-path: circle(var(--ripple-radius, 75%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+    animation: ripple-fade 120ms ease-out forwards;
+}
+
+
+.ripple-container[ripple-state = "tapped"]::before
+{
+    animation: ripple-grow 200ms ease-out, ripple-fade 250ms ease-out 200ms forwards;
+}
+
+
+@keyframes ripple-grow
+{
+    from
     {
-        clip-path: circle(0% at 50% 50%);
-        opacity: 1;
-    }
-    
-    60%
-    {
-        clip-path: circle(100% at 50% 50%);
+        clip-path: circle(0px at var(--ripple-x, 50%) var(--ripple-y, 50%));
         opacity: 1;
     }
 
-    100%
+    to
     {
-        clip-path: circle(100% at 50% 50%);
+        clip-path: circle(var(--ripple-radius, 75%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+        opacity: 1;
+    }
+}
+
+
+@keyframes ripple-fade
+{
+    from
+    {
+        clip-path: circle(var(--ripple-radius, 75%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
+        opacity: 1;
+    }
+
+    to
+    {
+        clip-path: circle(var(--ripple-radius, 75%) at var(--ripple-x, 50%) var(--ripple-y, 50%));
         opacity: 0;
     }
 }
