@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { goBack } from "@root/utils/go-back";
+    import { nav }    from "@root/CompositionRoot";
     import IconButton from "../buttons/icon-button.svelte";
-    import ArrowLeft from "../icons/arrow-left.svelte";
+    import ArrowLeft  from "../icons/arrow-left.svelte";
     import "./topbar-styles.css"
 
     
@@ -16,9 +16,9 @@
 
 <topbar-back class = "topbar-element">
     <IconButton 
-        shape = "square"
-        label = "back"
-        onclick = { goBack }
+        shape   = "square"
+        label   = "back"
+        onclick = { () => nav.goBack("/") }
     >
         <ArrowLeft />
     </IconButton>

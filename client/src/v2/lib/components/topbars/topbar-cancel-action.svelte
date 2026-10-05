@@ -12,10 +12,10 @@
         onCancel,
         onAction,
     }: {
-        title: string
+        title:               string
         is_action_disabled?: boolean
-        onCancel?: () => void
-        onAction?: () => void
+        onCancel?:           () => void
+        onAction?:           () => void
     } = $props()
 </script>
 
@@ -23,8 +23,8 @@
 
 <topbar-cancel-action class = "topbar-element">
     <IconButton 
-        shape = "square"
-        label = "cancel"
+        shape   = "square"
+        label   = "cancel"
         onclick = { onCancel }
     >
         <Ex />
@@ -33,8 +33,8 @@
     <p class = "title">{ title }</p>
 
     <Button
-        size = "slim"
-        state = { is_action_disabled ? "disabled" : "default" }
+        size    = "slim"
+        state   = { is_action_disabled ? "disabled" : "default" }
         onclick = { onAction }
     >
         Save

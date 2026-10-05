@@ -36,6 +36,7 @@
     <TopBar 
         title = {server_name ?? server_address}
         type  = "back"
+        fallback_url = "/auto-discovery"
     />
 
     <div class = "body-content">

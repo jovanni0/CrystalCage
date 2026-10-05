@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { session }         from "@root/CompositionRoot";
-	import { page }            from "$app/state";
-	import { goto }            from "$app/navigation";
-    import { onMount }         from "svelte";
-    import { Capacitor }       from "@capacitor/core";
-    import { App }             from "@capacitor/app"
-    import { SessionRules }    from "@v2/lib/rules/session-rules";
+	import { nav, 
+             session }      from "@root/CompositionRoot";
+	import { page }         from "$app/state";
+	import { goto }         from "$app/navigation";
+    import { onMount }      from "svelte";
+    import { Capacitor }    from "@capacitor/core";
+    import { App }          from "@capacitor/app"
+    import { SessionRules } from "@v2/lib/rules/session-rules";
 
 
 
@@ -26,22 +27,11 @@
     
     onMount( () =>
     {
-        if (!Capacitor.isNativePlatform())
-        {
-            return
-        }
+        if (!Capacitor.isNativePlatform()) return
 
-        App.addListener("backButton", ({ canGoBack }) => 
-        {
-            if (canGoBack)
-            {
-                window.history.back()
-            }
-            else
-            {
-                App.exitApp()
-            }
-        })
+        const listner = App.addListener("backButton", () => nav.onNativeBack())
+
+        return () => listner.then(it => it.remove())
     })
 </script>
 

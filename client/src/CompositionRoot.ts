@@ -16,6 +16,7 @@ import { SessionStorage }             from "@v2/lib/storage/session-storage";
 import { ApiAuth }                    from "@v2/lib/clients/api-auth";
 import { HttpClient }                 from "@v2/lib/clients/http-client";
 import { SessionHttp }                from "@v2/lib/clients/session-http";
+import { Nav }                        from "@v2/lib/utils/nav";
 
 
 
@@ -27,6 +28,8 @@ export const library_store       = new LibraryStore(logger, api_client)
 export const visibility_observer = new VisibilityObserver()
 
 export const edition_format_color_registry = new EditionFormatColorRegistry()
+
+export const nav = new Nav()
 
 
 // APIs

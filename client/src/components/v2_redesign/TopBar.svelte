@@ -1,13 +1,15 @@
 <script lang="ts">
+    import { nav }     from "@root/CompositionRoot";
     import ChevronLeft from "@root/icons/chevron-left.svelte";
-    import { goBack } from "@root/utils/go-back";
 
     let {
         title,
-        type
+        type,
+        fallback_url,
     }: {
         title: string
         type:  "back"
+        fallback_url?: string
     } = $props()
 </script>
 
@@ -17,7 +19,7 @@
     {#if type === "back"}
         <button 
             class   = "back-button"
-            onclick = { goBack }
+            onclick = { () => nav.goBack(fallback_url) }
         >
             <ChevronLeft />
         </button>
