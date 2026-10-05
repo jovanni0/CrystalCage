@@ -7,12 +7,30 @@
     import { Capacitor }    from "@capacitor/core";
     import { App }          from "@capacitor/app"
     import { SessionRules } from "@v2/lib/rules/session-rules";
+    import { triggerSoundEffect } from "@v2/lib/android/sound-feedback-plugin";
 
 
 
 	let { children } = $props();
 
     afterNavigate(navigation => nav.onNavigated(navigation))
+
+
+    function onClick(event: MouseEvent)
+    {
+        if (!event.isTrusted) return
+
+        if (event.target instanceof HTMLInputElement && event.target.closest("label") !== null)
+        {
+            return   // the browser's follow-up click from the label
+        }
+
+        const target = (event.target as Element).closest("button, a[href], label, [role='button'], summary")
+
+        if (target === null) return
+
+        triggerSoundEffect()
+    }
 
 
     // guards every navigation after the first load, and sessions that end while a page is open
@@ -31,9 +49,10 @@
     {
         if (!Capacitor.isNativePlatform()) return
 
-        const listner = App.addListener("backButton", () => nav.onNativeBack())
+        const back_listener = App.addListener("backButton", () => nav.onNativeBack())
+        const click_listener = document.addEventListener("click", onClick, { capture: true })
 
-        return () => listner.then(it => it.remove())
+        return () => back_listener.then(it => it.remove())
     })
 </script>
 
