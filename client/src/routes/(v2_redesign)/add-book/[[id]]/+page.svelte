@@ -89,7 +89,7 @@
     {/snippet}
 
 
-    <wrapper>
+    <details-wrapper>
         <InputField 
             label        = "Title"
             bind:value   = { book_store.title }
@@ -126,7 +126,7 @@
                 onclick = { () => volume_sheet = true }
             />
         </list>
-    </wrapper>
+    </details-wrapper>
 
 
     <CategoryListItem 
@@ -264,18 +264,19 @@
 
 
 <style>
-    :global(.page-content)
+    :global(layout.page-content)
     {
         display: flex;
         flex-direction: column;
-        padding: 8px 16px;
-        gap: 40px;
+        padding: 8px;
+        gap: 32px;
     }
 
-    wrapper
+    details-wrapper
     {
         display: flex;
         flex-direction: column;
+        padding: 0 8px 8px 8px;
         gap: 8px;
     }
 

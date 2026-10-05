@@ -47,5 +47,7 @@
     {
         position: relative;
         cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
     }
 </style>
