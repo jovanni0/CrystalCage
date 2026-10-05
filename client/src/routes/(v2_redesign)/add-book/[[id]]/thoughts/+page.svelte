@@ -57,11 +57,7 @@
         <TopbarBack title = "Thoughts" />
     {/snippet}
 
-    <editor-wrapper>
-        <editor-content 
-            bind:this={editor_el}
-        ></editor-content>
-    </editor-wrapper>
+    <editor-wrapper bind:this={editor_el}></editor-wrapper>
 </Page>
 
 
@@ -75,17 +71,9 @@
         gap: 40px;
     }
 
-    editor-wrapper 
+    editor-wrapper
     {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        min-height: 100%;
-    }
-
-    editor-content
-    {
-        min-height: 50%;
+        height: 100%;
         background-color: var(--input-fill);
         border-radius: 8px;
         border: 1px solid var(--lowered-border);
