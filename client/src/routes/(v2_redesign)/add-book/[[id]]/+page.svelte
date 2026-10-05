@@ -81,7 +81,7 @@
 <Page class = "page-content">
     {#snippet topbar()}
         <TopbarCancelAction 
-            title              = "Add Book" 
+            title              = { book_store.is_new_book ? "Add Book" : "Update book" }
             is_action_disabled = { !book_store.can_submit }
             onCancel           = { goBack }
             onAction           = { save }
