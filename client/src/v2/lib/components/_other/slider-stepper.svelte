@@ -18,14 +18,30 @@
 
     const progress = $derived( (value - min_value) / (max_value - min_value) );
     const label_value = $derived(Math.floor(min_value + progress * (max_value - min_value)))
+
+    function increment()
+    {
+        if (value === max_value) return
+
+        value++
+    }
+
+
+    function decrement()
+    {
+        if (value === min_value) return
+
+        value--
+    }
 </script>
 
 
 
 <stepper-slider>
     <IconButton
-        label = "decrement"
-        shape = "square"
+        label   = "decrement"
+        shape   = "square"
+        onclick = { decrement }
     >
         <Minus />
     </IconButton>
@@ -44,8 +60,9 @@
     </track-wrapper>
 
     <IconButton
-        label = "increment"
-        shape = "square"
+        label   = "increment"
+        shape   = "square"
+        onclick = { increment }
     >
         <Plus />
     </IconButton>

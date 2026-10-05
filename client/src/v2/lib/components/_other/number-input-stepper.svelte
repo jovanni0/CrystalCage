@@ -15,15 +15,31 @@
         min_value?: number
         max_value?: number
     } = $props()
+
+
+    function increment()
+    {
+        if (value === max_value) return
+
+        value++
+    }
+
+
+    function decrement()
+    {
+        if (value === min_value) return
+
+        value--
+    }
 </script>
 
 
 
 <number-input-stepper>
     <IconButton
-        label = "decrement"
-        shape = "square"
-        onclick = { () => value > min_value ? value = value - 1 : undefined }
+        label   = "decrement"
+        shape   = "square"
+        onclick = { decrement }
     >
         <Minus />
     </IconButton>
@@ -38,9 +54,9 @@
     </input-wrapper>
 
     <IconButton
-        label = "increment"
-        shape = "square"
-        onclick = { () => value < max_value ? value = value + 1 : undefined }
+        label   = "increment"
+        shape   = "square"
+        onclick = { increment }
     >
         <Plus />
     </IconButton>
