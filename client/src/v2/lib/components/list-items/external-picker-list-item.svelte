@@ -1,7 +1,8 @@
 <script lang="ts">
     import type { HTMLButtonAttributes } from "svelte/elements";
     import ChevronRight from "../icons/chevron-right.svelte";
-
+    import { ripple_effect } from "../buttons/ripple-effect";
+    import "../buttons/ripple-effect.css"
 
 
     let {
@@ -28,7 +29,9 @@
 <button
     onclick = { onclick }
     disabled = { disabled_message !== "" && disabled_message !== undefined }
+    class = "ripple-container"
     { ...rest }
+    {@attach ripple_effect}
 >
     <p class = "key">
         { key }

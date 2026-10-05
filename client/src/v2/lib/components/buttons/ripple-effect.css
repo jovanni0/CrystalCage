@@ -1,3 +1,9 @@
+:where(.ripple-container)
+{
+    position: relative;
+}
+
+
 .ripple-container::before
 {
     --ripple-color: rgba(0, 0, 0, 10%);

@@ -1,7 +1,8 @@
 <script lang="ts">
     import { generateEphemeralId } from "@root/utils/IdGenerator";
     import Radiobox from "../boxes/radiobox.svelte";
-
+    import { ripple_effect } from "../buttons/ripple-effect";
+    import "../buttons/ripple-effect.css"
 
 
     let {
@@ -20,7 +21,11 @@
 
 
 
-<label for = { radio_id }>
+<label 
+    for = { radio_id }
+    class = "ripple-container"
+    {@attach ripple_effect}
+>
     <p>{ label }</p>
     <Radiobox is_selected = { is_selected } />
     <input 
@@ -47,6 +52,9 @@
         padding: 16px 8px;
         border-bottom: 1px solid var(--text-placeholder);
         cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        overflow: hidden;
 
         & > p
         {
