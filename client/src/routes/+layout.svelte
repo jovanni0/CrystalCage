@@ -2,7 +2,7 @@
 	import { nav, 
              session }      from "@root/CompositionRoot";
 	import { page }         from "$app/state";
-	import { goto }         from "$app/navigation";
+	import { afterNavigate, goto }         from "$app/navigation";
     import { onMount }      from "svelte";
     import { Capacitor }    from "@capacitor/core";
     import { App }          from "@capacitor/app"
@@ -11,6 +11,8 @@
 
 
 	let { children } = $props();
+
+    afterNavigate(navigation => nav.onNavigated(navigation))
 
 
     // guards every navigation after the first load, and sessions that end while a page is open
