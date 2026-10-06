@@ -14,9 +14,9 @@
     import SelectVolumeNumberSheet               from "@v2/lib/elements/select-volume-number-sheet.svelte";
     import SetWordCountSheet                     from "@v2/lib/elements/set-word-count-sheet.svelte";
     import SelectOrCreateTagsSheet               from "@v2/lib/elements/select-or-create-tags-sheet.svelte";
-    import GenericPill                           from "@v2/lib/components/_other/generic-pill.svelte";
+    import GenericPill                           from "@v2/lib/components/pills/generic-pill.svelte";
     import CategoryLinkListItem                  from "@v2/lib/components/list-items/category-link-list-item.svelte";
-    import TopbarCancelAction                    from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
+    import TopbarCancelAction                    from "@v2/lib/components/bars/topbar-cancel-action.svelte";
 
 
 
@@ -66,7 +66,7 @@
 
 
 
-<Page class = "page-content">
+<Page class = "manage-book-page-content">
     {#snippet topbar()}
         <TopbarCancelAction 
             title              = { book_store.is_new_book ? "Add Book" : "Update book" }
@@ -264,7 +264,7 @@
 
 
 <style>
-    :global(layout.page-content)
+    :global(layout.manage-book-page-content)
     {
         display: flex;
         flex-direction: column;

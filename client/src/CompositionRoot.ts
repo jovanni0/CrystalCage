@@ -17,6 +17,8 @@ import { ApiAuth }                    from "@v2/lib/clients/api-auth";
 import { HttpClient }                 from "@v2/lib/clients/http-client";
 import { SessionHttp }                from "@v2/lib/clients/session-http";
 import { Nav }                        from "@v2/lib/utils/nav";
+import { CoverImageCache }            from "@v2/lib/caches/cover-image-cache";
+import { ApiCovers }                  from "@v2/lib/clients/api-covers";
 
 
 
@@ -36,7 +38,10 @@ export const nav = new Nav()
 export const http_client = new HttpClient(logger)
 export const session_http = new SessionHttp(http_client, session)
 export const api_auth = new ApiAuth(http_client, session_http)
+export const api_covers = new ApiCovers(session_http)
 
+// caches
+export const cover_image_cache = new CoverImageCache(api_covers, logger)
 
 // repositories
 const repo_api = api_client
@@ -48,5 +53,15 @@ export const edition_repository = new EditionRepository(repo_api, logger)
 export const book_repository = new BookRepository(repo_api, logger)
 export const cover_repository = new CoverRepository(repo_api, logger)
 
-const repos = [author_repository, universe_repository, series_repository, tag_repository, edition_repository, book_repository, cover_repository]
-session.onSignOut( () => repos.forEach(it => it.reset()) )
+
+const resettables = [
+    author_repository, 
+    universe_repository, 
+    series_repository, 
+    tag_repository, 
+    edition_repository, 
+    book_repository, 
+    cover_repository,
+    cover_image_cache
+]
+session.onSignOut( () => resettables.forEach(it => it.reset()) )

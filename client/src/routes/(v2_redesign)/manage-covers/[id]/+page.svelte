@@ -3,7 +3,7 @@
     import      { onDestroy }         from "svelte"
     import      CoverImage            from "@root/components/CoverImage.svelte"
     import      Page                  from "@v2/lib/components/_other/page.svelte"
-    import      TopbarBack            from "@v2/lib/components/topbars/topbar-back.svelte"
+    import      TopbarBack            from "@v2/lib/components/bars/topbar-back.svelte"
     import      Button                from "@v2/lib/components/buttons/button.svelte"
 
 

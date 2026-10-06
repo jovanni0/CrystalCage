@@ -1,11 +1,12 @@
 
 <script lang="ts">
-    import { markdown }                 from "@codemirror/lang-markdown";
-    import TopbarBack from "@v2/lib/components/topbars/topbar-back.svelte";
-    import Page from "@v2/lib/components/_other/page.svelte"
-    import { EditorView, minimalSetup } from "codemirror";
-    import { onMount }                  from "svelte";
-    import { placeholder } from "@codemirror/view";
+    import { markdown }     from "@codemirror/lang-markdown";
+    import { EditorView, 
+             minimalSetup } from "codemirror";
+    import { onMount }      from "svelte";
+    import { placeholder }  from "@codemirror/view";
+    import TopbarBack       from "@v2/lib/components/bars/topbar-back.svelte";
+    import Page             from "@v2/lib/components/_other/page.svelte"
 
 
     let { 
