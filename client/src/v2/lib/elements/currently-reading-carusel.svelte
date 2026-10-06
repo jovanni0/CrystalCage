@@ -1,0 +1,112 @@
+<script lang="ts" module>
+    export type CaruselItemInfo = {
+        cover_id: string | null
+        book_id:  string
+        title:    string
+        author:   string
+        progress: number
+    }
+</script>
+
+
+<script lang="ts">
+    import CaruselPips from "../components/_other/carusel-pips.svelte";
+
+    import CurrentlyReadingCard from "./currently-reading-card.svelte";
+
+
+    let {
+        items = [],
+    }: {
+        items?: CaruselItemInfo[]
+    } = $props()
+
+
+    let scroll_index: number = $state(0)
+
+    let current:  number  = $derived(Math.min(scroll_index, Math.max(items.length - 1, 0)))
+    let has_pips: boolean = $derived(items.length > 1)
+
+    function updateCurrent(event: Event & { currentTarget: HTMLElement }): void
+    {
+        const wrapper = event.currentTarget
+
+        if (wrapper.clientWidth === 0) return
+
+        scroll_index = Math.round(wrapper.scrollLeft / wrapper.clientWidth)
+    }
+</script>
+
+
+
+<currently-reading-carusel
+    role       = "region"
+    aria-label = "currently reading"
+>
+    <carusel-wrapper
+        onscroll = { updateCurrent }
+    >
+        {#each items as item (item.book_id)}
+            <CurrentlyReadingCard 
+                title    = { item.title }
+                author   = { item.author }
+                cover_id = { item.cover_id }
+                book_id  = { item.book_id }
+                progress = { item.progress }
+            />
+        {/each}
+    </carusel-wrapper>
+
+    {#if has_pips}
+        <CaruselPips 
+            count   = { items.length }
+            current = { current }
+        />
+    {/if}
+</currently-reading-carusel>
+
+
+
+<style>
+    currently-reading-carusel
+    {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px 0;
+        overflow: hidden;
+
+        & > :global(carusel-pips)
+        {
+            align-self: center;
+        }
+    }
+
+    carusel-wrapper
+    {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 100%;
+
+        width: 100%;
+        min-width: 0;
+
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+
+        &::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        & > :global(*)
+        {
+            scroll-snap-align: start;
+            scroll-snap-stop: always;
+            min-width: 0;
+        }
+    }
+</style>

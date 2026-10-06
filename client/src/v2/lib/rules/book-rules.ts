@@ -1,4 +1,5 @@
 import type { BookCreateRequest } from "@root/dtos/BookCreateRequest";
+import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse";
 
 
 

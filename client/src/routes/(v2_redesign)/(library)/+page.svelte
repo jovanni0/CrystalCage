@@ -4,10 +4,16 @@
     import TopbarBrandSearch from "@v2/lib/components/bars/topbar-brand-search.svelte";
     import type { LibStore } from "@v2/lib/stores/library-store.svelte.js";
     import Navbar from "@v2/lib/components/bars/navbar.svelte";
+    import CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
+    import FilterChipBar from "@v2/lib/components/_other/filter-chip-bar.svelte";
 
 
     let { data } = $props()
     const { library_store } : { library_store: LibStore } = $derived(data)
+
+    const filter_options = ["All", "Gallery", "DNFs", "To Read", "Waitlist", "Favorites"]
+
+    let filter: string = $state("")
 </script>
 
 
@@ -16,6 +22,21 @@
     {#snippet topbar()}
         <TopbarBrandSearch />
     {/snippet}
+
+    <filter-wrapper>
+        <FilterChipBar 
+            options    = { filter_options }
+            bind:value = { filter }
+            name       = "library filters"
+            label      = "library filters"
+        />
+    </filter-wrapper>
+
+    {#if library_store.are_current_reads}
+        <CurrentlyReadingCarusel 
+            items = { library_store.currently_reading }
+        />
+    {/if}
 
     <cover-grid>
         {#each library_store.items as item (item.book_id)}
@@ -38,7 +59,13 @@
 <style>
     :global(layout.library-page-content)
     {
-        padding: 8px 24px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    filter-wrapper
+    {
+        padding: 8px 16px;
     }
 
 
@@ -50,5 +77,6 @@
         align-items: baseline;
         column-gap: 8px;
         row-gap: 12px;
+        padding: 8px 24px;
     }
 </style>
