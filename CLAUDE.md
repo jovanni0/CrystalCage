@@ -57,7 +57,7 @@ Decisions:
 
 - Server: add cover thumbnails (eg `GET /covers/{id}?size=thumbnail`) before the full-collection stress test; full-size covers in the library grid are heavy to decode on Android. The cache key then needs the size.
 - Server: `GET /covers/{id}` finds the file with `AssetStorage.findByEmbeddedId`, which lists the whole covers directory on every request (O(n) per image), reads it fully into memory (`readAllBytes`) and sends no `Cache-Control`. Asset filenames are human-readable (`FilenameBuilder`), so derived files (thumbnails) should live outside the `covers/` folder, keyed by id only.
-- Server: `docker-compose.yaml` mounts no volume for `STORAGE_BASE_DIR` on the app service; check that cover files survive a container rebuild.
+- Server: covers uploaded before the `sanctum_fs` volume was added are gone from disk but still in the DB (`exists in DB but no matching file found on disk`); delete or re-upload them.
 - Move remaining repositories from the old `ApiClient` to per-resource API classes on `HttpClient`/`SessionHttp`, then delete `ApiClient` and the old `APIClient`/`ApiClientV2` interfaces.
 - Server: return 409 on signup when the username is taken; JWT expiry was ~23h (typo for 24h) – planned ~90 days plus a refresh endpoint.
 - Server must validate that a book's series/universe belong to its author.
