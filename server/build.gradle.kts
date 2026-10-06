@@ -38,11 +38,13 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:1.3.0")
     implementation("org.jetbrains.exposed:exposed-java-time:1.3.0")
 
-
     implementation("org.flywaydb:flyway-core:12.11.0")
     implementation("org.flywaydb:flyway-database-postgresql:12.11.0")
 
     implementation("at.favre.lib:bcrypt:0.10.2")
+    implementation("net.coobird:thumbnailator:0.4.20")
+    implementation("com.twelvemonkeys.imageio:imageio-jpeg:3.12.0")
+    implementation("com.twelvemonkeys.imageio:imageio-webp:3.12.0")
 
     testImplementation("io.ktor:ktor-server-test-host:3.5.1")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.5.1")

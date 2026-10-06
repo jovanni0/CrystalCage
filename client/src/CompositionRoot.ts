@@ -22,6 +22,9 @@ import { ApiCovers }                  from "@v2/lib/clients/api-covers";
 
 
 
+const MEGABYTE = 1024 * 1024
+
+
 export const session             = new Session(new SessionStorage())
 export const logger              = new ConsoleLogger("DEBUG")
 export const api_client          = new ApiClient(logger, session)
@@ -41,7 +44,8 @@ export const api_auth = new ApiAuth(http_client, session_http)
 export const api_covers = new ApiCovers(session_http)
 
 // caches
-export const cover_image_cache = new CoverImageCache(api_covers, logger)
+export const fullsize_cover_cache = new CoverImageCache(api_covers, logger, "original", 48 * MEGABYTE)
+export const thumbnail_cover_cache = new CoverImageCache(api_covers, logger, "thumbnail", 16 * MEGABYTE)
 
 // repositories
 const repo_api = api_client
@@ -62,6 +66,7 @@ const resettables = [
     edition_repository, 
     book_repository, 
     cover_repository,
-    cover_image_cache
+    fullsize_cover_cache,
+    thumbnail_cover_cache
 ]
 session.onSignOut( () => resettables.forEach(it => it.reset()) )

@@ -20,10 +20,11 @@
     <cover-grid>
         {#each library_store.items as item (item.book_id)}
             <CoverWrapper 
-                book_id  = { item.book_id }
-                cover_id = { item.cover_id }
-                alt      = { item.label }
-                label    = { item.label }
+                book_id    = { item.book_id }
+                cover_id   = { item.cover_id }
+                cover_type = "thumbnail"
+                alt        = { item.label }
+                label      = { item.label }
             />
         {/each}
     </cover-grid>

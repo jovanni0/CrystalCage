@@ -1,6 +1,8 @@
 <script lang="ts">
-    import { ripple_effect } from "../buttons/ripple-effect";
-    import CoverImage from "./cover-image.svelte";
+    import type { CoverType } from "@v2/lib/clients/api-covers";
+    import      { ripple_effect } from "../buttons/ripple-effect";
+    import      CoverImage from "./cover-image.svelte";
+    
     import "../buttons/ripple-effect.css"
 
 
@@ -8,13 +10,15 @@
     let {
         cover_id,
         book_id,
+        cover_type,
         alt = "",
         label
     }: {
-        cover_id: string | null
-        book_id:  string
-        alt?:     string
-        label:    string
+        cover_id:   string | null
+        book_id:    string
+        cover_type: CoverType
+        alt?:       string
+        label:      string
     } = $props()
 </script>
 
@@ -26,8 +30,9 @@
     {@attach ripple_effect}
 >
     <CoverImage 
-        cover_id = { cover_id }
-        alt      = { alt }
+        cover_id   = { cover_id }
+        cover_type = { cover_type }
+        alt        = { alt }
     />
     <p>{ label }</p>
 </a>
@@ -42,6 +47,10 @@
         gap: 4px;
         justify-content: center;
         text-align: center;
+        
+        cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
     }
 
     p

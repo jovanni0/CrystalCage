@@ -1,5 +1,5 @@
 import type { Logger }      from "@root/loggers/Logger"
-import type { ApiCovers }   from "../clients/api-covers"
+import type { ApiCovers, CoverType }   from "../clients/api-covers"
 import type { AsyncResult } from "../utils/result"
 import      { attempt }     from "../utils/result"
 
@@ -21,9 +21,10 @@ export class CoverImageCache
 
 
     constructor(
-        private source:    ApiCovers,
-        private logger:    Logger,
-        private max_bytes: number     = DEFAULT_MAX_BYTES,
+        private source:     ApiCovers,
+        private logger:     Logger,
+        private cover_type: CoverType,
+        private max_bytes:  number     = DEFAULT_MAX_BYTES,
     ) {}
 
 
@@ -89,7 +90,11 @@ export class CoverImageCache
     private async fetchAndStore(cover_id: string): AsyncResult<Blob>
     {
         const generation = this.generation
-        const result = await attempt(this.logger, `load cover image ${cover_id}`, () => this.source.getImage(cover_id))
+        const result = await attempt(
+            this.logger, 
+            `load ${this.cover_type} cover image ${cover_id}`, 
+            () => this.source.getImage(cover_id, this.cover_type)
+        )
 
         if (generation !== this.generation) return result
 

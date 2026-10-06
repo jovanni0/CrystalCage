@@ -1,17 +1,21 @@
 <script lang="ts">
     import type { CoverFrameStatus }    from "./cover-frame.svelte";
-    import      { cover_image_cache, 
+    import      { fullsize_cover_cache, 
+                  thumbnail_cover_cache, 
                   visibility_observer } from "@root/CompositionRoot";
     import      CoverFrame              from "./cover-frame.svelte";
+    import type { CoverType } from "@v2/lib/clients/api-covers";
 
 
 
     let {
         cover_id,
+        cover_type,
         alt = "",
     }: {
-        cover_id: string | null
-        alt?:     string
+        cover_id:   string | null
+        cover_type: CoverType
+        alt?:       string
     } = $props()
 
 
@@ -22,6 +26,7 @@
     function loadCover(node: HTMLElement): (() => void) | void
     {
         const current_id = cover_id
+        const cover_cache = cover_type === "original" ? fullsize_cover_cache : thumbnail_cover_cache
         src = null
 
         if (current_id === null)
@@ -46,7 +51,7 @@
         {
             if (!current_id) return
             
-            const result = await cover_image_cache.load(current_id)
+            const result = await cover_cache.load(current_id)
 
             if (is_canceled) return
 
@@ -59,7 +64,7 @@
             show(result.value)
         }
 
-        const cached = cover_image_cache.peek(current_id)
+        const cached = cover_cache.peek(current_id)
 
         if (cached !== null)
         {

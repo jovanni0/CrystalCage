@@ -15,6 +15,7 @@ Read first:
 - v1 client is done but is being redesigned. v2 lives inside the same client project; v1 will mostly be rewritten, so only review/refactor v2 code unless asked.
 - First v2 screen: add/manage book (`client/src/routes/(v2_redesign)/add-book`). It saves books against the real server. Covers and editions are no longer added during creation; they get separate pages from the book profile.
 - Temporary, unstyled cover and edition managers: `routes/(v2_redesign)/manage-covers/[id]` and `manage-editions/[id]` (stores in `v2/lib/stores/*-manager.store.svelte.ts`, picked files queue as drafts until uploaded). The v1 book profile's edit button opens them from the Covers / Reads tabs; the Details tab opens `/add-book/[id]`.
+- Library redesign in progress: `routes/(v2_redesign)/library` (`LibStore` in `v2/lib/stores/library-store.svelte.ts`, grid of `components/covers/cover-wrapper.svelte`). Dev preview of cover states: `routes/(v2_redesign)/dev/cover-image`.
 - Next goal: wire the page into the app and import the whole book collection as a stress test.
 - Git: trunk-based, short branches off `main` (`v1.0.0` tag planned at the last pure-v1 commit).
 
@@ -29,6 +30,7 @@ Read first:
 | `repositories/` | app-wide cached server data, created once in `CompositionRoot` | via clients | yes |
 | `states/` | app-wide client state (`Session`, format colour registry) | no | yes |
 | `stores/` | per-page/flow state (`ManageBookStore`), created by a layout `load` | via repositories | yes |
+| `caches/` | in-memory binary caches (`CoverImageCache`) | via clients | no |
 | `storage/` | device persistence adapters (`SessionStorage`, later a cache store) | no | no |
 
 Decisions:
@@ -44,11 +46,18 @@ Decisions:
 - Types live next to the code that owns them; DTOs are one file per resource (`tag.dto.ts`).
 - Edition format colours: built-ins + user overrides (`Record<id, Partial<…>>`), hue-only in oklch, muted variant derived in CSS.
 - Markup uses custom element names instead of `div` on purpose.
+- Cover images: `GET /covers/{id}` needs the bearer token, so images are fetched as Blobs (`ApiCovers.getImage`), never via plain `<img src>`. `CoverImageCache` is an LRU of Blobs by cover id with a byte budget (48 MB), shared in-flight requests, generation counter, `peek/load/forget/reset`; reset on sign out, `forget` after a cover is deleted. Cover files never change, so there is no time-based invalidation. Components create and revoke their own object urls, so eviction never breaks a visible image.
+- Cover components (`components/covers/`): `cover-frame` is presentational (`status: empty | loading | loaded | error` + `src`), used directly by the dev page; `cover-image` loads by `cover_id` when visible (v1 `VisibilityObserver` via an `{@attach}` passed through `cover-frame`'s rest-prop spread — attachments on components only work if the component spreads its rest props onto an element); `cover-wrapper` is the library tile (link + title). Size is set by the parent (`width: 100%`, `aspect-ratio: 2 / 3`).
+- Text truncation to N lines is pure CSS (`line-clamp` + `-webkit-box`), never JS; the full text stays in the DOM. In a tile with a visible title, the cover `alt` is empty to avoid double announcements.
+- Design tokens (colours, `--text-body`, `--text-body-sm`, `--text-caption`, …) are defined in `routes/(v2_redesign)/+layout.svelte`; use only those names (eg there is no `--text-body-small`).
 
 
 
 ## Open items
 
+- Server: add cover thumbnails (eg `GET /covers/{id}?size=thumbnail`) before the full-collection stress test; full-size covers in the library grid are heavy to decode on Android. The cache key then needs the size.
+- Server: `GET /covers/{id}` finds the file with `AssetStorage.findByEmbeddedId`, which lists the whole covers directory on every request (O(n) per image), reads it fully into memory (`readAllBytes`) and sends no `Cache-Control`. Asset filenames are human-readable (`FilenameBuilder`), so derived files (thumbnails) should live outside the `covers/` folder, keyed by id only.
+- Server: `docker-compose.yaml` mounts no volume for `STORAGE_BASE_DIR` on the app service; check that cover files survive a container rebuild.
 - Move remaining repositories from the old `ApiClient` to per-resource API classes on `HttpClient`/`SessionHttp`, then delete `ApiClient` and the old `APIClient`/`ApiClientV2` interfaces.
 - Server: return 409 on signup when the username is taken; JWT expiry was ~23h (typo for 24h) – planned ~90 days plus a refresh endpoint.
 - Server must validate that a book's series/universe belong to its author.

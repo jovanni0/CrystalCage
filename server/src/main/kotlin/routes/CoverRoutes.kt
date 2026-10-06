@@ -5,12 +5,15 @@ import dev.jovanni0.database.TenantResolution
 import dev.jovanni0.database.tenant_schema
 import dev.jovanni0.filesystem.AssetCategory
 import dev.jovanni0.filesystem.AssetStorage
+import dev.jovanni0.filesystem.CoverThumbnails
 import dev.jovanni0.repositories.BookRepository
 import dev.jovanni0.repositories.CoverRepository
+import dev.jovanni0.utils.CoverSize
 import dev.jovanni0.utils.getUuidCallParamOrRespond
 import dev.jovanni0.utils.parseUuid
 import dev.jovanni0.utils.requiredUuidQueryParam
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.forEachPart
 import io.ktor.http.content.PartData
@@ -18,8 +21,10 @@ import io.ktor.server.application.log
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.request.receiveMultipart
+import io.ktor.server.response.header
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondBytes
+import io.ktor.server.response.respondFile
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
@@ -32,7 +37,8 @@ import java.nio.file.Files
 
 fun Route.coverRoutes(
     book_repository: BookRepository,
-    cover_repository: CoverRepository
+    cover_repository: CoverRepository,
+    cover_thumbnails: CoverThumbnails,
 )
 {
     authenticate("auth-jwt")
@@ -57,6 +63,12 @@ fun Route.coverRoutes(
         {
             val schema_name = call.tenant_schema
             val cover_id = call.getUuidCallParamOrRespond("id") ?: return@get
+            var size = CoverSize.fromQuery(call.request.queryParameters["size"])
+
+            if (size == null)
+            {
+                size = CoverSize.ORIGINAL
+            }
 
             val cover = cover_repository.findById(schema_name, cover_id)
 
@@ -75,11 +87,14 @@ fun Route.coverRoutes(
                 return@get
             }
 
-            val content_type = Files.probeContentType(file_path)
-                ?.let { ContentType.parse(it) }
-                ?: ContentType.Application.OctetStream
+            val served_path = when (size)
+            {
+                CoverSize.ORIGINAL -> file_path
+                else               -> cover_thumbnails.ensure(schema_name, cover_id, file_path, size)
+            }
 
-            call.respondBytes(Files.readAllBytes(file_path), content_type)
+            call.response.header(HttpHeaders.CacheControl, "private, max-age=31536000, immutable")
+            call.respondFile(served_path.toFile())
         }
 
 
@@ -181,6 +196,7 @@ fun Route.coverRoutes(
             val schema_name = call.tenant_schema
             val id = call.getUuidCallParamOrRespond("id") ?: return@delete
 
+            cover_thumbnails.deleteAll(schema_name, id)
             val is_successful = cover_repository.delete(schema_name, id)
 
             if (!is_successful)

@@ -12,10 +12,10 @@ import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
+import dev.jovanni0.filesystem.CoverThumbnails
 import dev.jovanni0.repositories.*
 import dev.jovanni0.routes.*
 import dev.jovanni0.tables.User
-import dev.jovanni0.tables.User.password_hash
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -90,13 +90,15 @@ fun Application.configureRouting(
     read_record_repository: ReadRecordRepository,
     tag_category_repository: TagCategoryRepository,
     http_client: HttpClient,
+    cover_thumbnails: CoverThumbnails,
+
 ) {
     routing {
         serverRoutes()
         authRoutes(user_repository, invite_code_repository, jwt_config, data_source)
         authorRoutes(author_repository)
         bookRoutes(book_repository)
-        coverRoutes(book_repository, cover_repository)
+        coverRoutes(book_repository, cover_repository, cover_thumbnails)
         editionRoutes(book_repository, edition_repository)
         readRecordRoutes(read_record_repository)
         seriesRoutes(author_repository, universe_repository, series_repository)
@@ -267,6 +269,7 @@ fun Application.module() {
 
     val storage_path = Path(environment.config.property("storage.baseDirectory").getString())
     val storage = AssetStorage(storage_path)
+    val cover_thumbnails = CoverThumbnails(storage_path)
 
     val invite_code_repository = InviteCodeRepository()
     val user_repository = UserRepository(invite_code_repository)
@@ -306,5 +309,6 @@ fun Application.module() {
         read_record_repository,
         tag_category_repository,
         http_client,
+        cover_thumbnails,
     )
 }
