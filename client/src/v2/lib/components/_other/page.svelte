@@ -37,6 +37,10 @@
         position: relative;
         width: 100%;
         height: 100%;
+        box-sizing: border-box;
+        /* edge-to-edge: the page draws behind the system bars, so keep content out of them */
+        padding-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+        padding-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
         overflow: hidden;
         background-color: var(--bg);
         timeline-scope: --content-scroll;
