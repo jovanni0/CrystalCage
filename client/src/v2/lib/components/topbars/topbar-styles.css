@@ -1,0 +1,18 @@
+.topbar-element
+{
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+
+    & > p.title
+    {
+        font-size: var(--text-heading-sm);
+        font-weight: 500;
+        position: absolute;
+        inset: 50% 50% auto auto;
+        transform: translate(50%, -50%);
+    }
+}

@@ -11,6 +11,8 @@ public class MainActivity extends BridgeActivity
     public void onCreate(Bundle savedInstanceState)
     {
         registerPlugin(ServerDiscoveryPlugin.class);
+        registerPlugin(HapticFeedbackPlugin.class);
+        registerPlugin(SoundFeedbackPlugin.class);
 
         super.onCreate(savedInstanceState);
     }

@@ -1,7 +1,7 @@
 
 
 
-export class Dates
+export class DateRules
 {
     /*
         convert an ISO date string to a RISO string.
@@ -74,7 +74,7 @@ export class Dates
         const month = Number(digits.slice(2, 4))
         const year = Number(digits.slice(4, 8))
 
-        return Dates.isDateValid(day, month, year)
+        return DateRules.isDateValid(day, month, year)
     }
 
 
@@ -93,6 +93,6 @@ export class Dates
         const month = Number(digits.slice(4, 6))
         const day = Number(digits.slice(6, 8))
 
-        return Dates.isDateValid(day, month, year)
+        return DateRules.isDateValid(day, month, year)
     }
 }

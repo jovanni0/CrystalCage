@@ -9,7 +9,9 @@ import dev.jovanni0.tables.tenant.BookTable
 import dev.jovanni0.tables.tenant.BookTagTable
 import dev.jovanni0.tables.tenant.TagTable
 import dev.jovanni0.utils.Patch
+import dev.jovanni0.utils.Update
 import dev.jovanni0.utils.setIfPresent
+import dev.jovanni0.utils.updateIfPresent
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.and
@@ -40,12 +42,13 @@ class TagRepository
                     onColumn = TagTable.id,
                     otherColumn = BookTagTable.tag_id
                 )
-                .select(TagTable.id, TagTable.name, TagTable.description, count)
+                .select(TagTable.id, TagTable.name, TagTable.category_id, TagTable.description, count)
                 .groupBy(TagTable.id, TagTable.name, TagTable.description)
                 .orderBy(TagTable.name, SortOrder.ASC)
                 .map {
                     TagCountRow(
                         id = it[TagTable.id],
+                        category_id = it[TagTable.category_id],
                         name = it[TagTable.name],
                         description = it[TagTable.description],
                         book_count = it[count].toInt(),
@@ -72,7 +75,7 @@ class TagRepository
                     onColumn = BookTagTable.book_id,
                     otherColumn = BookTable.id
                 )
-                .select(TagTable.id, TagTable.name, TagTable.description, BookTable.id, BookTable.title, BookTable.series_id, BookTable.cover_id)
+                .select(TagTable.id, TagTable.category_id, TagTable.name, TagTable.description, BookTable.id, BookTable.title, BookTable.series_id, BookTable.cover_id)
                 .where { TagTable.id eq id }
                 .toList()
 
@@ -94,6 +97,7 @@ class TagRepository
 
             TagDetailRow(
                 id = tag_row[TagTable.id],
+                category_id = tag_row[TagTable.category_id],
                 name = tag_row[TagTable.name],
                 description = tag_row[TagTable.description],
                 books = books,
@@ -102,17 +106,19 @@ class TagRepository
     }
 
 
-    fun create(schema_name: String, name: String, description: String?): TagRow
+    fun create(schema_name: String, category_id: Uuid?, name: String, description: String?): TagRow
     {
         return tenantTransaction(schema_name)
         {
             val insert_query = TagTable.insert {
+                it[TagTable.category_id] = category_id
                 it[TagTable.name] = name
                 it[TagTable.description] = description
             }
 
             TagRow(
                 id = insert_query[TagTable.id],
+                category_id = insert_query[TagTable.category_id],
                 name = insert_query[TagTable.name],
                 description = insert_query[TagTable.description]
             )
@@ -120,7 +126,7 @@ class TagRepository
     }
 
 
-    fun update(schema_name: String, id: Uuid, name: Patch<String>, description: Patch<String>, added_book_ids: List<Uuid>, removed_book_ids: List<Uuid>)
+    fun update(schema_name: String, id: Uuid, category_id: Update<Uuid?>, name: Patch<String>, description: Patch<String>, added_book_ids: List<Uuid>, removed_book_ids: List<Uuid>)
     {
         tenantTransaction(schema_name)
         {
@@ -128,6 +134,7 @@ class TagRepository
             {
                 TagTable.update({ TagTable.id eq id })
                 {
+                    it.updateIfPresent(TagTable.category_id, category_id)
                     it.setIfPresent(TagTable.name, name)
                     it.setIfPresent(TagTable.description, description)
                 }

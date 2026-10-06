@@ -82,7 +82,7 @@ export function toBookCreateRequest2(context: AddBookContext, covers: CoverDraft
         series_id: context.series_id ?? undefined,
         volume_number: context.volume_number ?? undefined,
         title: context.title!,
-        launch_date: context.launch_date?.toISOString().slice(0, 10),
+        launch_date: context.launch_date?.slice(0, 10),
         word_count: context.word_count ?? undefined,
         blurb: context.blurb ?? undefined,
         notes: context.notes ?? undefined,

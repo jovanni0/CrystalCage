@@ -1,6 +1,7 @@
 <script lang="ts">
     import Button from "@root/components/button.svelte";
-    import { api_client } from "@root/CompositionRoot";
+    import TopbarBack from "@root/components/topbar-back.svelte";
+    import { api_client, session } from "@root/CompositionRoot";
     import { goBack } from "@root/utils/go-back";
 
 
@@ -26,14 +27,18 @@
 
 
 <div class="page">
-    <h1>Generate invite code</h1>
+    <TopbarBack />
 
-    <p>{ code }</p>
-
-    <div class="buttons">
-        <Button text = "Back" onClick={goBack} type = "secondary"/>
-        <Button text = "Generate" onClick={generate} />
-    </div>
+    <content-wrapper>
+        <h1>Generate invite code</h1>
+    
+        <p>{ code }</p>
+    
+        <div class="buttons">
+            <Button text = "Sign out" onClick={ () => session.signOut() } type = "secondary"/>
+            <Button text = "Generate" onClick={generate} />
+        </div>
+    </content-wrapper>
 </div>
 
 
@@ -42,10 +47,17 @@
     {
         display: flex;
         flex-direction: column;
+        height: 100%;
+    }
+
+    content-wrapper
+    {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
         align-items: center;
         justify-content: center;
         padding: 24px;
-        height: 100%;
         box-sizing: border-box;
         gap: 64px;
     }

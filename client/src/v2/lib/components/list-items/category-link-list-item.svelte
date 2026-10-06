@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { HTMLButtonAttributes } from "svelte/elements";
+    import type { HTMLAnchorAttributes } from "svelte/elements";
     import ChevronRight from "../icons/chevron-right.svelte";
     import "./category-list-item-styles.css"
     import { ripple_effect } from "../buttons/ripple-effect";
@@ -11,17 +11,19 @@
         title,
         children,
         class: className,
+        href,
         ...rest
-    }: HTMLButtonAttributes & {
+    }: HTMLAnchorAttributes & {
         title: string
     } = $props()
 </script>
 
 
 
-<button
+<a
     id = "category-{title}"
     class = {[ "category-list-item", "ripple-container", className ]}
+    href = { href }
     {@attach ripple_effect}
     { ...rest }
 >
@@ -36,13 +38,16 @@
     </top-wrapper>
 
     {@render children?.()}
-</button>
+</a>
 
 
 
 <style>
-    button
+    a
     {
-        position: relative
+        position: relative;
+        cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
     }
 </style>

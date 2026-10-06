@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TagResponse(
     val id: String,
+    val category_id: String?,
     val name: String,
     val description: String?,
     val book_count: Int,

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { HTMLButtonAttributes } from "svelte/elements";
     import IconButton from "../buttons/icon-button.svelte";
     import CircleQuestionMark from "../icons/circle-question-mark.svelte";
 
@@ -7,7 +8,8 @@
     let {
         label,
         helper,
-    }: {
+        onclick
+    }: HTMLButtonAttributes & {
         label: string
         helper?: string
     } = $props()
@@ -37,6 +39,7 @@
 <create-list-item>
     <button
         class = "create-button"
+        onclick = { onclick }
     >
         <p>Create <span>{ label }</span></p>
     </button>

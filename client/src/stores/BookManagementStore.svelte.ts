@@ -58,9 +58,9 @@ export class BookManagementStore
     public tag_search:      string = $state("")
     
     public author_results:   AuthorResponse[]     = $derived(this.author_query.filter(this.authors, this.author_search))
-    public author_name:      string | null        = $derived(this.author_query.nameOf(this.authors, this.author_id))
+    public author_name:      string | null        = $derived(this.author_query.nameOfId(this.authors, this.author_id))
     public universe_results: UniverseResponse[]   = $derived(this.universe_query.filter(this.universes, this.universe_search))
-    public universe_name:    string | null        = $derived(this.universe_query.nameOf(this.universes, this.universe_id))
+    public universe_name:    string | null        = $derived(this.universe_query.nameOfId(this.universes, this.universe_id))
     public series_results:   SeriesResponse[]     = $derived(this.series_query.filter(this.series, this.series_search))
     public series_name:      string | null        = $derived(this.series_query.nameOf(this.series, this.series_id))
     public default_cover_id: string | null        = $derived(this.cover_manager?.default_id ?? null)

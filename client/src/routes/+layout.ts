@@ -1,52 +1,47 @@
-import { session_manager }  from "@root/CompositionRoot";
-import { browser }          from "$app/environment";
-import { redirect }         from "@sveltejs/kit";
-import { toSearchParams }   from "@root/utils/SearchParams";
+import { redirect }     from "@sveltejs/kit";
+import { api_auth, 
+         logger, 
+         session }      from "@root/CompositionRoot";
+import { attempt }      from "@v2/lib/utils/result";
+import { SessionRules } from "@v2/lib/rules/session-rules";
 
 
 
 export const prerender = true;
 export const ssr = false;
 
-// NOTE: the previous code was triggering all the `load` functions to run when navigating from a page to a child page,
-// so the objects constructed on other `load` functions did not persist. this fixes it, but might create bugs with session management.
-// export const load = async ({ route }) =>
-// {
-//     if (!browser)
-//     {
-//         return
-//     }
 
-//     if (session_manager.status === "UNKNOWN")
-//     {
-//         await session_manager.restoreSession()
-//     }
 
-//     const status = session_manager.status
-//     const is_onboarding = route.id?.includes("onboarding") ?? false
+/*
+* Runs once: restores the session and redirects the first page if needed.
+*
+* `route` is read inside `untrack`, so this load does not rerun on navigation. If it did, every child layout that awaits `parent()`
+* would rerun too and rebuild its store, losing unsaved state. Redirects on later navigations happen in `+layout.svelte`.
+*/
+export const load = async ({ route, untrack }) =>
+{
+    if (session.status === "UNKNOWN")
+    {
+        const status = await session.restore()
 
-//     if (status === "AUTHENTICATED" && is_onboarding) 
-//     {
-//         redirect(303, "/")
-//     } 
-//     else if (status === "NEEDS_LOGIN" && !is_onboarding) 
-//     {
-//         const search_params = toSearchParams({ 
-//             address: session_manager.server_address, 
-//             name:    session_manager.server_name,
-//         })
+        if (status === "AUTHENTICATED")
+        {
+            const me = await attempt(logger, "verify session", () => api_auth.me())
 
-//         if (search_params)
-//         {
-//             redirect(303, `/login?${search_params}`)
-//         }
-//         else
-//         {
-//             redirect(303, "/auto-discovery")
-//         }
-//     } 
-//     else if (status === "NO_SERVER" && !is_onboarding) 
-//     {
-//         redirect(303, "/welcome")
-//     }
-// }
+            if (me.ok)
+            {
+                session.user = me.value
+            }
+
+            // on 401 `SessionHttp` has already signed out; on network errors the token is kept and cached data is used
+        }
+    }
+
+    const route_id = untrack(() => route.id)
+    const target   = SessionRules.redirectFor(session.status, route_id, session.base_url, session.server_name)
+
+    if (target !== null)
+    {
+        redirect(303, target)
+    }
+}

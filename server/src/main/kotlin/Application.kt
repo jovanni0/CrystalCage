@@ -88,6 +88,7 @@ fun Application.configureRouting(
     edition_repository: EditionRepository,
     cover_repository: CoverRepository,
     read_record_repository: ReadRecordRepository,
+    tag_category_repository: TagCategoryRepository,
     http_client: HttpClient,
 ) {
     routing {
@@ -99,7 +100,7 @@ fun Application.configureRouting(
         editionRoutes(book_repository, edition_repository)
         readRecordRoutes(read_record_repository)
         seriesRoutes(author_repository, universe_repository, series_repository)
-        tagRoutes(tag_repository)
+        tagRoutes(tag_repository, tag_category_repository)
         universeRoutes(universe_repository)
         imageProxy(http_client)
     }
@@ -277,6 +278,7 @@ fun Application.module() {
     val cover_repository = CoverRepository(storage)
     val book_repository = BookRepository(author_repository, cover_repository, edition_repository)
     val read_record_repository = ReadRecordRepository()
+    val tag_category_repository = TagCategoryRepository()
 
     val http_client = HttpClient(CIO)
     {
@@ -302,6 +304,7 @@ fun Application.module() {
         edition_repository,
         cover_repository,
         read_record_repository,
+        tag_category_repository,
         http_client,
     )
 }

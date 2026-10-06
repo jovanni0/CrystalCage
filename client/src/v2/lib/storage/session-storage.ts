@@ -1,5 +1,12 @@
-import type {PersistedSession} from "@data-types/PersistedSession";
-import      { Preferences }    from "@capacitor/preferences";
+import { Preferences } from "@capacitor/preferences"
+
+
+
+export type PersistedSession = {
+    base_url:    string
+    server_name: string | null
+    token:       string | null
+}
 
 
 
@@ -10,7 +17,9 @@ export class SessionStorage
 
     async load(): Promise<PersistedSession | null>
     {
-        const { value } = await Preferences.get({ key: this.SESSION_KEY })
+        const { value } = await Preferences.get({ 
+            key: this.SESSION_KEY 
+        })
 
         return value !== null ? JSON.parse(value) : null
     }

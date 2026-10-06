@@ -33,4 +33,21 @@ export class SeriesQuery
 
         return target.name
     }
+
+
+    /**
+     * Returns the new series name if there is no exact match with the search.
+     */
+    public getCreatableSeries(search: string, series: SeriesResponse[]): string | undefined
+    {
+        const series_from_search = search.trim()
+        const target = series.find(it => it.name === series_from_search)
+
+        if (!target)
+        {
+            return series_from_search
+        }
+
+        return undefined
+    }
 }

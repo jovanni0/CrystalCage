@@ -7,16 +7,18 @@
     let {
         title,
         children,
+        class: className,
     }: {
         title: string
         children?: Snippet
+        class?: string
     } = $props()
 </script>
 
 
 
 <category-list-item
-    class = "category-list-item"
+    class = {[ "category-list-item", className ]}
 >
     <p class = "category">
         { title.toLocaleUpperCase() }

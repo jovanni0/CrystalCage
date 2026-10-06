@@ -1,68 +1,58 @@
 <script lang="ts">
-	import { session_manager } from "@root/CompositionRoot";
-	import { page }            from "$app/state";
-	import { goto }            from "$app/navigation";
-    import { onMount }         from "svelte";
-    import { Capacitor }       from "@capacitor/core";
-    import { App }             from "@capacitor/app"
-    import { toSearchParams }  from "@root/utils/SearchParams";
+	import { nav, 
+             session }      from "@root/CompositionRoot";
+	import { page }         from "$app/state";
+	import { afterNavigate, goto }         from "$app/navigation";
+    import { onMount }      from "svelte";
+    import { Capacitor }    from "@capacitor/core";
+    import { App }          from "@capacitor/app"
+    import { SessionRules } from "@v2/lib/rules/session-rules";
+    import { triggerSoundEffect } from "@v2/lib/android/sound-feedback-plugin";
 
 
 
 	let { children } = $props();
 
-
-	$effect( () =>
-	{
-		const status = session_manager.status
-		const is_onboarding = page.route.id?.includes("onboarding") ?? false
+    afterNavigate(navigation => nav.onNavigated(navigation))
 
 
-        if (status === "AUTHENTICATED" && is_onboarding) 
+    function onClick(event: MouseEvent)
+    {
+        if (!event.isTrusted) return
+
+        if (event.target instanceof HTMLInputElement && event.target.closest("label") !== null)
         {
-            goto("/")
-        } 
-        else if (status === "NEEDS_LOGIN" && !is_onboarding) 
-        {
-            const search_params = toSearchParams({ 
-                address: session_manager.server_address, 
-                name:    session_manager.server_name,
-            })
-
-            if (search_params)
-            {
-                goto(`/login?${search_params}`)
-            }
-            else
-            {
-                goto("/auto-discovery")
-            }
-        } 
-        else if (status === "NO_SERVER" && !is_onboarding) 
-        {
-            goto("/welcome")
+            return   // the browser's follow-up click from the label
         }
-	})
+
+        const target = (event.target as Element).closest("button, a[href], label, [role='button'], summary")
+
+        if (target === null) return
+
+        triggerSoundEffect()
+    }
 
 
+    // guards every navigation after the first load, and sessions that end while a page is open
+    $effect(() =>
+    {
+        const target = SessionRules.redirectFor(session.status, page.route.id, session.base_url, session.server_name)
+
+        if (target !== null)
+        {
+            goto(target, { replaceState: true })
+        }
+    })
+
+    
     onMount( () =>
     {
-        if (!Capacitor.isNativePlatform())
-        {
-            return
-        }
+        if (!Capacitor.isNativePlatform()) return
 
-        App.addListener("backButton", ({ canGoBack }) => 
-        {
-            if (canGoBack)
-            {
-                window.history.back()
-            }
-            else
-            {
-                App.exitApp()
-            }
-        })
+        const back_listener = App.addListener("backButton", () => nav.onNativeBack())
+        const click_listener = document.addEventListener("click", onClick, { capture: true })
+
+        return () => back_listener.then(it => it.remove())
     })
 </script>
 

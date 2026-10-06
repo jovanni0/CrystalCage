@@ -7,7 +7,7 @@ export type AddBookContext = {
     series_id:        string | null
     volume_number:    number | null
     title:            string | null
-    launch_date:      Date | null
+    launch_date:      string | null
     word_count:       number | null
     blurb:            string | null
     notes:            string | null

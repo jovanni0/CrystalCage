@@ -25,6 +25,8 @@ import io.ktor.server.routing.post
 import io.ktor.server.util.getOrFail
 import io.ktor.util.toLowerCasePreservingASCIIRules
 import io.ktor.util.toUpperCasePreservingASCIIRules
+import java.time.Duration
+import java.time.Instant
 import java.util.Date
 import javax.sql.DataSource
 
@@ -81,7 +83,7 @@ fun Route.authRoutes(
             .withAudience(jwt_config.audience)
             .withClaim("realm", jwt_config.realm)
             .withClaim("user_id", user.id.toString())
-            .withExpiresAt(Date(System.currentTimeMillis() + 84_400_000))
+            .withExpiresAt(Date.from(Instant.now().plus(Duration.ofDays(90))))
             .sign(Algorithm.HMAC256(jwt_config.secret))
 
         call.respond(

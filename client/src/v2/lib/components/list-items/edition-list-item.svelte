@@ -1,7 +1,7 @@
 <script lang="ts">
     import FormatPill from "../pills/format-pill.svelte";
     import Radiobox from "../boxes/radiobox.svelte";
-    import type { FormatColorVariant } from "@v2/lib/utils/format-color-registry";
+    import type { EditionFileFormatDefinition } from "@v2/lib/utils/format-color-registry.svelte";
 
 
     
@@ -11,7 +11,7 @@
         is_disabled = false,
         onChange,
     }: {
-        variant:     FormatColorVariant
+        variant:     EditionFileFormatDefinition
         is_checked:  boolean
         is_disabled: boolean
         onChange?:   () => void
@@ -26,7 +26,8 @@
 >
     <FormatPill 
         label       = { variant.label }
-        color       = { variant.color }
+        hue         = { variant.hue }
+        chroma      = { variant.chroma }
         is_disabled = { is_disabled }
     />
 

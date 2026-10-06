@@ -1,136 +1,258 @@
 <script lang="ts">
-    import { onMount, type Snippet } from "svelte";
+    import { untrack, type Snippet } from "svelte"
 
 
 
-    // type SnapPoint = {
-    //     name:   string
-    //     offset: number
-    // } | {
-    //     name:    "auto"
-    //     is_auto: true
-    // }
-
-    type SnapPoint = {
-        name:   string
-        offset: number
-    }
+    type SheetPolicy = "fit" | "fit-expand"
+    type SnapName    = "closed" | "auto" | "full"
 
     let {
-        is_open = $bindable(false),
+        is_open  = $bindable(false),
+        policy   = "fit",
         children,
-        lock_to_fit = false,
+        header,
+        footer,
+        class: class_name,
     }: {
         is_open?:  boolean
-        children?: Snippet
-        lock_to_fit?: boolean
+        policy?:   SheetPolicy   // fit: content height, not resizable. fit-expand: content height, expandable to full.
+        children?: Snippet       // scrolling content
+        header?:   Snippet       // fixed above the scrolling content (e.g. a search field)
+        footer?:   Snippet       // fixed below the scrolling content (e.g. the action button)
+        class?:    string
     } = $props()
 
 
-    // const snap_options: SnapPoint[] = [
-    //     { name: "auto",   is_auto: true },
-    //     { name: "full",   offset: 0     },
-    //     { name: "large",  offset: 0.25  },
-    //     { name: "half",   offset: 0.5   },
-    //     { name: "small",  offset: 0.75  },
-    //     { name: "closed", offset: 1     },
-    // ]
+    /* ------------------------------------------------------------------ */
+    /*  constants                                                          */
+    /* ------------------------------------------------------------------ */
 
-    let sheet_height:   number        = $state(0)
-    let content_height: number        = $state(0)
+    const MAX_HEIGHT_RATIO = 0.9   // the sheet never grows beyond 90% of the scrim
+    const PADDING_TOP      = 36
+    const PADDING_BOTTOM   = 24
 
-    let auto_offset: number = $derived.by( () =>
-    {
-        if (!sheet_height || !content_height)
-        {
-            return 0.5
-        }
-        
-        const adjusted_content_height = content_height + 36 + 24
+    /* minimum speed in px/ms that counts as a fling. */
+    const FLING_THRESHOLD = 0.5
 
-        const visible_ratio = Math.min(1, adjusted_content_height / sheet_height)
-        const invisible_ration = 1 - visible_ratio
+    /* how long (ms) after the last scrim resize the height animates again. */
+    const SCRIM_SETTLE_TIME = 150
 
-        return invisible_ration
-    })
+    /* how far back (ms) the release velocity is measured. */
+    const VELOCITY_WINDOW = 100
 
-    const snap_options = $derived(
-        lock_to_fit 
-        ? [
-            { name: "auto",   offset: auto_offset },
-            { name: "closed", offset: 1 },
-        ]
-        : [
-            { name: "full",   offset: 0     },
-            { name: "half",   offset: 0.5   },
-            { name: "closed", offset: 1     },
-        ]
+    /* the pointer has to travel this far (px) before a press turns into a sheet drag. */
+    const DRAG_THRESHOLD = 8
+
+    /* the initial movement must stay within 45 degrees of the vertical axis to count as a drag. */
+    const CONE_TAN = Math.tan(45 * Math.PI / 180)
+
+    /* text-entry elements keep their own drag behaviour (selection, caret). */
+    const TEXT_ENTRY_SELECTOR = "textarea, select"
+
+
+    /* ------------------------------------------------------------------ */
+    /*  measurements                                                       */
+    /* ------------------------------------------------------------------ */
+
+    let scrim_height   = $state(0)
+    let header_height  = $state(0)
+    let footer_height  = $state(0)
+    let content_height = $state(0)
+
+    const max_height = $derived(scrim_height * MAX_HEIGHT_RATIO)
+
+    /* the height at which everything fits without scrolling (uncapped). */
+    const natural_height = $derived(
+        PADDING_TOP + header_height + content_height + footer_height + PADDING_BOTTOM
     )
 
+    /* fit-expand never shrinks while open: it keeps the tallest content height since opening.
+       reset in setSnap when the sheet opens. kept uncapped, so a shorter scrim (keyboard)
+       only caps it and the sheet returns to its size once the scrim grows back. */
+    let peak_height = $state(0)
 
-    const snap_points          = $derived(snap_options.toSorted((a, b) => a.offset - b.offset))
-    const snap_position_closed = $derived(snap_points[snap_points.length - 1])
-    const snap_position_half   = $derived(snap_points.find(it => it.name === "half") ?? snap_options[0])
+    const content_fit_height = $derived(
+        policy === "fit"
+            ? natural_height
+            : Math.max(natural_height, peak_height)
+    )
+
+    const auto_height = $derived(Math.min(content_fit_height, max_height))
 
     $effect( () =>
     {
-        console.log(snap_points)
+        peak_height = content_fit_height
     })
 
 
+    /* the scrim resizes when the keyboard opens or closes. the sheet follows it instantly:
+       an animated height would overshoot and lag behind the keyboard. */
+    let is_scrim_resizing = $state(false)
 
-
-    let sheet: HTMLElement
-
-    /* the minimum acceleration in px/s that triggers snapping to the next point. */
-    const FLING_THRESHOLD: number = 0.5
-
-    let current_snap:   SnapPoint     = $state({ name: "closed", offset: 1 })
-    let drag_offset:    number | null = $state(null)
-
-
-    let pointer_id: number | null = null
-    let start_pointer_y = 0
-    let start_translate_y = 0
-    let history: { time: number, y: number }[] = []
-
-
-    function offsetToPX(offset: number)
+    $effect.pre( () =>
     {
-        return offset * sheet_height
-    }
-
-    function currentTranslateY()
-    {
-        if (drag_offset !== null)
+        if (scrim_height === 0)
         {
-            return drag_offset
+            return
         }
 
-        return offsetToPX(current_snap.offset)
-    }
+        is_scrim_resizing = true
+
+        const timer = setTimeout( () => is_scrim_resizing = false, SCRIM_SETTLE_TIME )
+
+        return () => clearTimeout(timer)
+    })
+
+    /* ------------------------------------------------------------------ */
+    /*  snap points                                                        */
+    /* ------------------------------------------------------------------ */
+
+    /* sorted by height, ascending. auto is always the smallest open point. */
+    const snap_names: SnapName[] = $derived(
+        policy === "fit-expand"
+            ? ["closed", "auto", "full"]
+            : ["closed", "auto"]
+    )
+
+    const snap_heights: Record<SnapName, number> = $derived({
+        closed: 0,
+        auto:   auto_height,
+        full:   max_height,
+    })
+
+    const max_open_height = $derived(snap_heights[snap_names[snap_names.length - 1]])
+
+
+    /* ------------------------------------------------------------------ */
+    /*  state                                                              */
+    /* ------------------------------------------------------------------ */
+
+    let current_name: SnapName = $state("closed")
+
+    /* the height the sheet had when it was closed, so it slides away without resizing. */
+    let rest_height: number | null = $state(null)
+
+    /* raw finger-driven height while dragging. can go below the auto height. */
+    let drag_raw: number | null = $state(null)
+
+    /* the single source of truth for the sheet's height. */
+    const visible_height = $derived.by( () =>
+    {
+        if (drag_raw !== null)
+        {
+            return Math.min(max_open_height, Math.max(auto_height, drag_raw))
+        }
+
+        if (current_name === "closed")
+        {
+            return rest_height ?? auto_height
+        }
+
+        return snap_heights[current_name]
+    })
+
+    /* how far the sheet is pulled below its auto height (translateY, in px). */
+    const drag_overshoot = $derived(
+        drag_raw === null ? 0 : Math.max(0, auto_height - drag_raw)
+    )
+
+    const is_body_overflowing = $derived(natural_height > visible_height + 1)
+
+
+    /* ------------------------------------------------------------------ */
+    /*  dragging                                                           */
+    /* ------------------------------------------------------------------ */
+
+    let sheet: HTMLElement
+    let body_element: HTMLElement
+
+    type Gesture = "idle" | "pending" | "dragging" | "rejected"
+
+    let gesture:         Gesture       = "idle"
+    let pointer_id:      number | null = null
+    let start_pointer_x  = 0
+    let start_pointer_y  = 0
+    let start_height     = 0
+    let should_suppress_click = false
+    let history: { time: number, y: number }[] = []
+    let is_starting_in_body = false
 
     function onPointerDown(event: PointerEvent)
     {
         const target = event.target as HTMLElement
 
-        if (target.closest("button, a, input, select, textarea")) 
+        if (target.closest(TEXT_ENTRY_SELECTOR))
         {
             return
         }
+
+        /* inside a scrollable list the gesture is decided later, at the list's edge. */
+        is_starting_in_body = is_body_overflowing && body_element.contains(target)
         
-        pointer_id = event.pointerId
-
-        sheet.setPointerCapture(pointer_id)
-
+        /* nothing is captured or moved yet. this is only a candidate for a drag. */
+        gesture         = "pending"
+        pointer_id      = event.pointerId
+        start_pointer_x = event.clientX
         start_pointer_y = event.clientY
-        start_translate_y = currentTranslateY()
-        drag_offset = start_translate_y
+    }
 
-        history = [{ 
-            time: performance.now(), 
-            y:    event.clientY 
-        }]
+
+    function beginDrag(event: PointerEvent)
+    {
+        gesture = "dragging"
+
+        sheet.setPointerCapture(event.pointerId)
+
+        /* re-base on the current position so the sheet doesn't jump by the threshold. */
+        start_pointer_y = event.clientY
+        start_height    = visible_height
+        drag_raw        = start_height
+        history         = [{ time: event.timeStamp, y: event.clientY }]
+    }
+
+
+    function isVerticalSwipe(event: PointerEvent)
+    {
+        const delta_x = event.clientX - start_pointer_x
+        const delta_y = event.clientY - start_pointer_y
+
+        return Math.abs(delta_x) <= Math.abs(delta_y) * CONE_TAN
+    }
+
+
+    function hasPassedDragThreshold(event: PointerEvent)
+    {
+        return Math.hypot(event.clientX - start_pointer_x, event.clientY - start_pointer_y) >= DRAG_THRESHOLD
+    }
+
+    /* a scrolled list hands the gesture to the sheet only at its edge: pulling down at the top,
+    or pushing up at the bottom while the sheet can still grow. */
+    function canDragFromBody(delta_y: number)
+    {
+        if (delta_y > 0)
+        {
+            return body_element.scrollTop <= 0
+        }
+
+        const is_at_bottom = body_element.scrollTop + body_element.clientHeight >= body_element.scrollHeight - 1
+
+        return is_at_bottom && visible_height < max_open_height - 1
+    }
+
+
+    function shouldDragSheet(event: PointerEvent)
+    {
+        if (!isVerticalSwipe(event))
+        {
+            return false
+        }
+
+        if (!is_starting_in_body)
+        {
+            return true
+        }
+
+        return canDragFromBody(event.clientY - start_pointer_y)
     }
 
 
@@ -141,21 +263,79 @@
             return
         }
 
-        const swipe_delta = event.clientY - start_pointer_y
-        const translate_delta = start_translate_y + swipe_delta
-        const min_offset = Math.min(...snap_points.map(it => offsetToPX(it.offset)))
-        const max_offset = Math.max(...snap_points.map(it => offsetToPX(it.offset)))
+        if (gesture === "pending")
+        {
+            if (!hasPassedDragThreshold(event))
+            {
+                return
+            }
 
-        drag_offset = Math.min(max_offset, Math.max(min_offset, translate_delta))
+            /* decided once, when the threshold is crossed. */
+            if (shouldDragSheet(event))
+            {
+                beginDrag(event)
+            }
+            else
+            {
+                gesture = "rejected"
+            }
 
-        history.push({ 
-            time: performance.now(),
-            y:    event.clientY
-        })
+            return
+        }
 
-        const history_cutoff_time = performance.now() - 100
+        if (gesture !== "dragging")
+        {
+            return
+        }
 
-        history = history.filter(it => it.time >= history_cutoff_time)
+        /* swiping down shrinks the sheet, so the sign is flipped. */
+        drag_raw = Math.min(max_open_height, Math.max(0, start_height - (event.clientY - start_pointer_y)))
+
+        /* in-place trim: no allocation per move. */
+        history.push({ time: event.timeStamp, y: event.clientY })
+
+        while (history.length > 2 && history[0].time < event.timeStamp - VELOCITY_WINDOW)
+        {
+            history.shift()
+        }
+    }
+
+
+    /* px/ms, positive = moving down. */
+    function releaseVelocity()
+    {
+        const first_record = history[0]
+        const last_record  = history[history.length - 1]
+        const time_delta   = last_record.time - first_record.time
+
+        if (time_delta <= 0)
+        {
+            return 0
+        }
+
+        return (last_record.y - first_record.y) / time_delta
+    }
+
+
+    function targetSnap(release_height: number, velocity: number): SnapName
+    {
+        /* fling: go to the next snap point in the fling direction. */
+        if (velocity > FLING_THRESHOLD)
+        {
+            return snap_names.findLast( name => snap_heights[name] < release_height - 1 ) ?? "closed"
+        }
+
+        if (velocity < -FLING_THRESHOLD)
+        {
+            return snap_names.find( name => snap_heights[name] > release_height + 1 ) ?? snap_names[snap_names.length - 1]
+        }
+
+        /* otherwise: go to the closest snap point. */
+        return snap_names.reduce( (closest, name) =>
+            Math.abs(snap_heights[name] - release_height) < Math.abs(snap_heights[closest] - release_height)
+                ? name
+                : closest
+        )
     }
 
 
@@ -168,103 +348,71 @@
 
         pointer_id = null
 
-        const release_position = drag_offset ?? currentTranslateY()
-        let velocity = 0
+        const was_dragging = gesture === "dragging"
 
-        if (history.length >= 2)
+        gesture = "idle"
+
+        /* it never became a drag: either a plain click or a swipe we ignored. */
+        if (!was_dragging)
         {
-            const first_record = history[0]
-            const last_record = history[history.length - 1]
-            const history_time_delta = last_record.time - first_record.time
-
-            if (history_time_delta > 0)
-            {
-                velocity = (last_record.y - first_record.y) / history_time_delta
-            }
+            return
         }
 
-        let target_snap: SnapPoint
+        /* swallow the click the browser may fire after a drag. */
+        should_suppress_click = true
+        setTimeout( () => should_suppress_click = false, 0 )
 
-        // snap to the next point in the fling direction
-        if (Math.abs(velocity) > FLING_THRESHOLD)
-        {
-            const current_offset_px = release_position
-            const current_snap_index = snap_points.findIndex(it => offsetToPX(it.offset) >= current_offset_px)
-
-            if (velocity > 0)
-            {
-                const next_snap_index = Math.min(snap_points.length - 1, Math.max(0, current_snap_index))
-
-                target_snap = snap_points[next_snap_index]
-
-                if (offsetToPX(target_snap.offset) <= current_offset_px + 1 && current_snap_index < snap_points.length - 1)
-                {
-                    target_snap = snap_points[current_snap_index + 1]
-                }
-            }
-            else
-            {
-                const target_snap_index = current_snap_index <= 0 ? 0 : current_snap_index - 1
-
-                target_snap = snap_points[target_snap_index]
-            }
-        }
-        // snap to the closest point
-        else
-        {
-            target_snap = snap_points.reduce( (closest, it) =>
-            {
-                const next_point_position = offsetToPX(it.offset)
-                const closest_point_position = offsetToPX(closest.offset)
-
-                const next_delta = Math.abs(next_point_position - release_position)
-                const closest_delta = Math.abs(closest_point_position - release_position)
-
-                return next_delta < closest_delta ? it : closest
-            })
-
-        }
-
-        setSnap(target_snap)
+        setSnap(targetSnap(drag_raw ?? visible_height, releaseVelocity()))
     }
 
 
+    function onClickCapture(event: MouseEvent)
+    {
+        if (!should_suppress_click)
+        {
+            return
+        }
+
+        should_suppress_click = false
+        event.stopPropagation()
+        event.preventDefault()
+    }
 
     function onKeydown(event: KeyboardEvent)
     {
         if (event.key === "Escape")
         {
-            setSnap(snap_position_closed)
+            setSnap("closed")
         }
     }
 
 
-    function setSnap(snap_point: SnapPoint, notify_external: boolean = true)
+    function setSnap(name: SnapName, should_notify: boolean = true)
     {
-        drag_offset = null
-        current_snap = snap_point
-
-        if (notify_external)
+        if (name === "closed")
         {
-            is_open = snap_point.name !== "closed"
+            /* remember where we were, so the sheet slides out at that height. */
+            rest_height = visible_height
+        }
+        else if (current_name === "closed")
+        {
+            /* a fresh opening starts from the current content height. */
+            peak_height = 0
+        }
+
+        drag_raw     = null
+        current_name = name
+
+        if (should_notify)
+        {
+            is_open = name !== "closed"
         }
     }
 
 
-    onMount( () =>
-    {
-        sheet_height = sheet.offsetHeight
-
-        const resize_observer = new ResizeObserver( () =>
-        {
-            sheet_height = sheet.offsetHeight
-        })
-
-        resize_observer.observe(sheet)
-
-        return () => resize_observer.disconnect()
-    })
-
+    /* ------------------------------------------------------------------ */
+    /*  effects                                                            */
+    /* ------------------------------------------------------------------ */
 
     $effect( () =>
     {
@@ -277,50 +425,101 @@
     })
 
 
-    /* sync `is_open` with internal snap point changes. external changes have control. */
-    $effect( () => 
+
+    /* once the sheet owns a touch gesture, the list must not scroll along with it. */
+    $effect( () =>
     {
-        if (is_open && current_snap.name === "closed")
+        const preventScroll = (event: TouchEvent) =>
         {
-            setSnap(snap_position_half, false)
+            if (gesture === "dragging" && event.cancelable)
+            {
+                event.preventDefault()
+            }
         }
-        else if (!is_open && current_snap.name !== "closed")
-        {
-            setSnap(snap_position_closed, false)
-        }
+
+        sheet.addEventListener("touchmove", preventScroll, { passive: false })
+
+        return () => sheet.removeEventListener("touchmove", preventScroll)
     })
+
+
+    /* sync `is_open` with internal snap changes. external changes have control. */
+    $effect( () =>
+    {
+        const is_opening = is_open
+
+        untrack( () =>
+        {
+            if (is_opening && current_name === "closed")
+            {
+                setSnap("auto", false)
+            }
+            else if (!is_opening && current_name !== "closed")
+            {
+                setSnap("closed", false)
+            }
+        })
+    })
+
 </script>
 
 
 
-
 <scrim
-    role         = "presentation"
-    class:opened = { is_open }
-    class:closed = { !is_open }
-    onclick      = { () => setSnap(snap_position_closed) }
+    role              = "presentation"
+    bind:clientHeight = { scrim_height }
+    class:opened      = { is_open }
+    class:closed      = { !is_open }
+    onclick           = { () => setSnap("closed") }
 >
-    <bottom-sheet 
-        bind:this         = { sheet }
-        role              = "presentation"
-        style:transform   = "translateY({currentTranslateY()}px)"
-        style:height      = { lock_to_fit ? `${content_height}px` : undefined }
-        class:opened      = { is_open }
-        class:closed      = { !is_open }
-        class:fit-content = { lock_to_fit }
-        onclick           = { (event: MouseEvent) => event.stopPropagation() }
-        onpointerdown     = { onPointerDown }
-        onpointermove     = { onPointerMove }
-        onpointerup       = { onPointerUp }
-        onpointercancel   = { onPointerUp }
+    <bottom-sheet
+        bind:this       = { sheet }
+        role            = "presentation"
+        style:height    = "{visible_height}px"
+        style:transform = { drag_raw !== null ? `translateY(${drag_overshoot}px)` : undefined }
+        class:opened    = { is_open }
+        class:closed    = { !is_open }
+        class:dragging  = { drag_raw !== null }
+        class:resizing  = { is_scrim_resizing }
+        onclickcapture  = { onClickCapture }
+        onclick         = { (event: MouseEvent) => event.stopPropagation() }
+        onpointerdown   = { onPointerDown }
+        onpointermove   = { onPointerMove }
+        onpointerup     = { onPointerUp }
+        onpointercancel = { onPointerUp }
     >
-        <div class = "thumb"></div>
+        <div class="thumb"></div>
 
-        <wrapper
-            bind:clientHeight = { content_height }
+        {#if header}
+            <div 
+                class="header" 
+                bind:clientHeight = { header_height }
+            >
+                {@render header()}
+            </div>
+        {/if}
+
+        <div 
+            bind:this        = { body_element }
+            class            = {[ "body", class_name ]} 
+            class:scrollable = { is_body_overflowing }
         >
-            {@render children?.()}
-        </wrapper>
+            <div 
+                class="content" 
+                bind:clientHeight = { content_height }
+            >
+                {@render children?.()}
+            </div>
+        </div>
+
+        {#if footer}
+            <div 
+                class="footer" 
+                bind:clientHeight = { footer_height }
+            >
+                {@render footer()}
+            </div>
+        {/if}
     </bottom-sheet>
 </scrim>
 
@@ -353,12 +552,8 @@
         &.closed
         {
             transition:
-                opacity 200ms cubic-bezier(0.05, 0.7, 0.1, 1),
-                visibility 0ms linear 200ms;
-
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
+                opacity    200ms cubic-bezier(0.05, 0.7, 0.1, 1),
+                visibility 0ms   linear 200ms;
         }
     }
 
@@ -369,9 +564,14 @@
 
         display: flex;
         flex-direction: column;
-        height: 90vh;
-        overflow-y: hidden;
+        box-sizing: border-box;
+        overflow: hidden;
 
+        /* layout inside the sheet never leaks out to the page while it resizes. */
+        contain: layout paint;
+
+        /* `height` is set from script. the sheet is anchored to the bottom of the
+           screen, so the footer stays put while the content grows and shrinks. */
         background-color: var(--bg);
         border-radius: 32px 32px 0 0;
         padding: 36px 20px 24px 20px;
@@ -381,27 +581,31 @@
         overscroll-behavior: contain;
 
         transform: translateY(100%);
-        
+
         &.opened
         {
-            transition: 
-                height 700ms cubic-bezier(0.05, 0.7, 0.1, 1),
+            transition:
+                height    350ms cubic-bezier(0.05, 0.7, 0.1, 1),
                 transform 250ms cubic-bezier(0.05, 0.7, 0.1, 1);
+
             transform: translateY(0);
         }
 
         &.closed
         {
-            transition: 
-                height 700ms cubic-bezier(0.05, 0.7, 0.1, 1),
-                transform 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
-            transform: translateY(100%);
+            transition: transform 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
         }
 
-        &.fit-content
+        /* the height snaps to the keyboard; opening and closing still slide. */
+        &.opened.resizing
         {
-            max-height: 90vh;
-            justify-content: flex-end;
+            transition: transform 250ms cubic-bezier(0.05, 0.7, 0.1, 1);
+        }
+
+        /* no transitions while the finger is on the sheet. */
+        &.dragging
+        {
+            transition: none;
         }
     }
 
@@ -417,14 +621,37 @@
         border-radius: 100px;
     }
 
-    wrapper
+    .header
+    {
+        flex: none;
+        padding-bottom: 16px;
+    }
+
+    .body
+    {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        touch-action: none;
+
+        &.scrollable
+        {
+            touch-action: pan-y;
+        }
+    }
+
+    .content
     {
         display: flex;
         flex-direction: column;
-        gap: 32px;
-        height: 100%;
-        min-height: 0;
-        box-sizing: border-box;
-        overflow: hidden;
+    }
+
+    .footer
+    {
+        flex: none;
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
     }
 </style>

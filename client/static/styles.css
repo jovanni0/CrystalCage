@@ -116,36 +116,6 @@
     font-display: swap;
 }
 
-
-/* redesign v2 */
-:root
-{
-    --bg:                  hsl(39, 47%, 94%);
-    --bg-brand:            hsl(116, 21%, 32%);
-    --bg-brand-disabled:   hsl(117, 15%, 70%);
-    --bg-brand-secondary:  hsl(30, 42%, 39%);
-    --text:                hsl(33, 15%, 15%);
-    --text-brand:          var(--bg-brand);
-    --text-muted:          hsl(34, 5%, 40%);
-    --text-placeholder:    hsl(36, 5%, 60%);
-    --text-error:          hsl(6, 59%, 30%);
-    --text-inverted:       hsl(30, 15%, 95%);
-    --text-inverted-muted: hsl(33, 14%, 85%);
-    
-
-    --text-body:       16px;
-    --text-body-lg:    18px;
-    --text-body-sm:    14px;
-    --text-caption:    12px;
-    --text-display-lg: 48px;
-    --text-display-sm: 36px;
-    --text-heading-lg: 30px;
-    --text-heading-md: 24px;
-    --text-heading-sm: 20px;
-
-    interpolate-size: allow-keywords;
-}
-
 html, body 
 {
     margin: 0;
@@ -155,7 +125,17 @@ html, body
 }
 
 button {
-    all: unset;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    text-align: inherit;
+    box-shadow: none;
+    border-radius: 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
 }
