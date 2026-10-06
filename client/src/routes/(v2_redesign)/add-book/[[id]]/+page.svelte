@@ -1,22 +1,23 @@
 <script lang="ts">
-    import ExternalCategoryListItem from "@v2/lib/components/list-items/category-button-list-item.svelte";
-    import DateListItem             from "@v2/lib/components/list-items/date-list-item.svelte";
-    import ExternalPickerListItem   from "@v2/lib/components/list-items/external-picker-list-item.svelte";
-    import CategoryListItem         from "@v2/lib/components/list-items/category-list-item.svelte";
-    import InputField               from "@v2/lib/components/_other/input-field.svelte";
-    import Page                     from "@v2/lib/components/_other/page.svelte"
-    import { CreateBookStore }      from "@v2/lib/stores/book-management.store.svelte";
-    import { goBack } from "@root/utils/go-back.js";
+    import { CreateBookStore }                   from "@v2/lib/stores/book-management.store.svelte";
+    import { goBack }                            from "@root/utils/go-back.js";
+    import { renderMarkdown }                    from "@v2/lib/utils/markdown.js";
+    import { nav, 
+             tag_repository }                    from "@root/CompositionRoot.js";
+    import ExternalCategoryListItem              from "@v2/lib/components/list-items/category-button-list-item.svelte";
+    import DateListItem                          from "@v2/lib/components/list-items/date-list-item.svelte";
+    import ExternalPickerListItem                from "@v2/lib/components/list-items/external-picker-list-item.svelte";
+    import CategoryListItem                      from "@v2/lib/components/list-items/category-list-item.svelte";
+    import InputField                            from "@v2/lib/components/_other/input-field.svelte";
+    import Page                                  from "@v2/lib/components/_other/page.svelte"
     import SelectOrCreateFromSearchableListSheet from "@v2/lib/elements/select-or-create-from-searchable-list-sheet.svelte";
-    import SelectVolumeNumberSheet from "@v2/lib/elements/select-volume-number-sheet.svelte";
-    import SetWordCountSheet from "@v2/lib/elements/set-word-count-sheet.svelte";
-    import SelectOrCreateTagsSheet from "@v2/lib/elements/select-or-create-tags-sheet.svelte";
-    import GenericPill from "@v2/lib/components/_other/generic-pill.svelte";
-    import CategoryLinkListItem from "@v2/lib/components/list-items/category-link-list-item.svelte";
-    import TopbarCancelAction from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
-    import { renderMarkdown } from "@v2/lib/utils/markdown.js";
-    import { tag_repository } from "@root/CompositionRoot.js";
-    import { goto } from "$app/navigation";
+    import SelectVolumeNumberSheet               from "@v2/lib/elements/select-volume-number-sheet.svelte";
+    import SetWordCountSheet                     from "@v2/lib/elements/set-word-count-sheet.svelte";
+    import SelectOrCreateTagsSheet               from "@v2/lib/elements/select-or-create-tags-sheet.svelte";
+    import GenericPill                           from "@v2/lib/components/_other/generic-pill.svelte";
+    import CategoryLinkListItem                  from "@v2/lib/components/list-items/category-link-list-item.svelte";
+    import TopbarCancelAction                    from "@v2/lib/components/topbars/topbar-cancel-action.svelte";
+
 
 
     let { data } = $props()
@@ -27,6 +28,8 @@
         book_store: CreateBookStore
         id:         string | null 
     } = $derived(data)
+
+
 
     let author_sheet     = $state(false)
     let universe_sheet   = $state(false)
@@ -48,27 +51,12 @@
 
         if (result)
         {
-            goto(`/book/${result}`, { replaceState: true })
+            nav.goTo(`/book/${result}`, true)
 
             return
         }
 
         error_message = "An error occurred while trying to save the book"
-    }
-
-
-    async function deleteBook()
-    {
-        const is_deleted = await book_store.delete()
-
-        if (is_deleted)
-        {
-            goBack()
-
-            return
-        }
-
-        error_message = "An error occurred while trying to delete the book"
     }
 </script>
 
@@ -98,32 +86,32 @@
 
         <list>
             <ExternalPickerListItem 
-                key = "Author"
-                label = { book_store.author_name ?? "" }
+                key         = "Author"
+                label       = { book_store.author_name ?? "" }
                 is_required = { true }
-                onclick = { () => author_sheet = true }
+                onclick     = { () => author_sheet = true }
             />
 
             <ExternalPickerListItem 
-                key = "Universe"
-                label = { book_store.universe_name ?? "" }
+                key              = "Universe"
+                label            = { book_store.universe_name ?? "" }
                 disabled_message = { !book_store.is_author_selected ? "Needs author" : undefined }
-                onclick = { () => universe_sheet = true }
+                onclick          = { () => universe_sheet = true }
             />
 
             <ExternalPickerListItem 
-                key = "Series"
-                label = { book_store.series_name ?? "" }
+                key              = "Series"
+                label            = { book_store.series_name ?? "" }
                 disabled_message = { !book_store.is_author_selected ? "Needs author" : undefined }
-                onclick = { () => series_sheet = true }
+                onclick          = { () => series_sheet = true }
             />
 
             <ExternalPickerListItem 
-                key = "Volume"
-                label = { book_store.volume_number?.toString() ?? "" }
+                key              = "Volume"
+                label            = { book_store.volume_number?.toString() ?? "" }
                 disabled_message = { !book_store.is_series_selected ? "Needs series" : undefined }
-                is_required = { book_store.is_series_selected ? true : false }
-                onclick = { () => volume_sheet = true }
+                is_required      = { book_store.is_series_selected ? true : false }
+                onclick          = { () => volume_sheet = true }
             />
         </list>
     </details-wrapper>
@@ -134,13 +122,13 @@
     >
         <list>
             <ExternalPickerListItem 
-                key = "Word count"
-                label = { book_store.word_count ? `~ ${book_store.word_count.toString()} K` : "" }
+                key     = "Word count"
+                label   = { book_store.word_count ? `~ ${book_store.word_count.toString()} K` : "" }
                 onclick = { () => word_count_sheet = true }
             />
 
             <DateListItem 
-                key = "Release date"
+                key           = "Release date"
                 bind:ISO_date = { book_store.launch_date }
             />
         </list>
@@ -193,40 +181,49 @@
 
     {#snippet sheets()}
         <SelectOrCreateFromSearchableListSheet 
-            bind:is_open      = { author_sheet} 
-            bind:search       = { book_store.author_search }
-            bind:selected_id  = { () => book_store.author_id ?? "", 
-                                  (value: string) => { book_store.setAuthorId(value); author_sheet = false } }
-            search_placeholder = "Type a name to search or add"
-            items             = { book_store.author_results }
-            create_label      = { book_store.author_create_label }
-            button_label      = "Set author"
-            is_resetable      = { false }
-            onCreate          = { () => { book_store.createAndSetAuthor(); author_sheet = false } }
+            bind:is_open             = { author_sheet} 
+            bind:search              = { book_store.author_search }
+            bind:selected_id         = { () => book_store.author_id ?? "", 
+                                         (value: string) => { book_store.setAuthorId(value); author_sheet = false } }
+            search_placeholder       = "Type a name to search or add..."
+            empty_placeholder        = "There are no authors saved yet."
+            empty_search_palceholder = "No author matches the search."
+            items                    = { book_store.author_results }
+            create_label             = { book_store.author_create_label }
+            button_label             = "Set author"
+            is_resetable             = { false }
+            is_empty                 = { book_store.author_options.length === 0 }
+            onCreate                 = { () => { book_store.createAndSetAuthor(); author_sheet = false } }
         />
 
         <SelectOrCreateFromSearchableListSheet 
-            bind:is_open     = { universe_sheet } 
-            bind:search      = { book_store.universe_search }
-            items            = { book_store.universe_results }
-            bind:selected_id = { () => book_store.universe_id ?? "", 
-                                 (value: string) => { book_store.setUniverseId(value); universe_sheet = false } }
-            search_placeholder = "Type a universe to search or add"
-            create_label     = { book_store.universe_create_label }
-            button_label     = "Set universe"
-            onCreate         = { () => { book_store.createAndSetUniverse(); universe_sheet = false } }
+            bind:is_open             = { universe_sheet } 
+            bind:search              = { book_store.universe_search }
+            items                    = { book_store.universe_results }
+            bind:selected_id         = { () => book_store.universe_id ?? "", 
+                                         (value: string) => { book_store.setUniverseId(value); universe_sheet = false } }
+            search_placeholder       = "Type a universe to search or add..."
+            empty_placeholder        = "There are no universes saved yet."
+            empty_search_palceholder = "No universe matches the search."
+            create_label             = { book_store.universe_create_label }
+            button_label             = "Set universe"
+            is_empty                 = { book_store.universe_options.length === 0 }
+            onCreate                 = { () => { book_store.createAndSetUniverse(); universe_sheet = false } }
         />
 
         <SelectOrCreateFromSearchableListSheet 
-            bind:is_open     = { series_sheet } 
-            bind:search      = { book_store.series_search }
-            items            = { book_store.series_results }
-            bind:selected_id = { () => book_store.series_id ?? "", 
-                                 (value: string) => { book_store.setSeriesId(value); series_sheet = false } }
-            search_placeholder = "Type a series to search or add"
-            create_label     = { book_store.series_create_label }
-            button_label     = "Set series"
-            onCreate         = { () => { book_store.createAndSetSeries(); series_sheet = false } }
+            bind:is_open             = { series_sheet } 
+            bind:search              = { book_store.series_search }
+            items                    = { book_store.series_results }
+            bind:selected_id         = { () => book_store.series_id ?? "", 
+                                         (value: string) => { book_store.setSeriesId(value); series_sheet = false } }
+            search_placeholder       = "Type a series to search or add..."
+            empty_placeholder        = "There are no series saved yet."
+            empty_search_palceholder = "No series matches the search."
+            create_label             = { book_store.series_create_label }
+            button_label             = "Set series"
+            is_empty                 = { book_store.series_options.length === 0 }
+            onCreate                 = { () => { book_store.createAndSetSeries(); series_sheet = false } }
         />
         
         <SelectVolumeNumberSheet 
@@ -246,13 +243,16 @@
         />
 
         <SelectOrCreateTagsSheet 
-            bind:is_open      = { tags_sheet }
-            bind:search       = { book_store.tag_search }
-            bind:selected_ids = { book_store.tag_ids }
-            tag_groups        = { book_store.tag_groups }
-            show_create       = { book_store.should_create_tag }
-            is_empty          = { tag_repository.all.length === 0 }
-            onCreate          = { () => book_store.createTag() }
+            bind:is_open             = { tags_sheet }
+            bind:search              = { book_store.tag_search }
+            bind:selected_ids        = { book_store.tag_ids }
+            search_placeholder       = "Type a tag to search or add..."
+            empty_placeholder        = "There are no tags saved yet." 
+            empty_search_palceholder = "No tag matches the search."
+            tag_groups               = { book_store.tag_groups }
+            show_create              = { book_store.should_create_tag }
+            is_empty                 = { tag_repository.all.length === 0 }
+            onCreate                 = { () => book_store.createTag() }
         />
     {/snippet}
 </Page>

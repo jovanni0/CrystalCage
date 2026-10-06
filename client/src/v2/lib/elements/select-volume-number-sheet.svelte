@@ -1,10 +1,9 @@
 <script lang="ts">
-    import NumberInputStepper from "../components/_other/number-input-stepper.svelte";
-    import CategoryListItem from "../components/list-items/category-list-item.svelte";
-    import KeyValueListItem from "../components/list-items/key-value-list-item.svelte";
-    import Sheetv2 from "./sheetv2.svelte";
-    import Button from "@v2/lib/components/buttons/button.svelte"
-    import Sheetv3 from "./sheetv3.svelte";
+    import type { VolumeLabel }    from "../stores/book-management.store.svelte";
+    import      NumberInputStepper from "../components/_other/number-input-stepper.svelte";
+    import      KeyValueListItem   from "../components/list-items/key-value-list-item.svelte";
+    import      Button             from "@v2/lib/components/buttons/button.svelte"
+    import      BottomSheet        from "../components/_other/bottom-sheet.svelte";
 
 
     let {
@@ -13,9 +12,9 @@
         volumes,
         next_volume,
     }: {
-        is_open?: boolean
-        volume?:  number | null
-        volumes:  { id: string, title: string, volume: number }[]
+        is_open?:    boolean
+        volume?:     number | null
+        volumes:     VolumeLabel[]
         next_volume: number
     } = $props()
 
@@ -31,7 +30,7 @@
 
 
 
-<Sheetv3 
+<BottomSheet 
     bind:is_open
     policy = "fit-expand"
 >
@@ -58,7 +57,7 @@
             <volume-list>
                 {#each volumes as volume (volume.id)}
                     <KeyValueListItem 
-                        key = { volume.title }
+                        key   = { volume.title }
                         value = "#{volume.volume}"
                     />
                 {/each}
@@ -70,13 +69,13 @@
 
     {#snippet footer()}
         <Button 
-            state = { already_exists ? "disabled" : "default" }
+            state   = { already_exists ? "disabled" : "default" }
             onclick = { () => { volume = draft_volume; is_open = false } }
         >
             Set volume number
         </Button>
     {/snippet}
-</Sheetv3>
+</BottomSheet>
 
 
 <style>

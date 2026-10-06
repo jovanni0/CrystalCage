@@ -1,36 +1,40 @@
 <script lang="ts">
-    import SearchBar        from "@v2/lib/components/_other/search-bar.svelte";
-    import Button           from "@v2/lib/components/buttons/button.svelte";
-    import CreateListItem   from "@v2/lib/components/list-items/create-list-item.svelte";
-    import RadioListItem    from "@v2/lib/components/list-items/radio-list-item.svelte";
-    import Sheetv2          from "./sheetv2.svelte";
-    import Sheetv3 from "./sheetv3.svelte";
-    import IconButton from "../components/buttons/icon-button.svelte";
-    import Ex from "../components/icons/ex.svelte";
-    import SearchBarWithCreate from "../components/_other/search-bar-with-create.svelte";
+    import type { DisplayLabel }    from "../stores/book-management.store.svelte";
+    import      Button              from "@v2/lib/components/buttons/button.svelte";
+    import      RadioListItem       from "@v2/lib/components/list-items/radio-list-item.svelte";
+    import      BottomSheet         from "../components/_other/bottom-sheet.svelte";
+    import      IconButton          from "../components/buttons/icon-button.svelte";
+    import      Ex                  from "../components/icons/ex.svelte";
+    import      SearchBarWithCreate from "../components/_other/search-bar-with-create.svelte";
 
 
 
     let {
-        is_open     = $bindable(),
-        search      = $bindable(),
+        is_open                   = $bindable(),
+        search                    = $bindable(),
+        selected_id               = $bindable(),
         search_placeholder,
+        empty_placeholder,
+        empty_search_palceholder,
         items,
-        selected_id = $bindable(),
         create_label,
         button_label,
-        is_resetable = true,
+        is_resetable              = true,
+        is_empty                  = false,
         onCreate,
     }: {
-        is_open?:      boolean
-        search?:       string
-        search_placeholder?: string
-        items:         { id: string, label: string }[],
-        selected_id?:  string | null
-        create_label?: string | null,
-        button_label:  string
-        is_resetable?: boolean
-        onCreate?:     () => void
+        is_open?:                  boolean
+        search?:                   string
+        search_placeholder?:       string
+        empty_placeholder?:        string
+        empty_search_palceholder?: string
+        items:                     DisplayLabel[],
+        selected_id?:              string | null
+        create_label?:             string | null,
+        button_label:              string
+        is_resetable?:             boolean
+        is_empty?:                 boolean
+        onCreate?:                 () => void
     } = $props()
 
 
@@ -55,7 +59,7 @@
 
 
 
-<Sheetv3 
+<BottomSheet 
     bind:is_open 
     policy = "fit-expand"
 >
@@ -77,18 +81,26 @@
         </search-wrapper>
     {/snippet}
 
-    <author-list class = "scrollbar-thin">
-        {#each items as item (item.id)}
-            <RadioListItem 
-                label = { item.label }
-                is_selected = { draft_id === item.id }
-                onSelect = { () => draft_id = item.id }
-            />
-        {/each}
+    <author-list
+        class:empty = { is_empty || items.length === 0 }
+    >
+        {#if is_empty}
+            <p class = "empty-message">{ empty_placeholder }</p>
+        {:else if items.length === 0}
+            <p class = "empty-search-message">{ empty_search_palceholder }</p>
+        {:else}
+            {#each items as item (item.id)}
+                <RadioListItem 
+                    label       = { item.label }
+                    is_selected = { draft_id === item.id }
+                    onSelect    = { () => draft_id = item.id }
+                />
+            {/each}
+        {/if}
     </author-list>
     
     {#snippet footer()}
-        <button-wrapper>
+        <button-wrapper class:content-empty = { is_empty }>
             {#if is_resetable}
                 <IconButton 
                     class   = { [ "clear", is_selection_removeable && "open" ] }
@@ -101,16 +113,16 @@
             {/if}
 
             <Button 
-                class = "primary-button"
+                class   = "primary-button"
                 onclick = { () => selected_id = draft_id }
-                state = { !draft_id || draft_id === selected_id ? "disabled" : "default" }
-                style = "flex: 1;"
+                state   = { !draft_id || draft_id === selected_id ? "disabled" : "default" }
+                style   = "flex: 1;"
             >
                 { button_label }
             </Button>
         </button-wrapper>
     {/snippet}
-</Sheetv3>
+</BottomSheet>
 
 
 
@@ -134,15 +146,26 @@
         }
     }
 
-
     author-list
     {
         display: flex;
         flex-direction: column;
-        min-width: 0;
-        flex: 1;
         overflow-y: auto;
         min-height: 128px;
+        height: 100%;
+
+        &.empty
+        {
+            justify-content: center;
+            align-content: center;
+        }
+    }
+
+    .empty-message,
+    .empty-search-message
+    {
+        color: var(--text-placeholder);
+        text-align: center;
     }
 
     button-wrapper
@@ -150,6 +173,11 @@
         display: flex;
         flex-direction: row;
         padding-top: 16px;
+
+        &.content-empty
+        {
+            padding-top: 0;
+        }
     }
 
 

@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { edition_format_color_registry } from "@root/CompositionRoot";
-    import SliderStepper from "../components/_other/slider-stepper.svelte";
-    import Button from "../components/buttons/button.svelte";
-    import InlineHelpButton from "../components/buttons/inline-help-button.svelte";
-    import EditionWordcountListItem from "../components/list-items/edition-wordcount-list-item.svelte";
-    import Sheetv2 from "./sheetv2.svelte";
-    import Sheetv3 from "./sheetv3.svelte";
+    import type { EditionWordCount } from "../stores/book-management.store.svelte";
+    import      { edition_format_color_registry } from "@root/CompositionRoot";
+    import      SliderStepper                     from "../components/_other/slider-stepper.svelte";
+    import      Button                            from "../components/buttons/button.svelte";
+    import      InlineHelpButton                  from "../components/buttons/inline-help-button.svelte";
+    import      EditionWordcountListItem          from "../components/list-items/edition-wordcount-list-item.svelte";
+    import      BottomSheet                       from "../components/_other/bottom-sheet.svelte";
 
 
 
     let {
-        is_open = $bindable(),
-        value   = $bindable(),
+        is_open         = $bindable(),
+        value           = $bindable(),
         slider_min,
         slider_max,
         wpp_coeficient,
@@ -22,7 +22,7 @@
         slider_min:     number
         slider_max:     number
         wpp_coeficient: number
-        editions:       { id: string, label: string, format: string, added_at: string }[]
+        editions:       EditionWordCount[]
     } = $props()
 
     let draft_count = $derived.by( () =>
@@ -34,7 +34,8 @@
 </script>
 
 
-<Sheetv3
+
+<BottomSheet
     bind:is_open
     policy = "fit-expand"
 >
@@ -73,13 +74,13 @@
 
     {#snippet footer()}
         <Button
-            state = { draft_count === (value ?? 0) ? "disabled" : "default" }
+            state   = { draft_count === (value ?? 0) ? "disabled" : "default" }
             onclick = { () => { draft_count > 0 ? value = draft_count : value = null; is_open = false } }
         >
             { draft_count > 0 ? "Set this length" : "Remove length" }
         </Button>
     {/snippet}
-</Sheetv3>
+</BottomSheet>
 
 
 
