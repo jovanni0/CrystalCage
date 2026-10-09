@@ -7,6 +7,7 @@
     import CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
     import FilterChipBar from "@v2/lib/components/_other/filter-chip-bar.svelte";
     import UpdateProgressSheet from "@v2/lib/elements/update-progress-sheet.svelte";
+    import { nav } from "@root/CompositionRoot.js";
 
 
     let { data } = $props()
@@ -19,9 +20,13 @@
 
 
 
-<Page class = "library-page-content">
+<Page 
+    class = "library-page-content"
+>
     {#snippet topbar()}
-        <TopbarBrandSearch />
+        <TopbarBrandSearch 
+            onAddBook = { () => nav.goTo("/add-book")}
+        />
     {/snippet}
 
     <filter-wrapper>
@@ -57,17 +62,6 @@
     {/snippet}
 
     {#snippet sheets()}
-        <!-- <UpdateProgressSheet 
-            bind:is_open = { progress_sheet_open }
-            percentage = { 0 }
-            total_pages = { undefined }
-            title = "When the Last Star Goes Cold"
-            format = "epub"
-            edition_label = "Penguin Random House"
-            cover_id = "c59252dc-f14a-4361-b663-b328a1654f79"
-            book_id = "book-1"
-        /> -->
-
         <UpdateProgressSheet
             bind:is_open = { library_store.is_progress_sheet_open }
             read         = { library_store.selected_read }
@@ -84,11 +78,12 @@
     {
         display: flex;
         flex-direction: column;
+        gap: 16px;
     }
 
     filter-wrapper
     {
-        padding: 8px 16px;
+        padding: 0 16px;
     }
 
 

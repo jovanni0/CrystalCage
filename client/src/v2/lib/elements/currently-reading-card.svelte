@@ -53,7 +53,7 @@
         flex-direction: row;
         align-items: center;
         gap: 8px;
-        padding: 8px 32px 8px 40px;
+        padding: 0 24px 0 32px;
         border-radius: 8px;
     }
 

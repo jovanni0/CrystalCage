@@ -65,7 +65,6 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        padding: 8px 0;
         overflow: hidden;
         flex-shrink: 0;
 
