@@ -8,6 +8,7 @@ import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.auth.PasswordHasher
 import dev.jovanni0.data_types.UserRole
 import dev.jovanni0.database.DbConfig
+import dev.jovanni0.database.migrateAllTenantSchemas
 import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
@@ -91,7 +92,7 @@ fun Application.configureRouting(
     tag_category_repository: TagCategoryRepository,
     http_client: HttpClient,
     cover_thumbnails: CoverThumbnails,
-
+    read_progress_repository: ReadProgressRepository,
 ) {
     routing {
         serverRoutes()
@@ -105,6 +106,7 @@ fun Application.configureRouting(
         tagRoutes(tag_repository, tag_category_repository)
         universeRoutes(universe_repository)
         imageProxy(http_client)
+        readProgressRoutes(read_progress_repository)
     }
 }
 
@@ -149,6 +151,8 @@ fun Application.configureDatabase(): HikariDataSource {
         .migrate()
 
     Database.connect(data_source)
+
+    migrateAllTenantSchemas(data_source)
 
     return data_source
 }
@@ -282,6 +286,7 @@ fun Application.module() {
     val book_repository = BookRepository(author_repository, cover_repository, edition_repository)
     val read_record_repository = ReadRecordRepository()
     val tag_category_repository = TagCategoryRepository()
+    val read_progress_repository = ReadProgressRepository(read_record_repository)
 
     val http_client = HttpClient(CIO)
     {
@@ -310,5 +315,6 @@ fun Application.module() {
         tag_category_repository,
         http_client,
         cover_thumbnails,
+        read_progress_repository,
     )
 }

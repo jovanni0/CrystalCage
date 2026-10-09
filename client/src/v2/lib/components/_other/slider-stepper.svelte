@@ -6,13 +6,17 @@
 
 
     let {
-        value = $bindable(),
-        min_value = 0,
-        max_value = 300,
+        value         = $bindable(),
+        label_prefix,
+        label_suffix,
+        min_value     = 0,
+        max_value     = 300,
     }: {
-        value: number,
-        min_value?: number
-        max_value?: number
+        value:         number
+        label_prefix?: string
+        label_suffix?: string
+        min_value?:    number
+        max_value?:    number
     } = $props()
 
 
@@ -56,7 +60,7 @@
             bind:value
         >
 
-        <span>~ {label_value} K</span>
+        <span>{label_prefix}{label_value}{label_suffix}</span>
     </track-wrapper>
 
     <IconButton
@@ -87,7 +91,7 @@
         display: block;
         flex: 1;
         min-width: 0;
-        padding: 1.75rem 0;
+        padding: 1.75rem 0 20px 0;
 
         & > span
         {

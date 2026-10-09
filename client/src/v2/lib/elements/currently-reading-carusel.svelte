@@ -1,24 +1,16 @@
-<script lang="ts" module>
-    export type CaruselItemInfo = {
-        cover_id: string | null
-        book_id:  string
-        title:    string
-        author:   string
-        progress: number
-    }
-</script>
-
-
 <script lang="ts">
     import CaruselPips from "../components/_other/carusel-pips.svelte";
+    import type { CurrentRead } from "../stores/library-store.svelte";
 
     import CurrentlyReadingCard from "./currently-reading-card.svelte";
 
 
     let {
         items = [],
+        triggerSheet,
     }: {
-        items?: CaruselItemInfo[]
+        items?: CurrentRead[]
+        triggerSheet?: (id: string) => void
     } = $props()
 
 
@@ -46,13 +38,13 @@
     <carusel-wrapper
         onscroll = { updateCurrent }
     >
-        {#each items as item (item.book_id)}
+        {#each items as item (item.read_record_id)}
             <CurrentlyReadingCard 
                 title    = { item.title }
                 author   = { item.author }
                 cover_id = { item.cover_id }
-                book_id  = { item.book_id }
                 progress = { item.progress }
+                onClick  = { () => triggerSheet?.(item.read_record_id) }
             />
         {/each}
     </carusel-wrapper>
@@ -75,6 +67,7 @@
         align-items: stretch;
         padding: 8px 0;
         overflow: hidden;
+        flex-shrink: 0;
 
         & > :global(carusel-pips)
         {

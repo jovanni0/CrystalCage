@@ -48,7 +48,7 @@
 
 <Sheet
     bind:is_open = { is_sheet_opened }
-    lock_to_fit  = { true }
+    policy = "fit"
 >
     {#if sheet_step === 1}
         <list

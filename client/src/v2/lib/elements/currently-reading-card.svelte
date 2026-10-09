@@ -7,22 +7,22 @@
     let {
         title,
         author,
-        book_id,
         cover_id,
         progress,
+        onClick,
     }: {
         title: string
         author: string
-        book_id: string
         cover_id: string | null
         progress: number
+        onClick?: () => void
     } = $props()
 </script>
 
 
 
-<a
-    href = "/book/{book_id}"
+<button
+    onclick = { onClick }
 >
     <cover-wrapper>
         <CoverImage 
@@ -38,16 +38,16 @@
             <p class = "author">by { author }</p>
         </info-wrapper>
 
-        <ProgressBar percentage = { progress } />
+        <ProgressBar percentage = { progress / 100 } />
     </details-wrapper>
 
     <ChevronRight />
-</a>
+</button>
 
 
 
 <style>
-    a
+    button
     {
         display: flex;
         flex-direction: row;
@@ -55,10 +55,6 @@
         gap: 8px;
         padding: 8px 32px 8px 40px;
         border-radius: 8px;
-
-        color: inherit;
-        text-decoration: none;
-        -webkit-tap-highlight-color: transparent;
     }
 
     cover-wrapper

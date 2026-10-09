@@ -45,6 +45,7 @@
             inset: 0 auto 0 0;
             width: clamp(4px, var(--progress), 100%);
             background-color: var(--text-muted);
+            transition: width 0.6s ease;
         }
     }
 </style>

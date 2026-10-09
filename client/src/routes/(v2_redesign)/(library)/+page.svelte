@@ -6,6 +6,7 @@
     import Navbar from "@v2/lib/components/bars/navbar.svelte";
     import CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
     import FilterChipBar from "@v2/lib/components/_other/filter-chip-bar.svelte";
+    import UpdateProgressSheet from "@v2/lib/elements/update-progress-sheet.svelte";
 
 
     let { data } = $props()
@@ -32,9 +33,10 @@
         />
     </filter-wrapper>
 
-    {#if library_store.are_current_reads}
+    {#if library_store.current_reads.length > 0}
         <CurrentlyReadingCarusel 
-            items = { library_store.currently_reading }
+            items = { library_store.current_reads }
+            triggerSheet = { (id: string) => library_store.openProgressSheet(id) }
         />
     {/if}
 
@@ -52,6 +54,27 @@
 
     {#snippet navbar()}
         <Navbar />
+    {/snippet}
+
+    {#snippet sheets()}
+        <!-- <UpdateProgressSheet 
+            bind:is_open = { progress_sheet_open }
+            percentage = { 0 }
+            total_pages = { undefined }
+            title = "When the Last Star Goes Cold"
+            format = "epub"
+            edition_label = "Penguin Random House"
+            cover_id = "c59252dc-f14a-4361-b663-b328a1654f79"
+            book_id = "book-1"
+        /> -->
+
+        <UpdateProgressSheet
+            bind:is_open = { library_store.is_progress_sheet_open }
+            read         = { library_store.selected_read }
+            is_saving    = { library_store.is_saving_progress }
+            error        = { library_store.error_message }
+            onSave       = { (progress: number) => library_store.saveProgress(progress) }
+        />
     {/snippet}
 </Page>
 

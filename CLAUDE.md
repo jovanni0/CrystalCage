@@ -17,6 +17,7 @@ Read first:
 - Temporary, unstyled cover and edition managers: `routes/(v2_redesign)/manage-covers/[id]` and `manage-editions/[id]` (stores in `v2/lib/stores/*-manager.store.svelte.ts`, picked files queue as drafts until uploaded). The v1 book profile's edit button opens them from the Covers / Reads tabs; the Details tab opens `/add-book/[id]`.
 - Library redesign in progress: `routes/(v2_redesign)/library` (`LibStore` in `v2/lib/stores/library-store.svelte.ts`, grid of `components/covers/cover-wrapper.svelte`). Dev preview of cover states: `routes/(v2_redesign)/dev/cover-image`.
 - Next goal: wire the page into the app and import the whole book collection as a stress test.
+- Current phase: using the app with the real collection (adding books, covers, reads, historical reads) to collect UX issues. The book profile is the main focus after that (workable v2, read position for the library progress bar), then one polish pass across library + book profile, starting with shared components.
 - Git: trunk-based, short branches off `main` (`v1.0.0` tag planned at the last pure-v1 commit).
 
 
@@ -48,6 +49,7 @@ Decisions:
 - Markup uses custom element names instead of `div` on purpose.
 - Cover images: `GET /covers/{id}` needs the bearer token, so images are fetched as Blobs (`ApiCovers.getImage`), never via plain `<img src>`. `CoverImageCache` is an LRU of Blobs by cover id with a byte budget (48 MB), shared in-flight requests, generation counter, `peek/load/forget/reset`; reset on sign out, `forget` after a cover is deleted. Cover files never change, so there is no time-based invalidation. Components create and revoke their own object urls, so eviction never breaks a visible image.
 - Cover components (`components/covers/`): `cover-frame` is presentational (`status: empty | loading | loaded | error` + `src`), used directly by the dev page; `cover-image` loads by `cover_id` when visible (v1 `VisibilityObserver` via an `{@attach}` passed through `cover-frame`'s rest-prop spread — attachments on components only work if the component spreads its rest props onto an element); `cover-wrapper` is the library tile (link + title). Size is set by the parent (`width: 100%`, `aspect-ratio: 2 / 3`).
+- Read progress: server keeps an append-only `read_progress` log (one row per saved update, `recorded_at TIMESTAMPTZ`, `progress NUMERIC(5,2)` 0–100, cascade on read delete); the latest row is the read's current progress. Page counts are media/device-specific, so they are stored only on the device (keyed by read record id), never on the server; the client derives pages from the percentage.
 - Text truncation to N lines is pure CSS (`line-clamp` + `-webkit-box`), never JS; the full text stays in the DOM. In a tile with a visible title, the cover `alt` is empty to avoid double announcements.
 - Design tokens (colours, `--text-body`, `--text-body-sm`, `--text-caption`, …) are defined in `routes/(v2_redesign)/+layout.svelte`; use only those names (eg there is no `--text-body-small`).
 
@@ -55,6 +57,7 @@ Decisions:
 
 ## Open items
 
+- Server: authors, universes and series only have `POST` (no `PATCH`/`DELETE`); tags have both. Delete semantics for entities still referenced by books are undefined (block with 409 vs reassign/merge).
 - Server: add cover thumbnails (eg `GET /covers/{id}?size=thumbnail`) before the full-collection stress test; full-size covers in the library grid are heavy to decode on Android. The cache key then needs the size.
 - Server: `GET /covers/{id}` finds the file with `AssetStorage.findByEmbeddedId`, which lists the whole covers directory on every request (O(n) per image), reads it fully into memory (`readAllBytes`) and sends no `Cache-Control`. Asset filenames are human-readable (`FilenameBuilder`), so derived files (thumbnails) should live outside the `covers/` folder, keyed by id only.
 - Server: covers uploaded before the `sanctum_fs` volume was added are gone from disk but still in the DB (`exists in DB but no matching file found on disk`); delete or re-upload them.
