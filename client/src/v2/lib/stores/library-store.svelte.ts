@@ -121,6 +121,21 @@ export class LibStore
     }
 
 
+    public async refresh(): Promise<void>
+    {
+        const { books, authors, editions, read_records, read_progress } = this.dependencies
+
+        books.invalidate()
+        authors.invalidate()
+        editions.invalidate()
+        read_records.invalidate()
+        read_progress.invalidate()
+
+        await Promise.all([ books.load(), authors.load() ])
+        await this.loadCurrentReads()
+    }
+
+
     /*
     * Per-book data for the carousel. Failures here are logged by the repositories but do not block the library.
     */

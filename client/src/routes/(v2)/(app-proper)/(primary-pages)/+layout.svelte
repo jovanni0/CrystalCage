@@ -10,7 +10,7 @@
 
     let { children }: { children?: Snippet } = $props()
 
-    const slots = PageSlots.providePageSlots()
+    const slots = PageSlots.provide()
 
     let current_page: NavbarTabs = $derived(tabOf(page.url.pathname))
 
@@ -33,9 +33,11 @@
 
 
 
-<Page>
+<Page
+    onRefresh = { slots.contents.refresh ?? undefined }
+>
     {#snippet topbar()}
-        {@render slots.topbar?.()}
+        {@render slots.contents.topbar?.()}
     {/snippet}
 
 
@@ -48,6 +50,6 @@
 
 
     {#snippet sheets()}
-        {@render slots.sheets?.()}
+        {@render slots.contents.sheets?.()}
     {/snippet}
 </Page>

@@ -10,10 +10,14 @@
 
 
 
-    PageSlots.usePageSlots({ sheets, topbar })
-
     let { data } = $props()
     const { library_store } : { library_store: LibStore } = $derived(data)
+    
+    PageSlots.use({ 
+        sheets, 
+        topbar,
+        refresh: () => library_store.refresh()
+    })
 
     const filter_options = ["All", "Gallery", "DNFs", "To Read", "Waitlist", "Favorites"]
 
