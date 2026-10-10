@@ -92,7 +92,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, 112px);
         justify-content: space-between;
-        align-items: baseline;
+        align-items: start;
         column-gap: 8px;
         row-gap: 12px;
         padding: 8px 24px;
