@@ -1,3 +1,4 @@
+import { Maths } from "@v2/lib/utils/maths";
 import type { Attachment } from "svelte/attachments";
 
 
@@ -10,7 +11,38 @@ const IGNORED_ELEMENTS = ":disabled, [aria-disabled='true'], [aria-busy='true']"
 
 
 
+/*
+* Ripple on the element itself.
+*/
 export const ripple_effect: Attachment<HTMLElement> = (element) =>
+{
+    return attachRipple(element, element)
+}
+
+
+
+/*
+* Listens on the host element but draws the ripple on a child, eg: the whole navbar tab reacts, only the pill ripples.
+* The child needs the `ripple-container` class.
+*/
+export function rippleOn(surface_selector: string): Attachment<HTMLElement>
+{
+    return (element) =>
+    {
+        const surface = element.querySelector<HTMLElement>(surface_selector)
+
+        if (surface === null)
+        {
+            return
+        }
+
+        return attachRipple(element, surface)
+    }
+}
+
+
+
+function attachRipple(trigger: HTMLElement, surface: HTMLElement): () => void
 {
     let press_timer: ReturnType<typeof setTimeout> | null = null
     let start_x = 0
@@ -19,25 +51,28 @@ export const ripple_effect: Attachment<HTMLElement> = (element) =>
 
     function setState(state: RippleState): void
     {
-        element.removeAttribute("ripple-state")
+        surface.removeAttribute("ripple-state")
 
-        void element.offsetWidth
+        void surface.offsetWidth
 
-        element.setAttribute("ripple-state", state)
+        surface.setAttribute("ripple-state", state)
     }
 
 
-    function setOrigin(event: PointerEvent)
+    /*
+    * The origin is clamped to the surface, so a tap on the label starts the ripple at the pill's nearest edge.
+    */
+    function setOrigin(event: PointerEvent): void
     {
-        const bounding_box = element.getBoundingClientRect()
+        const bounding_box = surface.getBoundingClientRect()
 
-        const ripple_x = event.clientX - bounding_box.left
-        const ripple_y = event.clientY - bounding_box.top
+        const ripple_x      = Maths.clamp(event.clientX - bounding_box.left, 0, bounding_box.width)
+        const ripple_y      = Maths.clamp(event.clientY - bounding_box.top, 0, bounding_box.height)
         const ripple_radius = Math.hypot(Math.max(ripple_x, bounding_box.width - ripple_x), Math.max(ripple_y, bounding_box.height - ripple_y))
 
-        element.style.setProperty("--ripple-x", `${ripple_x}px`)
-        element.style.setProperty("--ripple-y", `${ripple_y}px`)
-        element.style.setProperty("--ripple-radius", `${ripple_radius}px`)
+        surface.style.setProperty("--ripple-x", `${ripple_x}px`)
+        surface.style.setProperty("--ripple-y", `${ripple_y}px`)
+        surface.style.setProperty("--ripple-radius", `${ripple_radius}px`)
     }
 
 
@@ -57,22 +92,25 @@ export const ripple_effect: Attachment<HTMLElement> = (element) =>
 
     function isEventInside(event: PointerEvent): boolean
     {
-        const bounding_box = element.getBoundingClientRect()
+        const bounding_box = trigger.getBoundingClientRect()
 
         return event.clientX >= bounding_box.left && event.clientX <= bounding_box.right
             && event.clientY >= bounding_box.top && event.clientY <= bounding_box.bottom
     }
 
 
-    function stopTracking()
+    function stopTracking(): void
     {
-        element.removeEventListener("pointermove", onMove)
+        trigger.removeEventListener("pointermove", onMove)
     }
 
 
-    function onDown(event: PointerEvent)
+    function onDown(event: PointerEvent): void
     {
-        if (element.matches(IGNORED_ELEMENTS)) return
+        if (trigger.matches(IGNORED_ELEMENTS))
+        {
+            return
+        }
 
         start_x = event.clientX
         start_y = event.clientY
@@ -80,17 +118,17 @@ export const ripple_effect: Attachment<HTMLElement> = (element) =>
         clearTimer()
         setOrigin(event)
 
-        press_timer = setTimeout( () =>
+        press_timer = setTimeout(() =>
         {
             press_timer = null
             setState("pressed")
         }, PRESS_DELAY_MS)
 
-        element.addEventListener("pointermove", onMove)
+        trigger.addEventListener("pointermove", onMove)
     }
 
 
-    function onMove(event: PointerEvent)
+    function onMove(event: PointerEvent): void
     {
         const distance = Math.hypot(event.clientX - start_x, event.clientY - start_y)
 
@@ -101,7 +139,7 @@ export const ripple_effect: Attachment<HTMLElement> = (element) =>
     }
 
 
-    function onUp(event: PointerEvent)
+    function onUp(event: PointerEvent): void
     {
         stopTracking()
 
@@ -111,48 +149,51 @@ export const ripple_effect: Attachment<HTMLElement> = (element) =>
             return
         }
 
-        if (element.hasAttribute("ripple-state"))
+        if (surface.hasAttribute("ripple-state"))
         {
             setState(isEventInside(event) ? "released" : "cancelled")
         }
     }
 
 
-    function onCancel()
+    function onCancel(): void
     {
         stopTracking()
 
-        if (clearTimer()) return
+        if (clearTimer())
+        {
+            return
+        }
 
-        if (element.hasAttribute("ripple-state"))
+        if (surface.hasAttribute("ripple-state"))
         {
             setState("cancelled")
         }
     }
 
 
-    function onAnimationEnd(event: AnimationEvent)
+    function onAnimationEnd(event: AnimationEvent): void
     {
         if (event.pseudoElement === "::before" && event.animationName === "ripple-fade")
         {
-            element.removeAttribute("ripple-state")
+            surface.removeAttribute("ripple-state")
         }
     }
 
 
-    element.addEventListener("pointerdown",   onDown)
-    element.addEventListener("pointerup",     onUp)
-    element.addEventListener("pointercancel", onCancel)
-    element.addEventListener("animationend",  onAnimationEnd)
+    trigger.addEventListener("pointerdown",   onDown)
+    trigger.addEventListener("pointerup",     onUp)
+    trigger.addEventListener("pointercancel", onCancel)
+    surface.addEventListener("animationend",  onAnimationEnd)
 
 
     return () =>
     {
         clearTimer()
         stopTracking()
-        element.removeEventListener("pointerdown",   onDown)
-        element.removeEventListener("pointerup",     onUp)
-        element.removeEventListener("pointercancel", onCancel)
-        element.removeEventListener("animationend",  onAnimationEnd)
+        trigger.removeEventListener("pointerdown",   onDown)
+        trigger.removeEventListener("pointerup",     onUp)
+        trigger.removeEventListener("pointercancel", onCancel)
+        surface.removeEventListener("animationend",  onAnimationEnd)
     }
 }

@@ -1,14 +1,16 @@
 <script lang="ts">
-    import Page from "@v2/lib/components/_other/page.svelte"
-    import CoverWrapper from "@v2/lib/components/covers/cover-wrapper.svelte";
-    import TopbarBrandSearch from "@v2/lib/components/bars/topbar-brand-search.svelte";
-    import type { LibStore } from "@v2/lib/stores/library-store.svelte.js";
-    import Navbar from "@v2/lib/components/bars/navbar.svelte";
-    import CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
-    import FilterChipBar from "@v2/lib/components/_other/filter-chip-bar.svelte";
-    import UpdateProgressSheet from "@v2/lib/elements/update-progress-sheet.svelte";
-    import { nav } from "@root/CompositionRoot.js";
+    import type { LibStore }            from "@v2/lib/stores/library-store.svelte.js";
+    import      { PageSlots }           from "@v2/lib/utils/page-slots.svelte.js";
+    import      { nav }                 from "@root/CompositionRoot.js";
+    import      CoverWrapper            from "@v2/lib/components/covers/cover-wrapper.svelte";
+    import      CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
+    import      FilterChipBar           from "@v2/lib/components/_other/filter-chip-bar.svelte";
+    import      UpdateProgressSheet     from "@v2/lib/elements/update-progress-sheet.svelte";
+    import      TopbarBrandSearch       from "@v2/lib/components/bars/topbar-brand-search.svelte";
 
+
+
+    PageSlots.usePageSlots({ sheets, topbar })
 
     let { data } = $props()
     const { library_store } : { library_store: LibStore } = $derived(data)
@@ -20,15 +22,7 @@
 
 
 
-<Page 
-    class = "library-page-content"
->
-    {#snippet topbar()}
-        <TopbarBrandSearch 
-            onAddBook = { () => nav.goTo("/add-book")}
-        />
-    {/snippet}
-
+<library-page-wrapper>
     <filter-wrapper>
         <FilterChipBar 
             options    = { filter_options }
@@ -37,14 +31,14 @@
             label      = "library filters"
         />
     </filter-wrapper>
-
+    
     {#if library_store.current_reads.length > 0}
         <CurrentlyReadingCarusel 
-            items = { library_store.current_reads }
+            items        = { library_store.current_reads }
             triggerSheet = { (id: string) => library_store.openProgressSheet(id) }
         />
     {/if}
-
+    
     <cover-grid>
         {#each library_store.items as item (item.book_id)}
             <CoverWrapper 
@@ -56,25 +50,28 @@
             />
         {/each}
     </cover-grid>
+</library-page-wrapper>
 
-    {#snippet navbar()}
-        <Navbar />
-    {/snippet}
+{#snippet topbar()}
+    <TopbarBrandSearch 
+        onAddBook = { () => nav.goTo("/add-book")}
+    />
+{/snippet}
 
-    {#snippet sheets()}
-        <UpdateProgressSheet
-            bind:is_open = { library_store.is_progress_sheet_open }
-            read         = { library_store.selected_read }
-            is_saving    = { library_store.is_saving_progress }
-            error        = { library_store.error_message }
-            onSave       = { (progress: number) => library_store.saveProgress(progress) }
-        />
-    {/snippet}
-</Page>
+{#snippet sheets()}
+    <UpdateProgressSheet
+        bind:is_open = { library_store.is_progress_sheet_open }
+        read         = { library_store.selected_read }
+        is_saving    = { library_store.is_saving_progress }
+        error        = { library_store.error_message }
+        onSave       = { (progress: number) => library_store.saveProgress(progress) }
+    />
+{/snippet}
+
 
 
 <style>
-    :global(layout.library-page-content)
+    library-page-wrapper
     {
         display: flex;
         flex-direction: column;
@@ -83,6 +80,7 @@
 
     filter-wrapper
     {
+        display: flex;
         padding: 0 16px;
     }
 

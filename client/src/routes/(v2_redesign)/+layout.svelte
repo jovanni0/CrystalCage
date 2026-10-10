@@ -50,4 +50,9 @@
         display: contents;
         font-family: Manrope;
     }
+
+    :global(a)
+    {
+        -webkit-tap-highlight-color: transparent;
+    }
 </style>
