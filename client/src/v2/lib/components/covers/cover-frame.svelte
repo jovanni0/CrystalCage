@@ -30,6 +30,7 @@
 <cover-frame
     class:loading = { status === "loading" }
     class:error   = { status === "error" }
+    class:empty   = { status === "empty" }
     { ...rest }
 >
     {#if status === "loaded" && src !== null}
@@ -43,10 +44,7 @@
         <ImageLoadingError />
         <p>Error loading image</p>
     {:else if status === "empty"}
-        <BookOpenText 
-            width  = { 72 } 
-            height = { 72 } 
-        />
+        <BookOpenText />
     {/if}
 </cover-frame>
 
@@ -90,6 +88,13 @@
             );
             background-size: 200% 200%;
             animation: shimmer 1.5s linear infinite;
+        }
+
+        &.empty > :global(svg)
+        {
+            width: 65%;
+            height: auto;
+            aspect-ratio: 1;
         }
 
         & > :global(svg path)
