@@ -56,7 +56,6 @@
         overflow-x: auto;
         scrollbar-width: none;
 
-        padding-block: 4px;
         mask-image: linear-gradient(to right, black calc(100% - 32px), transparent);
     }
 

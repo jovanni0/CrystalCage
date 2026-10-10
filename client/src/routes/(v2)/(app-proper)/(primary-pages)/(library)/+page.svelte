@@ -80,6 +80,7 @@
         display: flex;
         flex-direction: column;
         gap: 16px;
+        padding-top: 8px;
     }
 
     filter-wrapper
@@ -97,6 +98,6 @@
         align-items: start;
         column-gap: 8px;
         row-gap: 12px;
-        padding: 8px 24px;
+        padding: 0 24px;
     }
 </style>
