@@ -4,6 +4,10 @@
     import      TopbarBackTabbed        from "@root/components/topbars/TopbarBackTabbed.svelte";
     import      Pencil                  from "@root/icons/Pencil.svelte";
     import      { page }                from "$app/state";
+    import DropdownMenu from "@root/components/dropdown-menu.svelte";
+    import { nav } from "@root/CompositionRoot.js";
+    import EllipsisVertical from "@v2/lib/components/icons/ellipsis-vertical.svelte";
+    import ConfirmDialog from "@root/components/confirm-dialog.svelte";
 
     
     let { data, children } = $props()
@@ -39,6 +43,26 @@
         { label: "Covers", href: `/book/${book_store.book_id}/covers` },
         { label: "Reads", href: `/book/${book_store.book_id}/reads` },
     ])
+
+    let is_delte_popup_open = $state(false)
+    let is_deleting = $state(false)
+
+
+    async function deleteBook()
+    {
+        is_deleting = true
+
+        const success = await book_store.delete()
+
+        if (success)
+        {
+            is_deleting = false
+            nav.goBack()
+            return
+        }
+
+        is_deleting = false
+    }
 </script>
 
 
@@ -48,15 +72,31 @@
     tabs  = { tabs }
 >
     {#snippet right()}
-        <a href = { edit_href }>
-            <Pencil />
-        </a>
+        <DropdownMenu
+            label = "Book options"
+            items = {[
+                { label: "Edit",   onSelect: () => nav.goTo(edit_href) },
+                { label: "Delete", onSelect: () => is_delte_popup_open = true, is_destructive: true },
+            ]}
+        >
+            {#snippet icon()}
+                <EllipsisVertical />
+            {/snippet}
+        </DropdownMenu>
     {/snippet}
 </TopbarBackTabbed>
 
 <main>
     {@render children()} 
 </main>
+
+<ConfirmDialog
+    bind:is_open = { is_delte_popup_open }
+    title        = "Delete this book?"
+    message      = "“{ book_store.title }” and all its covers, editions and reads will be permanently removed."
+    is_busy      = { is_deleting }
+    onConfirm    = { deleteBook }
+/>
 
 
 
