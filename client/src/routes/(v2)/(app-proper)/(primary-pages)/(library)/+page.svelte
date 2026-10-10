@@ -21,7 +21,7 @@
 
     const filter_options = ["All", "Gallery", "DNFs", "To Read", "Waitlist", "Favorites"]
 
-    let filter: string = $state("")
+    let filter: string = $state("All")
 </script>
 
 
