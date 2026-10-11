@@ -139,8 +139,7 @@
 
         & > :global(svg *)
         {
-            stroke-width: 3;
-            vector-effect: non-scaling-stroke;
+            stroke-width: 1;
         }
 
         & > :global(a)
