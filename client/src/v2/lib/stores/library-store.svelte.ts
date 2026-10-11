@@ -6,10 +6,15 @@ import type { BookRepository }         from "../repositories/book-repository.sve
 import type { EditionRepository }      from "../repositories/edition-repository.svelte"
 import type { ReadRecordRepository }   from "../repositories/read-record-repository.svelte"
 import type { ReadProgressRepository } from "../repositories/read-progress-repository.svelte"
+import type { BookFacts, 
+              FilterPredicate, 
+              SavedFilter }            from "../rules/filter-rules"
 import      { AuthorRules }            from "../rules/author-rules"
 import      { ReadRecordRules }        from "../rules/read-record-rules"
 import      { ReadProgressRules }      from "../rules/read-progress-rules"
 import      { describeError }          from "../utils/result"
+import      { BUILT_IN_FILTERS, 
+              FilterRules }            from "../rules/filter-rules"
 
 
 
@@ -44,22 +49,29 @@ export type LibraryStoreDependencies = {
 
 export class LibStore
 {
+    public filters:                SavedFilter[] = BUILT_IN_FILTERS
+
     public is_progress_sheet_open: boolean       = $state(false)
     public is_saving_progress:     boolean       = $state(false)
     public error_message:          string | null = $state(null)
 
     private selected_read_id: string | null = $state(null)
 
-    public items: LibraryItem[] = $derived(
-        this.dependencies.books.all.map(it => ({ book_id: it.id, cover_id: it.cover_id, label: it.title }))
-    )
-
     public current_reads: CurrentRead[] = $derived(this.buildCurrentReads())
     public has_current_reads: boolean = $derived(this.current_reads.length > 0)
 
-    public selected_read: CurrentRead | null = $derived(
-        this.current_reads.find(it => it.read_record_id === this.selected_read_id) ?? null
-    )
+    public selected_read: CurrentRead | null = $derived(this.current_reads.find(it => it.read_record_id === this.selected_read_id) ?? null)
+
+
+    public active_filter_id: string = $state(this.filters[0].id)
+
+    private active_filter:           SavedFilter | null = $derived(this.filters.find(it => it.id === this.active_filter_id) ?? null)
+    private active_filter_predicate: FilterPredicate    = $derived(this.active_filter ? FilterRules.compile(this.active_filter.definition) : () => true)
+
+    private book_facts:          BookFacts[] = $derived(this.dependencies.books.all.map(it => this.toBookFacts(it)))
+    private filtered_book_facts: BookFacts[] = $derived(this.book_facts.filter(it => this.active_filter_predicate(it)))
+
+    public items: LibraryItem[] = $derived(this.filtered_book_facts.map(it => ({ book_id: it.book.id, cover_id: it.book.cover_id, label: it.book.title })))
 
 
     private constructor(private dependencies: LibraryStoreDependencies)
@@ -198,6 +210,15 @@ export class LibStore
             progress:       latest?.progress ?? 0,
             format:         edition?.format ?? null,
             edition_label:  edition?.label ?? null,
+        }
+    }
+
+
+    private toBookFacts(book: BookSummaryResponse): BookFacts
+    {
+        return {
+            book: book,
+            word_count: book.word_count
         }
     }
 }

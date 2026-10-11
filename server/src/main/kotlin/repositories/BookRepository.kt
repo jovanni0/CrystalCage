@@ -103,6 +103,7 @@ class BookRepository(
                     title = it[BookTable.title],
                     read_status = ReadStatus.UNREAD,
                     reread_count = 0,
+                    word_count = it[BookTable.word_count],
                 )
             }
 
@@ -264,6 +265,7 @@ class BookRepository(
                 title = insert_statement[BookTable.title],
                 read_status = ReadStatus.UNREAD,
                 reread_count = 0,
+                word_count = insert_statement[BookTable.word_count],
             )
         }
     }

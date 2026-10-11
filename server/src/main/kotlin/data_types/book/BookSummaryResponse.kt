@@ -16,4 +16,5 @@ data class BookSummaryResponse(
     val title: String,
     val read_status: ReadStatus,
     val reread_count: Int,
+    val word_count: Int?
 )

@@ -12,4 +12,5 @@ export type BookSummaryResponse = {
     title:          string
     read_status:    ReadStatus
     reread_count:   number
+    word_count:     number | null
 }

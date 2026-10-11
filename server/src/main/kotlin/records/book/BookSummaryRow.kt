@@ -16,6 +16,7 @@ data class BookSummaryRow(
     val title: String,
     val read_status: ReadStatus,
     val reread_count: Int,
+    val word_count: Int?,
 )
 {
     fun toBookSummaryResponse(): BookSummaryResponse
@@ -30,6 +31,7 @@ data class BookSummaryRow(
             title = title,
             read_status = read_status,
             reread_count = reread_count,
+            word_count = word_count,
         )
     }
 }

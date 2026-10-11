@@ -8,7 +8,7 @@
         name,
         label,
     }: {
-        options: string[]
+        options: { id: string, label: string }[]
         value:   string
         name:    string
         label:   string
@@ -28,20 +28,20 @@
     role       = "radiogroup"
     aria-label = { label }
 >
-    {#each options as option (option)}
+    {#each options as option (option.id)}
         <label
             class          = "ripple-container"
-            class:selected = { option === value }
+            class:selected = { option.id === value }
             {@attach ripple_effect}
-            {@attach option === value ? revealSelected : undefined}
+            {@attach option.id === value ? revealSelected : undefined}
         >
             <input
                 type       = "radio"
-                { name }
-                value      = { option }
+                name       = { name }
+                value      = { option.id }
                 bind:group = { value }
             />
-            { option }
+            { option.label }
         </label>
     {/each}
 </filter-chip-bar>

@@ -18,10 +18,6 @@
         topbar,
         refresh: () => library_store.refresh()
     })
-
-    const filter_options = ["All", "Gallery", "DNFs", "To Read", "Waitlist", "Favorites"]
-
-    let filter: string = $state("All")
 </script>
 
 
@@ -29,8 +25,8 @@
 <library-page-wrapper>
     <filter-wrapper>
         <FilterChipBar 
-            options    = { filter_options }
-            bind:value = { filter }
+            options    = { library_store.filters.map(it => ({ id: it.id, label: it.name })) }
+            bind:value = { library_store.active_filter_id }
             name       = "library filters"
             label      = "library filters"
         />
