@@ -154,7 +154,7 @@
     {
         from, to
         {
-            padding-bottom: 128px;
+            padding-bottom: 20px;
         }
     }
 
