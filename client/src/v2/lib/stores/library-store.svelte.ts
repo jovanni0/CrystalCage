@@ -64,7 +64,6 @@ export class LibStore
 
 
     public active_filter_id: string = $state(this.filters[0].id)
-
     private active_filter:           SavedFilter | null = $derived(this.filters.find(it => it.id === this.active_filter_id) ?? null)
     private active_filter_predicate: FilterPredicate    = $derived(this.active_filter ? FilterRules.compile(this.active_filter.definition) : () => true)
 
@@ -72,6 +71,7 @@ export class LibStore
     private filtered_book_facts: BookFacts[] = $derived(this.book_facts.filter(it => this.active_filter_predicate(it)))
 
     public items: LibraryItem[] = $derived(this.filtered_book_facts.map(it => ({ book_id: it.book.id, cover_id: it.book.cover_id, label: it.book.title })))
+    public has_items: boolean = $derived(this.book_facts.length > 0)
 
 
     private constructor(private dependencies: LibraryStoreDependencies)
