@@ -101,7 +101,7 @@ export class CreateBookStore
     public is_series_selected:   boolean = $derived(!isNullOrUndefined(this.series_id))
     public has_notes:            boolean = $derived(!isNullOrUndefined(this.thoughts))
     public has_blurb:            boolean = $derived(!isNullOrUndefined(this.blurb))
-    public can_submit:           boolean = $derived(!!this.author_id && this.title.trim() !== "" && (!this.universe_id || this.volume_number !== null))
+    public can_submit:           boolean = $derived(!!this.author_id && this.title.trim() !== "" && (!this.series_id || this.volume_number !== null))
 
 
     public setAuthorId(id: string): void
