@@ -45,10 +45,12 @@
             <p class = "empty-message">No books match the current filters.</p>
         </empty-wrapper>
     {:else if library_store.has_items}
-        <CurrentlyReadingCarusel 
-            items        = { library_store.current_reads }
-            triggerSheet = { (id: string) => library_store.openProgressSheet(id) }
-        />
+        {#if library_store.current_reads.length > 0}
+            <CurrentlyReadingCarusel 
+                items        = { library_store.current_reads }
+                triggerSheet = { (id: string) => library_store.openProgressSheet(id) }
+            />
+        {/if}
 
         <cover-grid>
             {#each library_store.items as item (item.book_id)}
