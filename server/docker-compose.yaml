@@ -20,6 +20,8 @@ services:
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
       PORT: ${PORT}
       DISCOVERY_PORT: ${DISCOVERY_PORT}
+    volumes:
+      - sanctum_fs:/app/sanctum-fs # cover files; must match STORAGE_BASE_DIR, or they are lost on every rebuild
     ports:
       - "${PORT}:${PORT}"
       - "${DISCOVERY_PORT}:${DISCOVERY_PORT}"
@@ -44,3 +46,4 @@ services:
 
 volumes:
   db_data:
+  sanctum_fs:

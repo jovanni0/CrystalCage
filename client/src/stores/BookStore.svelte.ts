@@ -192,4 +192,18 @@ export class BookStore
         this.reads = await this.api.getReadRecords(this.book_id)
         this.book = await this.api.getBook(this.book_id)
     }
+
+    public async delete()
+    {
+        try
+        {
+            await this.api.deleteBook(this.book_id)
+        }
+        catch
+        {
+            return false
+        }
+
+        return true
+    }
 }

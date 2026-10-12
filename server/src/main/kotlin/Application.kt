@@ -8,14 +8,15 @@ import dev.jovanni0.auth.AuthConfig
 import dev.jovanni0.auth.PasswordHasher
 import dev.jovanni0.data_types.UserRole
 import dev.jovanni0.database.DbConfig
+import dev.jovanni0.database.migrateAllTenantSchemas
 import dev.jovanni0.database.provisionTenantSchema
 import dev.jovanni0.exceptions.*
 import dev.jovanni0.exceptions.not_found.NotFoundException
 import dev.jovanni0.filesystem.AssetStorage
+import dev.jovanni0.filesystem.CoverThumbnails
 import dev.jovanni0.repositories.*
 import dev.jovanni0.routes.*
 import dev.jovanni0.tables.User
-import dev.jovanni0.tables.User.password_hash
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
@@ -90,19 +91,22 @@ fun Application.configureRouting(
     read_record_repository: ReadRecordRepository,
     tag_category_repository: TagCategoryRepository,
     http_client: HttpClient,
+    cover_thumbnails: CoverThumbnails,
+    read_progress_repository: ReadProgressRepository,
 ) {
     routing {
         serverRoutes()
         authRoutes(user_repository, invite_code_repository, jwt_config, data_source)
         authorRoutes(author_repository)
         bookRoutes(book_repository)
-        coverRoutes(book_repository, cover_repository)
+        coverRoutes(book_repository, cover_repository, cover_thumbnails)
         editionRoutes(book_repository, edition_repository)
         readRecordRoutes(read_record_repository)
         seriesRoutes(author_repository, universe_repository, series_repository)
         tagRoutes(tag_repository, tag_category_repository)
         universeRoutes(universe_repository)
         imageProxy(http_client)
+        readProgressRoutes(read_progress_repository)
     }
 }
 
@@ -147,6 +151,8 @@ fun Application.configureDatabase(): HikariDataSource {
         .migrate()
 
     Database.connect(data_source)
+
+    migrateAllTenantSchemas(data_source)
 
     return data_source
 }
@@ -267,6 +273,7 @@ fun Application.module() {
 
     val storage_path = Path(environment.config.property("storage.baseDirectory").getString())
     val storage = AssetStorage(storage_path)
+    val cover_thumbnails = CoverThumbnails(storage_path)
 
     val invite_code_repository = InviteCodeRepository()
     val user_repository = UserRepository(invite_code_repository)
@@ -279,6 +286,7 @@ fun Application.module() {
     val book_repository = BookRepository(author_repository, cover_repository, edition_repository)
     val read_record_repository = ReadRecordRepository()
     val tag_category_repository = TagCategoryRepository()
+    val read_progress_repository = ReadProgressRepository(read_record_repository)
 
     val http_client = HttpClient(CIO)
     {
@@ -306,5 +314,7 @@ fun Application.module() {
         read_record_repository,
         tag_category_repository,
         http_client,
+        cover_thumbnails,
+        read_progress_repository,
     )
 }

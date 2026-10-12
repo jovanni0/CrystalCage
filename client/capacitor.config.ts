@@ -9,6 +9,7 @@ const config: CapacitorConfig = {
     plugins: 
     {
         CapacitorHttp: { enabled: true },
+        SystemBars: { style: "LIGHT" }, // dark status/navigation bar icons, the app background is light
         SplashScreen: { launchAutoHide: false }, // the splash scrren is done native via android/app/src/main/res/values/styles.xml
     },
 }

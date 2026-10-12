@@ -41,6 +41,8 @@
 >
     <SliderStepper 
         bind:value = { draft_count }
+        label_prefix = "~ "
+        label_suffix = " K"
         min_value  = { slider_min }
         max_value  = { slider_max }
     />

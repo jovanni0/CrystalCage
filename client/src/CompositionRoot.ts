@@ -17,7 +17,17 @@ import { ApiAuth }                    from "@v2/lib/clients/api-auth";
 import { HttpClient }                 from "@v2/lib/clients/http-client";
 import { SessionHttp }                from "@v2/lib/clients/session-http";
 import { Nav }                        from "@v2/lib/utils/nav";
+import { CoverImageCache }            from "@v2/lib/caches/cover-image-cache";
+import { ApiCovers }                  from "@v2/lib/clients/api-covers";
+import { ApiReadProgress }            from "@v2/lib/clients/api-read-progress";
+import { ApiReadRecords }             from "@v2/lib/clients/api-read-records";
+import { ReadRecordRepository }       from "@v2/lib/repositories/read-record-repository.svelte";
+import { ReadProgressRepository }     from "@v2/lib/repositories/read-progress-repository.svelte";
+import { ReadPageCountStorage }       from "@v2/lib/storage/read-page-count-storage";
 
+
+
+const MEGABYTE = 1024 * 1024
 
 
 export const session             = new Session(new SessionStorage())
@@ -32,11 +42,20 @@ export const edition_format_color_registry = new EditionFormatColorRegistry()
 export const nav = new Nav()
 
 
+export const read_page_count_storage = new ReadPageCountStorage()
+
+
 // APIs
 export const http_client = new HttpClient(logger)
 export const session_http = new SessionHttp(http_client, session)
 export const api_auth = new ApiAuth(http_client, session_http)
+export const api_covers = new ApiCovers(session_http)
+export const api_read_progress = new ApiReadProgress(session_http)
+export const api_read_records = new ApiReadRecords(session_http)
 
+// caches
+export const fullsize_cover_cache = new CoverImageCache(api_covers, logger, "original", 48 * MEGABYTE)
+export const thumbnail_cover_cache = new CoverImageCache(api_covers, logger, "thumbnail", 16 * MEGABYTE)
 
 // repositories
 const repo_api = api_client
@@ -47,6 +66,21 @@ export const tag_repository = new TagRepository(repo_api, logger)
 export const edition_repository = new EditionRepository(repo_api, logger)
 export const book_repository = new BookRepository(repo_api, logger)
 export const cover_repository = new CoverRepository(repo_api, logger)
+export const read_record_repository = new ReadRecordRepository(api_read_records, logger)
+export const read_progress_repository = new ReadProgressRepository(api_read_progress, logger)
 
-const repos = [author_repository, universe_repository, series_repository, tag_repository, edition_repository, book_repository, cover_repository]
-session.onSignOut( () => repos.forEach(it => it.reset()) )
+
+const resettables = [
+    author_repository, 
+    universe_repository, 
+    series_repository, 
+    tag_repository, 
+    edition_repository, 
+    book_repository, 
+    cover_repository,
+    fullsize_cover_cache,
+    thumbnail_cover_cache,
+    read_record_repository,
+    read_progress_repository,
+]
+session.onSignOut( () => resettables.forEach(it => it.reset()) )

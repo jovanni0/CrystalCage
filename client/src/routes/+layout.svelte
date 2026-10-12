@@ -50,7 +50,7 @@
         if (!Capacitor.isNativePlatform()) return
 
         const back_listener = App.addListener("backButton", () => nav.onNativeBack())
-        const click_listener = document.addEventListener("click", onClick, { capture: true })
+        document.addEventListener("click", onClick, { capture: true })
 
         return () => back_listener.then(it => it.remove())
     })
