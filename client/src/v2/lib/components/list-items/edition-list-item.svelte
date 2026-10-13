@@ -6,11 +6,15 @@
 
     
     let {
+        label,
+        added_at,
         variant,
         is_checked  = false,
         is_disabled = false,
         onChange,
     }: {
+        label:       string | null
+        added_at:    string 
         variant:     EditionFileFormatDefinition
         is_checked:  boolean
         is_disabled: boolean
@@ -32,8 +36,8 @@
     />
 
     <wrapper>
-        <p>Nemira</p>
-        <subtitle>Added 07-07-2021</subtitle>
+        <p>{ label }</p>
+        <subtitle>Added { added_at }</subtitle>
     </wrapper>
 
     <Radiobox 

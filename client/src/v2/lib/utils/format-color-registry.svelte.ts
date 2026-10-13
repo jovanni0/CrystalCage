@@ -16,7 +16,7 @@ const BUILTIN_EDITON_FORMATS: EditionFileFormatDefinition[] = [
     { id: "pdf",      label: "PDF",      hue: 310 },
     { id: "tome",     label: "TOME",     hue: 85  },
     { id: "physical", label: "Physical", hue: 35  },
-    { id: "other",    label: "Other",    hue: 65, chroma: 0.04 },
+    { id: "unknown",  label: "unknown",    hue: 65, chroma: 0.04 },
 ]
 
 
@@ -28,6 +28,8 @@ export class EditionFormatColorRegistry
 
     public formats: EditionFileFormatDefinition[] = $derived([ ...BUILTIN_EDITON_FORMATS.map(it => ({ ...it, ...this.overrides[it.id]}) ), ...this.custom ])
 
+
+    public static readonly UNKNOWN = "unknown"
 
     public resolve(id: string): EditionFileFormatDefinition
     {

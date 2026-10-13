@@ -1,6 +1,7 @@
 import { author_repository, 
          book_repository, 
          cover_repository, 
+         edition_repository, 
          read_record_repository, 
          series_repository, 
          tag_repository, 
@@ -23,6 +24,7 @@ export const load = async ({ parent, params }) =>
         read_records: read_record_repository,
         tags: tag_repository,
         cover_repository: cover_repository,
+        edition_repository: edition_repository,
     }, params.id)
 
     if (!result.ok)

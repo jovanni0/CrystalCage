@@ -12,6 +12,7 @@
     import      CalendarPlus from "@v2/lib/components/icons/calendar-plus.svelte";
     import      ImageEdit from "@v2/lib/components/icons/image-edit.svelte";
     import { nav } from "@root/CompositionRoot";
+    import { PageSlots } from "@v2/lib/utils/page-slots.svelte";
 
 
 
@@ -24,7 +25,7 @@
     } = $props()
 
 
-
+    const slots = PageSlots.provide()
 
     const store           = $derived(data.book_profile_store)
     const tabs: Tab[]     = $derived([
@@ -34,6 +35,8 @@
         { id: "editions", label: "Editions", href: `/book-profile/${store.book_id}/editions` },
     ])
     const current_page_id = $derived(TabRules.activeId(tabs, page.url.pathname))
+
+    console.log(store.editions)
 </script>
 
 
@@ -58,6 +61,7 @@
                     <IconButton
                         shape = "square"
                         label = "edit book details"
+                        onclick = { () => nav.goTo(`/add-book/${store.cover_id}`) }
                     >
                         <BookEdit />
                     </IconButton>
@@ -65,6 +69,7 @@
                     <IconButton
                         shape = "square"
                         label = "add new read"
+                        onclick = { () => store.is_start_read_sheet_open = true }
                     >
                         <CalendarPlus />
                     </IconButton>
@@ -91,6 +96,10 @@
     {/snippet}
 
     {@render children?.()}
+
+    {#snippet sheets()}
+        {@render slots.contents.sheets?.()}
+    {/snippet}
 </Page>
 
 

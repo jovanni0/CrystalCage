@@ -14,6 +14,13 @@ import { renderMarkdown } from "../utils/markdown"
 import type { TagRepository } from "../repositories/tag-repository.svelte"
 import type { CoverRepository } from "../repositories/cover-repository.svelte"
 import type { CoverResponse } from "@root/dtos/CoverResponse"
+import type { EditionRepository } from "../repositories/edition-repository.svelte"
+import type { EditionResponse } from "@root/dtos/EditionResponse"
+import type { PickableEdition } from "../types/pickable-edition.type"
+import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest"
+import { edition_format_color_registry } from "@root/CompositionRoot"
+import { EditionFormatColorRegistry } from "../utils/format-color-registry.svelte"
+import type { ReadRecordUpdateRequest } from "@root/dtos/ReadRecordUpdateRequest"
 
 
 
@@ -25,6 +32,7 @@ export type BookProfileStoreDependencies = {
     read_records:   ReadRecordRepository
     tags: TagRepository
     cover_repository: CoverRepository
+    edition_repository: EditionRepository
 }
 
 
@@ -53,6 +61,7 @@ export class BookProfileStore
             dependencies.read_records.load(book_id),
             dependencies.tags.ensure(),
             dependencies.cover_repository.load(book_id),
+            dependencies.edition_repository.load(book_id)
         ])
 
         if (!details_result.ok) 
@@ -84,8 +93,9 @@ export class BookProfileStore
     private read_repo:     ReadRecordRepository = $derived.by(() => this.dependencies.read_records)
     private tags_repo:     TagRepository        = $derived.by(() => this.dependencies.tags)
     private cover_repo:    CoverRepository      = $derived.by(() => this.dependencies.cover_repository)
+    private edition_repo:  EditionRepository    = $derived.by(() => this.dependencies.edition_repository)
 
-    public read_records:       ReadRecordResponse[]      = $derived(this.read_repo.get(this.book.id))
+    public read_records:       ReadRecordResponse[]      = $derived(this.read_repo.get(this.book.id).sort((a, b) => -ReadRecordRules.compare(a, b)))
     public read_records_error: AppError | null           = $derived(this.read_repo.errorOf(this.book.id))
     public current_read:       ReadRecordResponse | null = $derived(ReadRecordRules.currentReadOf(this.read_records))
     public is_reading:         boolean                   = $derived(this.current_read !== null)
@@ -108,8 +118,23 @@ export class BookProfileStore
     // COVERS
     public covers:         CoverResponse[] = $derived(this.cover_repo.get(this.book.id))
     public covers_preview: BookDetails_Cover[] = $derived(this.covers.map(it => ({ id: it.id, is_default: it.is_default, resolution: "px", label: it.label, added_at: it.added_at }) ))
-    
+
     public is_saving_cover: boolean       = $state(false)
+
+    // READS
+    public is_start_read_sheet_open: boolean = $state(false)
+    public read_previews = $derived(this.read_repo.get(this.book.id).map(it => this.buildReadPreview(it)))
+
+    public editions: EditionResponse[] = $derived(this.edition_repo.get(this.book.id))
+    public pickable_editions: PickableEdition[] = $derived(this.editions.map(it => ({ id: it.id, format_id: it.format, label: it.label ?? "", added_at: it.added_at }) ))
+
+    public start_date:        string        = $state("")
+    public end_date:          string        = $state("")
+    public is_dnf:            boolean       = $state(false)
+    public is_historical:     boolean       = $state(false)
+    public edition_id:        string | null = $derived(this.pickable_editions[0]?.id ?? null)
+    public dont_have_edition: boolean       = $derived(this.edition_id ? false : true)
+
 
 
 
@@ -196,5 +221,80 @@ export class BookProfileStore
         }
 
         return `${series.name}\u00A0#${volume_number}`
+    }
+
+
+    private buildReadPreview(read: ReadRecordResponse)
+    {
+        const edition: EditionResponse | null = read.edition_id ? this.editions.find(it => it.id === read.edition_id) ?? null : null
+        const format_definition = edition_format_color_registry.resolve(edition?.format ?? EditionFormatColorRegistry.UNKNOWN)
+        const rendered_note = read.notes ? renderMarkdown(read.notes) : null
+        
+        return {
+            id: read.id,
+            format_definition: format_definition,
+            rendered_note: rendered_note,
+            start_date: read.start_date,
+            end_date: read.end_date,
+            is_in_progress: !ReadRecordRules.isFinished(read),
+            is_historical: read.is_historical,
+        }
+    }
+
+
+    public async handleReadData(save: boolean): Promise<boolean>
+    {
+        if (!save)
+        {
+            this.start_date = ""
+            this.end_date = ""
+            this.is_dnf = false
+            this.is_historical = false
+
+            console.log("dumped data")
+            return true
+        }
+
+        const read_request: ReadRecordCreateRequest = {
+            book_id: this.book.id,
+            edition_id: this.edition_id,
+            start_date: this.start_date !== "" ? this.start_date : null,
+            end_date: this.end_date !== "" ? this.end_date : null,
+            did_not_finish: this.is_dnf,
+            is_historical: this.is_historical,
+            stop_position: null,
+            notes: null,
+        }
+
+        const result = await this.read_repo.create(read_request)
+
+        if (!result.ok)
+        {
+            return false
+        }
+
+        this.start_date = ""
+        this.end_date = ""
+        this.is_dnf = false
+        this.is_historical = false
+        this.dont_have_edition = false
+
+        return true
+    }
+
+
+    public async finishRead(read_id: string): Promise<boolean>
+    {
+        const read = this.read_repo.get(read_id)
+
+        if (!read) return false
+
+        const request: ReadRecordUpdateRequest = {
+            end_date: new Date().toISOString().slice(0, 10)
+        }
+
+        const result = await this.read_repo.update(read_id, request)
+
+        return result.ok
     }
 }
