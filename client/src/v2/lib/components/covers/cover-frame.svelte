@@ -1,5 +1,11 @@
 <script lang="ts" module>
     export type CoverFrameStatus = "empty" | "loading" | "loaded" | "error"
+    export type CoverFrameFit = "cover" | "contain"
+
+    export type CoverFrameImageSize = { 
+        width: number, 
+        height: number 
+    }
 </script>
 
 
@@ -15,14 +21,31 @@
         status,
         src = null,
         alt = "",
+        fit = "cover",
+        onImageLoad,
         onImageError,
         ...rest
     }: {
         status:        CoverFrameStatus
         src?:          string | null
         alt?:          string | null
+        fit?:          CoverFrameFit
+        onImageLoad?:  (size: CoverFrameImageSize) => void
         onImageError?: () => void
     } & HTMLAttributes<HTMLElement> = $props()
+
+
+    function reportSize(event: Event): void
+    {
+        if (onImageLoad === undefined) return
+
+        const image = event.currentTarget as HTMLImageElement
+
+        onImageLoad({
+            width: image.naturalWidth,
+            height: image.naturalHeight
+        })
+    }
 </script>
 
 
@@ -35,10 +58,13 @@
 >
     {#if status === "loaded" && src !== null}
         <img
-            src = { src }
-            alt = { alt }
-            decoding = "async"
-            onerror  = { onImageError }
+            src           = { src }
+            alt           = { alt }
+            decoding      = "async"
+            draggable     = "false"
+            class:contain = { fit === "contain" }
+            onload        = { reportSize }
+            onerror       = { onImageError }
         />
     {:else if status === "error"}
         <ImageLoadingError />
@@ -57,16 +83,10 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        overflow: hiddden;
-
-        width: 100%; 
-        aspect-ratio: 2/3;
         gap: 4px;
 
-        border: 1px solid var(--text-placeholder);
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
+        width: 100%; 
+        height: 100%; 
 
         text-align: center;
         line-height: 1;
@@ -93,13 +113,14 @@
         &.empty 
         {
             background-color: rgba(0, 0, 0, 10%);
+        }
 
-            & > :global(svg)
-            {
-                width: 65%;
-                height: auto;
-                aspect-ratio: 1;
-            }
+        & > :global(svg)
+        {
+            width: 65%;
+            max-width: 80px;
+            height: auto;
+            aspect-ratio: 1;
         }
 
         & > :global(svg path)
@@ -114,6 +135,13 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        user-select: none;
+        -webkit-user-drag: none;
+
+        &.contain
+        {
+            object-fit: contain;
+        }
     }
 
 

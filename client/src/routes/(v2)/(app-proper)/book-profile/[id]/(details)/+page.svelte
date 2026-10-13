@@ -6,6 +6,7 @@
     import      Library from "@v2/lib/components/icons/library.svelte";
     import      User from "@v2/lib/components/icons/user.svelte";
     import      GenericPill from "@v2/lib/components/pills/generic-pill.svelte";
+    import CoverTile from "@v2/lib/components/covers/cover-tile.svelte";
 
 
 
@@ -29,11 +30,13 @@
 <page-wrapper>
     <cover-info-wrapper>
         <cover-wrapper>
-            <CoverImage 
-                cover_id   = { store.cover_id }
-                cover_type = "thumbnail"
-                alt        = { store.title }
-            />
+            <CoverTile>
+                <CoverImage 
+                    cover_id   = { store.cover_id }
+                    cover_type = "thumbnail"
+                    alt        = { store.title }
+                />
+            </CoverTile>
         </cover-wrapper>
 
         <info-wrapper>

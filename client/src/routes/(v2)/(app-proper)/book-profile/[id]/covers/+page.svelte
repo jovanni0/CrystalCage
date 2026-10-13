@@ -1,11 +1,10 @@
 <script lang="ts">
-    import { pushState } from "$app/navigation";
-    import { page } from "$app/state";
-    import { nav } from "@root/CompositionRoot";
-    import Star from "@root/icons/Star.svelte";
-    import CoverImage from "@v2/lib/components/covers/cover-image.svelte";
-    import CoverViewer from "@v2/lib/elements/cover-viewer.svelte";
     import type { BookProfileStore } from "@v2/lib/stores/book-profile-store.svelte";
+    import      { page } from "$app/state";
+    import      { nav } from "@root/CompositionRoot";
+    import      Star from "@root/icons/Star.svelte";
+    import      CoverImage from "@v2/lib/components/covers/cover-image.svelte";
+    import      CoverViewerOverlay from "@v2/lib/elements/cover-viewer-overlay.svelte";
 
 
 
@@ -25,11 +24,13 @@
     {#each store.covers_preview as cover, index (cover.id)}
         <cover-wrapper>
             <content-wrapper>
-                <CoverImage 
-                    cover_id   = { cover.id }
-                    cover_type = "thumbnail"
-                    alt        = { cover.label ?? undefined }
-                />
+                <cover-image-wrapper>
+                    <CoverImage 
+                        cover_id   = { cover.id }
+                        cover_type = "thumbnail"
+                        alt        = { cover.label ?? undefined }
+                    />
+                </cover-image-wrapper>
     
                 <button
                     class      = "view"
@@ -53,11 +54,11 @@
     {/each}
 
     {#if page.state.cover_viewer_index !== undefined && store.covers_preview.length > 0}
-        <CoverViewer
+        <CoverViewerOverlay
             covers            = { store.covers_preview }
             start_index       = { page.state.cover_viewer_index }
             is_saving_default = { store.is_saving_cover }
-            onClose           = { nav.goBack }
+            onClose           = { () => nav.goBack() }
             onSetDefault      = { (cover_id) => store.setDefaultCover(cover_id) }
         />
     {/if}
@@ -74,9 +75,21 @@
 
     cover-wrapper
     {
-        width: 100%;
         display: flex;
         flex-direction: column;
+        width: 100%;
+
+        cover-image-wrapper
+        {
+            display: block;
+            width: 100%;
+            aspect-ratio: 2/3;
+            overflow: hidden;
+
+            border: 1px solid var(--text-placeholder);
+            border-radius: 8px;
+            box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.2);
+        }
         
         p.label
         {

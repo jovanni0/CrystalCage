@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { CoverType } from "@v2/lib/clients/api-covers";
+    import type { CoverType }     from "@v2/lib/clients/api-covers";
     import      { ripple_effect } from "../buttons/ripple-effect";
-    import      CoverImage from "./cover-image.svelte";
-    
+    import      CoverTile         from "./cover-tile.svelte";
+    import      CoverImage        from "./cover-image.svelte";
     import "../buttons/ripple-effect.css"
 
 
@@ -29,11 +29,14 @@
     class = "ripple-container"
     {@attach ripple_effect}
 >
-    <CoverImage 
-        cover_id   = { cover_id }
-        cover_type = { cover_type }
-        alt        = { alt }
-    />
+    <CoverTile>
+        <CoverImage 
+            cover_id   = { cover_id }
+            cover_type = { cover_type }
+            alt        = { alt }
+        />
+    </CoverTile>
+    
     <p>{ label }</p>
 </a>
 
