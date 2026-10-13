@@ -22,7 +22,7 @@
     type VisibleSlide =
     {
         cover:  ViewerCover
-        offset: number
+        index: number
     }
 
 
@@ -78,13 +78,11 @@
     {
         const slides: VisibleSlide[] = []
 
-        for (let offset = -1; offset <= 1; offset++)
+        for (let index = current_index - 1; index <= current_index + 1; index++)
         {
-            const cover = covers[current_index + offset]
-
-            if (cover !== undefined)
+            if (isInRange(index))
             {
-                slides.push({ cover: cover, offset: offset })
+                slides.push({ cover: covers[index], index: index })
             }
         }
 
@@ -102,13 +100,13 @@
 
         if (event.key === "ArrowRight")
         {
-            void gestures.page(1)
+            gestures.page(1)
             return
         }
 
         if (event.key === "ArrowLeft")
         {
-            void gestures.page(-1)
+            gestures.page(-1)
         }
     }
 </script>
@@ -129,14 +127,14 @@
     >
         <viewer-strip
             class:settling  = { gestures.is_settling }
-            style:transform = "translate({gestures.page_offset_x}px, {gestures.dismiss_offset_y}px)"
+            style:transform = "translate(calc({-current_index * 100}% + {gestures.page_offset_x}px), {gestures.dismiss_offset_y}px)"
         >
             {#each visible_slides as slide (slide.cover.id)}
                 <CoverViewerSlide
                     cover_id      = { slide.cover.id }
                     alt           = { slide.cover.label ?? "" }
-                    offset        = { slide.offset }
-                    transform     = { slide.offset === 0 ? gestures.transform : ZoomRules.IDENTITY }
+                    index         = { slide.index }
+                    transform     = { slide.index === current_index ? gestures.transform : ZoomRules.IDENTITY }
                     container     = { container }
                     is_animating  = { gestures.is_settling }
                     onNaturalSize = { (cover_id, size) => natural_sizes.set(cover_id, size) }
@@ -211,6 +209,7 @@
         position: absolute;
         inset: 0;
         display: block;
+        will-change: transform;
 
         &.settling
         {

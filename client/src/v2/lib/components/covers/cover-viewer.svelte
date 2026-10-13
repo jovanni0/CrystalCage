@@ -10,7 +10,7 @@
     let {
         cover_id,
         alt,
-        offset,
+        index,
         transform,
         container,
         is_animating,
@@ -18,7 +18,7 @@
     }: {
         cover_id:      string
         alt:           string
-        offset:        number
+        index:        number
         transform:     ZoomTransform
         container:     Size
         is_animating:  boolean
@@ -42,7 +42,7 @@
 
 
 <viewer-slide 
-    style:left = "{offset * 100}%"
+    style:left = "{index * 100}%"
 >
     <zoom-layer
         class:animating = { is_animating }
@@ -75,6 +75,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
+
+        will-change: transform;
+        contain: layout paint;
     }
 
     zoom-layer

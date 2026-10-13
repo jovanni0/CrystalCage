@@ -32,11 +32,19 @@
     let status: CoverFrameStatus = $state("loading")
     let src:    string | null    = $state(null)
 
+    // A parent that rebuilds its item objects re-sends the same values through new objects; a derived only notifies its
+    // readers when the value itself changes, so the cover is not reloaded (and its <img> not recreated) for nothing.
+    const stable_cover_id:                 string | null = $derived(cover_id)
+    const stable_cover_type:               CoverType     = $derived(cover_type)
+    const stable_is_lazy:                  boolean       = $derived(is_lazy)
+    const stable_should_preview_thumbnail: boolean       = $derived(should_preview_thumbnail)
+
 
     function loadCover(node: HTMLElement): (() => void) | void
     {
-        const current_id = cover_id
-        const cover_cache = cover_type === "original" ? fullsize_cover_cache : thumbnail_cover_cache
+        const current_id  = stable_cover_id
+        const cover_cache = stable_cover_type === "original" ? fullsize_cover_cache : thumbnail_cover_cache
+
         src = null
 
         if (current_id === null)
@@ -114,9 +122,9 @@
 
         status = "loading"
 
-        if (should_preview_thumbnail && cover_type === "original" && cover_id)
+        if (stable_should_preview_thumbnail && stable_cover_type === "original" && stable_cover_id)
         {
-            const thumbnail = thumbnail_cover_cache.peek(cover_id)
+            const thumbnail = thumbnail_cover_cache.peek(stable_cover_id)
 
             if (thumbnail !== null)
             {
@@ -124,14 +132,14 @@
             }
         }
 
-        if (is_lazy)
+        if (stable_is_lazy)
         {
             is_observed = true
             visibility_observer.observe(node, fetchAndShow)
         }
         else
         {
-            void fetchAndShow()
+            fetchAndShow()
         }
 
         return cleanup

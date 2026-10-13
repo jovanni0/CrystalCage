@@ -58,7 +58,7 @@
             covers            = { store.covers_preview }
             start_index       = { page.state.cover_viewer_index }
             is_saving_default = { store.is_saving_cover }
-            onClose           = { () => nav.goBack() }
+            onClose           = { () => nav.closeOverlay() }
             onSetDefault      = { (cover_id) => store.setDefaultCover(cover_id) }
         />
     {/if}

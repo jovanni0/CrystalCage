@@ -4,7 +4,6 @@ import type { PageDirection,
 import type { Point,
               Size,
               ZoomTransform }        from "../rules/zoom-rules"
-import      { tick }                 from "svelte"
 import      { DOUBLE_TAP_DELAY_MS,
               GestureRules,
               ZOOM_SNAP_BACK_SCALE } from "../rules/gesture-rules"
@@ -87,29 +86,21 @@ export class ViewerGestures
 
 
     /*
-    * Moves to the neighbouring item, or springs back when there is none. The strip is re-based on the new item at the same on-screen
-    * position, a forced layout commits it, then it animates to rest, so the slide keeps moving instead of jumping.
+    * Moves to the neighbouring item, or springs back when there is none. Changing the index and clearing the drag offset in the same
+    * update lets the strip's transform transition carry the slide from where the finger left it to its resting place.
     */
-    public async page(direction: PageDirection): Promise<void>
+    public page(direction: PageDirection): void
     {
+        this.is_settling   = true
+        this.page_offset_x = 0
+
         if (!this.options.canPage(direction))
         {
-            this.is_settling   = true
-            this.page_offset_x = 0
             return
         }
 
-        this.is_settling   = false
-        this.transform     = ZoomRules.IDENTITY
-        this.page_offset_x = this.page_offset_x + direction * this.options.getContainer().width
+        this.transform = ZoomRules.IDENTITY
         this.options.onPage(direction)
-
-        await tick()
-        this.stage_rect = null
-        document.body.getBoundingClientRect()
-
-        this.is_settling   = true
-        this.page_offset_x = 0
     }
 
 
@@ -327,7 +318,7 @@ export class ViewerGestures
             return
         }
 
-        void this.page(direction)
+        this.page(direction)
     }
 
 
