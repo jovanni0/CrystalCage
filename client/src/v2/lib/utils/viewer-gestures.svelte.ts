@@ -148,13 +148,14 @@ export class ViewerGestures
         this.start_time      = performance.now()
         this.start_transform = this.transform
 
-        if (this.transform.scale > 1)
+        if (can_be_tap)
         {
-            this.gesture = "pan"
+            this.gesture = "undecided"
             return
         }
 
-        this.gesture = can_be_tap ? "undecided" : "none"
+        // the finger left on screen after a pinch: never a tap, keeps panning if zoomed
+        this.gesture = this.transform.scale > 1 ? "pan" : "none"
     }
 
 
@@ -185,7 +186,7 @@ export class ViewerGestures
 
         if (this.gesture === "undecided")
         {
-            this.gesture = GestureRules.decide(delta)
+            this.gesture = GestureRules.decide(delta, this.transform.scale > 1)
         }
 
         this.applyGesture(delta)

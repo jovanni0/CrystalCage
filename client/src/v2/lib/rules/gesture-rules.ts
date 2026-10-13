@@ -2,7 +2,7 @@ import type { Point } from "./zoom-rules"
 
 
 
-export type SwipeDecision = "undecided" | "page" | "dismiss" | "none"
+export type SwipeDecision = "undecided" | "pan" | "page" | "dismiss" | "none"
 export type PageDirection = -1 | 1
 
 export type TapRecord =
@@ -27,13 +27,19 @@ export const ZOOM_SNAP_BACK_SCALE      = 1.05
 export class GestureRules
 {
     /*
-    * One finger at 1×: stays undecided (a tap if released) until it moves far enough, then the dominant axis decides. Dragging up does nothing.
+    *   One finger stays undecided (a tap if released) until it moves far enough. Zoomed, any drag pans the image; at 1× the dominant
+    *   axis decides between paging and dismissing, and dragging up does nothing.
     */
-    public static decide(delta: Point): SwipeDecision
+    public static decide(delta: Point, is_zoomed: boolean): SwipeDecision
     {
         if (Math.hypot(delta.x, delta.y) < GESTURE_DECISION_DISTANCE)
         {
             return "undecided"
+        }
+
+        if (is_zoomed)
+        {
+            return "pan"
         }
 
         if (Math.abs(delta.x) > Math.abs(delta.y))
