@@ -7,6 +7,11 @@ declare global {
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
+
+		interface PageState
+		{
+			cover_viewer_index?: number
+		}
 	}
 }
 

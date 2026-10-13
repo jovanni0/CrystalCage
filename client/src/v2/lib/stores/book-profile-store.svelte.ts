@@ -1,0 +1,200 @@
+import type { BookDetailResponse } from "@root/dtos/BookDetailResponse"
+import type { AuthorRepository } from "../repositories/author-repository.svelte"
+import type { BookRepository } from "../repositories/book-repository.svelte"
+import type { ReadRecordRepository } from "../repositories/read-record-repository.svelte"
+import type { SeriesRepository } from "../repositories/series-repository.svelte"
+import type { UniverseRepository } from "../repositories/universe-repository.svelte"
+import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
+import type { AppError, AsyncResult } from "../utils/result"
+import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
+import type { ReadStatusSummary } from "../rules/read-record-rules"
+import      { ReadRecordRules } from "../rules/read-record-rules"
+import      { AuthorRules } from "../rules/author-rules"
+import { renderMarkdown } from "../utils/markdown"
+import type { TagRepository } from "../repositories/tag-repository.svelte"
+import type { CoverRepository } from "../repositories/cover-repository.svelte"
+import type { CoverResponse } from "@root/dtos/CoverResponse"
+
+
+
+export type BookProfileStoreDependencies = {
+    books:          BookRepository
+    authors:        AuthorRepository
+    universes:      UniverseRepository
+    series:         SeriesRepository
+    read_records:   ReadRecordRepository
+    tags: TagRepository
+    cover_repository: CoverRepository
+}
+
+
+export type BookDetails_Cover = {
+    id:         string
+    is_default: boolean
+    resolution: string
+    added_at:   string
+    label:      string | null
+}
+
+
+
+export class BookProfileStore
+{
+    /*
+    *   Blocks only on what the page cannot render without (book list, details). Read records failures are exposed through `read_records_error`.
+    */
+    public static async create(dependencies: BookProfileStoreDependencies, book_id: string): AsyncResult<BookProfileStore>
+    {
+        const [ details_result, ...other_results ] = await Promise.all([
+            dependencies.books.details(book_id),
+            dependencies.authors.ensure(),
+            dependencies.universes.ensure(),
+            dependencies.series.ensure(),
+            dependencies.read_records.load(book_id),
+            dependencies.tags.ensure(),
+            dependencies.cover_repository.load(book_id),
+        ])
+
+        if (!details_result.ok) 
+        {
+            return details_result
+        }
+
+        const failed_others = other_results.slice(0, 3).find(it => !it.ok)
+
+        if (failed_others !== undefined && !failed_others.ok)
+        {
+            return failed_others
+        }
+
+        return { 
+            ok: true, 
+            value: new BookProfileStore(dependencies, details_result.value) 
+        }
+    }
+
+
+    private book_details: BookDetailResponse
+
+    private book:          BookDetailResponse   = $derived.by(() => this.book_details) // so TypeScript does not complain
+    private book_repo:     BookRepository       = $derived.by(() => this.dependencies.books)
+    private author_repo:   AuthorRepository     = $derived.by(() => this.dependencies.authors)
+    private universe_repo: UniverseRepository   = $derived.by(() => this.dependencies.universes)
+    private series_repo:   SeriesRepository     = $derived.by(() => this.dependencies.series)
+    private read_repo:     ReadRecordRepository = $derived.by(() => this.dependencies.read_records)
+    private tags_repo:     TagRepository        = $derived.by(() => this.dependencies.tags)
+    private cover_repo:    CoverRepository      = $derived.by(() => this.dependencies.cover_repository)
+
+    public read_records:       ReadRecordResponse[]      = $derived(this.read_repo.get(this.book.id))
+    public read_records_error: AppError | null           = $derived(this.read_repo.errorOf(this.book.id))
+    public current_read:       ReadRecordResponse | null = $derived(ReadRecordRules.currentReadOf(this.read_records))
+    public is_reading:         boolean                   = $derived(this.current_read !== null)
+    public read_summary: ReadStatusSummary = $derived(ReadRecordRules.summaryOf(this.read_records))
+
+    // DETAILS
+    public book_id:     string           = $derived(this.book.id)
+    public cover_id:    string | null    = $derived(this.book.cover_id)
+    public title:       string           = $derived(this.book.title)
+    public author:      string           = $derived(this.buildAuthorName() ?? "Unknown author")
+    public universe:    string | null    = $derived(this.book.universe_id ? this.universe_repo.byId(this.book.universe_id)?.name ?? "Unknown universe" : null)
+    public series:      string | null    = $derived(this.buildSeriesLabel())
+    public thoughts:    string | null    = $derived(this.book.notes ? renderMarkdown(this.book.notes) : null)
+    public blurb:       string | null    = $derived(this.book.blurb ? renderMarkdown(this.book.blurb) : null)
+    public tags:        string[]         = $derived(this.book.tag_ids.map(it => this.tags_repo.byId(it)).map(it => it?.name ?? "error"))
+    public released_at: string | null    = $derived(this.book.launch_date)
+    public word_count:  string | null    = $derived(this.book.word_count ? `~ ${this.book.word_count} K` : null)
+    public read_count:  string           = $derived(this.read_summary.kind === "dnf" ? "0 (DNF)" : this.read_summary.kind === "unread" ? "0" : this.read_summary.count.toString())
+
+    // COVERS
+    public covers:         CoverResponse[] = $derived(this.cover_repo.get(this.book.id))
+    public covers_preview: BookDetails_Cover[] = $derived(this.covers.map(it => ({ id: it.id, is_default: it.is_default, resolution: "px", label: it.label, added_at: it.added_at }) ))
+    
+    public is_saving_cover: boolean       = $state(false)
+
+
+
+    private constructor(
+        private dependencies: BookProfileStoreDependencies, 
+        details: BookDetailResponse,
+    ) 
+    {
+        this.book_details = $state.raw(details)
+    }
+
+
+    public async setDefaultCover(cover_id: string): Promise<void>
+    {
+        if (this.is_saving_cover || cover_id === this.book.cover_id) return 
+
+        this.is_saving_cover = true
+
+        const result = await this.book_repo.update(this.book.id, { cover_id: cover_id })
+
+        this.is_saving_cover = false
+
+        if (!result.ok) return
+
+        this.cover_repo.markDefault(this.book.id, cover_id)
+        this.book_details = { ...this.book_details, cover_id: result.value.cover_id }
+    }
+
+
+    public async refresh(): Promise<void>
+    {
+        this.dependencies.read_records.invalidate(this.book.id)
+
+        await Promise.all([
+            this.dependencies.read_records.load(this.book.id),
+            this.loadDetails(),
+        ])
+    }
+
+
+    private async loadDetails(): AsyncResult<BookDetailResponse>
+    {
+        const result = await this.book_repo.details(this.book.id)
+
+        if (result.ok)
+        {
+            this.book = result.value
+        }
+
+        return result
+    }
+
+
+    private buildAuthorName(): string | null
+    {
+        const author = this.author_repo.byId(this.book.author_id)
+
+        if (author === undefined)
+        {
+            return null
+        }
+
+        return AuthorRules.nameOf(author)
+    }
+
+
+    /*
+    * Non-breaking space keeps "#1" on the same line as the last word of the series name.
+    */
+    private buildSeriesLabel(): string | null
+    {
+        const series = this.series_repo.byId(this.book.series_id)
+
+        if (series === undefined) 
+        {
+            return null
+        }
+
+        const volume_number = this.book.volume_number
+
+        if (volume_number === null)
+        {
+            return series.name
+        }
+
+        return `${series.name}\u00A0#${volume_number}`
+    }
+}

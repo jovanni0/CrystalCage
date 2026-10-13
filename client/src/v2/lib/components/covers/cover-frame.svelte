@@ -70,7 +70,7 @@
 
         text-align: center;
         line-height: 1;
-        font-size: var(--text-body-small);
+        font-size: var(--text-body-sm);
         color: var(--text-placeholder);
 
         &.error
@@ -90,11 +90,16 @@
             animation: shimmer 1.5s linear infinite;
         }
 
-        &.empty > :global(svg)
+        &.empty 
         {
-            width: 65%;
-            height: auto;
-            aspect-ratio: 1;
+            background-color: rgba(0, 0, 0, 10%);
+
+            & > :global(svg)
+            {
+                width: 65%;
+                height: auto;
+                aspect-ratio: 1;
+            }
         }
 
         & > :global(svg path)

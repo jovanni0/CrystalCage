@@ -25,7 +25,7 @@
 
 
 <a
-    href = "/book/{book_id}"
+    href = "/book-profile/{book_id}"
     class = "ripple-container"
     {@attach ripple_effect}
 >
