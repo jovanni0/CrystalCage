@@ -13,6 +13,7 @@
     import      ImageEdit from "@v2/lib/components/icons/image-edit.svelte";
     import { nav } from "@root/CompositionRoot";
     import { PageSlots } from "@v2/lib/utils/page-slots.svelte";
+    import FilePlusCorner from "@v2/lib/components/icons/file-plus-corner.svelte";
 
 
 
@@ -35,8 +36,6 @@
         { id: "editions", label: "Editions", href: `/book-profile/${store.book_id}/editions` },
     ])
     const current_page_id = $derived(TabRules.activeId(tabs, page.url.pathname))
-
-    console.log(store.editions)
 </script>
 
 
@@ -57,7 +56,7 @@
                     >
                         <ImageEdit />
                     </IconButton>
-                {:else if current_page_id === "details"}
+                {:else if current_page_id === "book"}
                     <IconButton
                         shape = "square"
                         label = "edit book details"
@@ -79,7 +78,7 @@
                         label = "manage editions"
                         onclick = { () => nav.goTo(`/manage-editions/${store.book_id}`) }
                     >
-                        <BookEdit />
+                        <FilePlusCorner />
                     </IconButton>
                 {/if}
             {/snippet}
