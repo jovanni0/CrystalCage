@@ -15,14 +15,16 @@
 <style>
     v2-wrapper
     {
-        --bg:                     hsl(39, 47%, 94%);
-        --bg-brand:               hsl(116, 21%, 32%);
-        --bg-brand-disabled:      hsl(117, 15%, 70%);
-        --bg-brand-secondary:     hsl(30, 42%, 39%);
+        --bg:                       hsl(39, 47%, 94%);
+        --bg-brand:                 hsl(116, 21%, 32%);
+        --bg-brand-disabled:        hsl(117, 15%, 70%);
+        --bg-brand-secondary:       hsl(30, 42%, 39%);
         --bg-brand-secondary-muted: hsl(40, 50%, 75%);
         --bg-brand-pale:            hsl(65, 20%, 87%);
-        --bg-inverted-muted:      hsl(33, 14%, 85%);
-        --bg-overlay:             hsl(39, 47%, 98%);
+        --bg-inverted-muted:        hsl(33, 14%, 85%);
+        --bg-overlay:               hsl(39, 47%, 98%);
+        --bg-error-pale:            hsl(6, 15%, 85%);
+
 
         --text:                       hsl(33, 15%, 15%);
         --text-muted:                 hsl(34, 5%, 40%);

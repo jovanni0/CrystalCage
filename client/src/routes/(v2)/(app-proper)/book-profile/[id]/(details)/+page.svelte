@@ -21,7 +21,7 @@
     const stats = $derived([
         { label: "words",   value: store.word_count ?? "" },
         { label: "release", value: store.released_at ?? "" },
-        { label: "reads",   value: "0" },
+        { label: "reads",   value: store.read_count },
     ])
 </script>
 

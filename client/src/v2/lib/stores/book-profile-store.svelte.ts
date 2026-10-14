@@ -19,7 +19,7 @@ import type { EditionResponse } from "@root/dtos/EditionResponse"
 import type { PickableEdition } from "../types/pickable-edition.type"
 import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest"
 import { edition_format_color_registry } from "@root/CompositionRoot"
-import { EditionFormatColorRegistry } from "../utils/format-color-registry.svelte"
+import { EditionFormatColorRegistry, type EditionFileFormatDefinition } from "../utils/format-color-registry.svelte"
 import type { ReadRecordUpdateRequest } from "@root/dtos/ReadRecordUpdateRequest"
 
 
@@ -42,6 +42,26 @@ export type BookDetails_Cover = {
     resolution: string
     added_at:   string
     label:      string | null
+}
+
+
+export type BookProfile_EditionPreview = {
+    id:           string
+    label:        string
+    release_date: string | null
+    read_status:  string
+    format:       EditionFileFormatDefinition
+}
+
+
+export type BookProfile_EditionDetails = {
+    id:           string
+    label:        string
+    release_date: string | null
+    read_status:  string
+    file_size:    string
+    added_at:     string
+    format:       EditionFileFormatDefinition
 }
 
 
@@ -118,12 +138,14 @@ export class BookProfileStore
     // COVERS
     public covers:         CoverResponse[] = $derived(this.cover_repo.get(this.book.id))
     public covers_preview: BookDetails_Cover[] = $derived(this.covers.map(it => ({ id: it.id, is_default: it.is_default, resolution: "px", label: it.label, added_at: it.added_at }) ))
+    public has_covers:     boolean         = $derived(this.covers.length > 0)
 
     public is_saving_cover: boolean       = $state(false)
 
     // READS
     public is_start_read_sheet_open: boolean = $state(false)
     public read_previews = $derived(this.read_repo.get(this.book.id).map(it => this.buildReadPreview(it)))
+    public has_reads: boolean = $derived(this.read_previews.length > 0)
 
     public editions: EditionResponse[] = $derived(this.edition_repo.get(this.book.id))
     public pickable_editions: PickableEdition[] = $derived(this.editions.map(it => ({ id: it.id, format_id: it.format, label: it.label ?? "", added_at: it.added_at }) ))
@@ -135,6 +157,15 @@ export class BookProfileStore
     public edition_id:        string | null = $derived(this.pickable_editions[0]?.id ?? null)
     public dont_have_edition: boolean       = $derived(this.edition_id ? false : true)
 
+
+    // EDITIONS
+    public has_editions:    boolean                      = $derived(this.editions.length > 0)
+    public edition_preview: BookProfile_EditionPreview[] = $derived(this.editions.map(it => this.toEditionPreview(it)))
+
+    public is_edition_details_sheet_open: boolean = $state(false)
+    public inspected_edition_id:          string  = $state("")
+    
+    public inspected_edition_details: BookProfile_EditionDetails = $derived(this.toEditionDetails(this.editions.find(it => it.id === this.inspected_edition_id) ?? null))
 
 
 
@@ -294,6 +325,88 @@ export class BookProfileStore
         }
 
         const result = await this.read_repo.update(read_id, request)
+
+        return result.ok
+    }
+
+    private getReadStatusMessage(edition: EditionResponse): string
+    {
+        const book_reads = this.read_repo.get(this.book_id)
+        const edition_reads = book_reads.filter(it => it.edition_id === edition.id)
+        const read_summary: ReadStatusSummary = ReadRecordRules.summaryOf(edition_reads)
+
+        return read_summary.kind === "finished" 
+            ? read_summary.count > 1 
+                ? `Read (${read_summary.count})` 
+                : "Read"
+            : read_summary.kind === "dnf"
+            ? "DNF"
+            : "In progress"
+    }
+
+
+    private toEditionPreview(edition: EditionResponse): BookProfile_EditionPreview
+    {
+        const read_status_messge = this.getReadStatusMessage(edition)
+        const format_definition = edition_format_color_registry.resolve(edition.format)
+
+        return {
+            id: edition.id,
+            label: edition.label ?? "",
+            release_date: edition.release_date,
+            read_status: read_status_messge,
+            format: format_definition,
+        }
+    }
+
+
+    private toEditionDetails(edition: EditionResponse | null): BookProfile_EditionDetails
+    {
+        if (!edition)
+        {
+            return {
+                id: "",
+                label: "",
+                release_date: "",
+                read_status: "",
+                file_size: "",
+                added_at: "",
+                format: edition_format_color_registry.resolve(EditionFormatColorRegistry.UNKNOWN)
+            }
+        }
+
+        const preview = this.toEditionPreview(edition)
+
+        return {
+            ...preview,
+            file_size: "",
+            added_at: edition.added_at
+        }
+    }
+
+
+    public async deleteInspectedEdition(): Promise<boolean>
+    {
+        const edition = this.editions.find(it => it.id === this.inspected_edition_id)
+
+        if (!edition) return false
+
+        const result = await this.edition_repo.delete(edition)
+
+        if (result.ok)
+        {
+            this.book_repo.invalidate()
+            void this.book_repo.load()
+
+            this.read_repo.invalidate(this.book.id)
+            void this.read_repo.load(this.book.id)
+
+            const book = await this.book_repo.details(this.book.id)
+
+            if (!book.ok) return false
+
+            this.book_details = book.value
+        }
 
         return result.ok
     }
