@@ -202,7 +202,7 @@
 
             <IconButton
                 label = "open book page"
-                onclick = { () => nav.goTo(`/book/${book_id}`) }
+                onclick = { () => nav.goTo(`/book-profile/${book_id}`) }
             >
                 <ExternalLink />
             </IconButton>
