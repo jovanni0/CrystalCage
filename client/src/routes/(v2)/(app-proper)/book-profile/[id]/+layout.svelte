@@ -60,7 +60,7 @@
                     <IconButton
                         shape = "square"
                         label = "edit book details"
-                        onclick = { () => nav.goTo(`/add-book/${store.cover_id}`) }
+                        onclick = { () => nav.goTo(`/add-book/${store.book_id}`) }
                     >
                         <BookEdit />
                     </IconButton>
@@ -116,7 +116,7 @@
         text-align: center;
         padding: 6px 0;
 
-        font-size: var(--text-body-small);
+        font-size: var(--text-body-sm);
         font-weight: 600;
     }
 </style>
