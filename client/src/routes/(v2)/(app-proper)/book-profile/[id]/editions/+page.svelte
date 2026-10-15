@@ -23,6 +23,7 @@
 
     function triggerSheet(id: string)
     {
+        console.log("[editions] open sheet", id)
         store.inspected_edition_id = id
         store.is_edition_details_sheet_open = true
     }
@@ -99,7 +100,8 @@
         justify-content: center;
         align-items: center;
         gap: 16px;
-        height: 100%;
+        /* height: 100%; */
+        flex: 1;
         color: var(--text-brand-secondary);
 
         & > :global(svg *)

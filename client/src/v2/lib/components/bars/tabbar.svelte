@@ -7,9 +7,11 @@
     let { 
         tabs,
         current_tab_id,
+        transition_name,
     } : { 
         tabs:           Tab[]
         current_tab_id: string | null
+        transition_name: string
     } = $props()
 
 
@@ -35,7 +37,7 @@
     {/each}
 
     {#if current_tab_id !== null}
-        <tab-indicator></tab-indicator>
+        <tab-indicator style:view-transition-name = { transition_name }></tab-indicator>
     {/if}
 </tab-bar>
 

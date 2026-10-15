@@ -72,7 +72,7 @@
     <StartReadSheet 
         bind:is_sheet_opened = { 
             () => store.is_start_read_sheet_open,
-            (value: boolean) => { store.is_start_read_sheet_open = value; store.handleReadData(false); console.log("closed"); } }
+            (value: boolean) => { store.is_start_read_sheet_open = value; store.handleReadData(false) } }
         bind:start_date = { store.start_date }
         bind:end_date = { store.end_date }
         bind:is_dnf = { store.is_dnf }
@@ -93,7 +93,8 @@
         justify-content: center;
         align-items: center;
         gap: 16px;
-        height: 100%;
+        /* height: 100%; */
+        flex: 1;
         color: var(--text-brand-secondary);
 
         & > :global(svg *)
