@@ -1,0 +1,61 @@
+# Roadmap. status: done | in-progress | planned | idea | dropped
+
+stages:
+  - title: Stage 1 -- New interface
+    status: in-progress
+    text: A full redesign of the app. The new library and book profile are in use; the current focus is using the app with a real collection and fixing what it reveals.
+    items:
+      - text: New library
+        status: done
+      - text: New add book flow
+        status: done
+      - text: New book profile (covers, details, reads, editions)
+        status: in-progress
+      - text: Global read history
+        status: planned
+      - text: Authors page and separate author gallery
+        status: planned
+      - text: Record management (tags, authors, universe, series)
+        status: planned
+      - text: User profile
+        status: planned
+      - text: Polish pass across the library and book profile
+        status: planned
+
+  - title: Stage 2 -- Web and Desktop
+    status: planned
+    text: Desktop and web clients, with the same functionality as the mobile app.
+
+  - title: Stage 3 -- Built-in reader
+    status: planned
+    text: An ebook reader integrated directly with in the app. It allows you to seamlessly open an uploaded edition and actively tracks your progress.
+
+ideas:
+  title: Later
+  items:
+    - title: Offline support
+      text: The app keeps the latest data from the server and uses it when the server cannot be reached.
+      status: idea
+    - title: Import from Goodreads and StoryGraph
+      text: Bring an existing library and read history into Sanctum.
+      status: idea
+    - title: Metadata lookup
+      text: Fill in book details from outside sources instead of typing them.
+      status: idea
+
+explored:
+  title: Directions we explored
+  text: Ideas that came up while planning Sanctum. Some may come back in a different shape; some were dropped and the reason is noted.
+  items:
+    - title: Seeing other readers on the same server
+      text: Opt-in visibility between users of one server, as a small social layer that needs no central service.
+      status: idea
+    - title: BookWyrm interoperability
+      text: BookWyrm already connects readers across servers through ActivityPub. Working with it is cheaper than building a parallel network.
+      status: idea
+    - title: Recommendations hub
+      text: An opt-in service with shared reading profiles. It only makes sense with many users, so it waits.
+      status: idea
+    - title: Sanctum Archives
+      text: A crowdsourced archive of metadata and covers. Dropped in this form, because it would duplicate Open Library.
+      status: dropped

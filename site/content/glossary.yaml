@@ -1,0 +1,14 @@
+# Definitions for :term[...] in the docs (help tooltips). Also usable by the chatbot.
+
+self-hosted: You run the server yourself, on your own computer, a home server or a VPS, instead of using a service run by someone else.
+isolated-library: Every user on a Sanctum server has their own library. Users cannot see each other's books, reads or files.
+edition: One digital version of a book, an ebook file or in a specific format (EPUB, PDF, etc), or record of a physical copy. A book can have several editions.
+universe: A shared world that can contain several series by the same author. It is not mandatory for a series to be inside a universe.
+series: An ordered set of books. Each book in a series has a volume number.
+historical-read: A read you finished before you started using Sanctum, logged afterwards.
+dnf: Did Not Finish. A read you stopped without finishing the book.
+invite-code: An 8-character code an admin generates so a new person can create an account. Each code works only once.
+lan-discovery: The app finds Sanctum servers on the same network by itself, without you typing an address.
+reverse-proxy: A web server (Caddy, nginx, Traefik) placed in front of Sanctum. It receives requests on your domain, handles HTTPS and forwards them to Sanctum.
+docker-volume: Storage managed by Docker that survives when containers are rebuilt or updated.
+environment-variable: A setting passed to a program when it starts. Sanctum reads all its configuration from environment variables.

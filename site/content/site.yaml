@@ -1,0 +1,37 @@
+# Site-wide settings, used by the layout on every page.
+
+name: Sanctum
+tagline: Your library, your rules.
+description: "Open-source, self-hosted book management: store your ebook files, track your reads and manage covers, on your own server.""
+
+repository: https://github.com/jovanni0/CrystalCage
+
+# Order here is the order in the navigation bar.
+# Docs pages (content/docs/*.md) are linked by slug.
+nav:
+  - label: Home
+    href: /
+  - label: The app
+    href: /docs/app
+  - label: Hosting
+    href: /docs/hosting
+  - label: Formats
+    href: /docs/formats
+  - label: Roadmap
+    href: /roadmap
+  - label: Contact
+    href: /contact
+
+social:
+  - name: GitHub
+    href: https://github.com/jovanni0/CrystalCage
+    icon: github
+  - name: F-Droid
+    href: ""            # TODO: add once published
+    icon: fdroid
+  - name: IzzyOnDroid
+    href: ""            # TODO: add once published
+    icon: izzyondroid
+
+footer:
+  note: Sanctum is open source. Your books stay on your server.

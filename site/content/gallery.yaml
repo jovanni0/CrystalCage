@@ -1,0 +1,25 @@
+# Screenshots for the gallery (lightbox with Previous/Next).
+# Images live in site/static/images/gallery/.
+
+# images:
+#   - src: /images/gallery/library.png
+#     alt: The library, a grid of book covers.
+#     caption: Your library at a glance.
+#   - src: /images/gallery/book-profile.png
+#     alt: A book profile on the Book tab, with title, series and blurb.
+#     caption: Everything about a book on one page.
+#   - src: /images/gallery/covers.png
+#     alt: The Covers tab with several covers for one book.
+#     caption: Several covers per book, one of them shown in the library.
+#   - src: /images/gallery/cover-viewer.png
+#     alt: A cover opened full screen.
+#     caption: Open a cover full screen, zoom and swipe between covers.
+#   - src: /images/gallery/reads.png
+#     alt: The Reads tab with a read in progress and past reads.
+#     caption: Every read, current and past.
+#   - src: /images/gallery/editions.png
+#     alt: The Editions tab with an EPUB and a PDF edition.
+#     caption: Your ebook files, in any format.
+#   - src: /images/gallery/add-book.png
+#     alt: The add book form.
+#     caption: Adding a book.
