@@ -6,6 +6,7 @@
     import "#lib/styles/prose.css";
     import Header from "#lib/components/header.svelte";
     import Footer from "#lib/components/footer.svelte";
+    import FloatingActions from "#lib/elements/floating-actions.svelte";
 
     let { data, children } = $props()
 
@@ -33,3 +34,4 @@
 </page-content>
 
 <Footer />
+<FloatingActions />

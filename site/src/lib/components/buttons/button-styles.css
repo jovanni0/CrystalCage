@@ -1,0 +1,66 @@
+.button-mimic
+{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 999px;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+}
+
+.button-mimic.fat
+{
+    padding: 16px 32px;
+}
+
+.button-mimic.slim
+{
+    padding: 8px 16px;
+}
+
+.button-mimic.fat,
+.button-mimic.slim
+{
+    &.primary
+    {           
+        background-color: var(--bg-brand);
+        color: var(--text-inverted);
+
+        &.disabled
+        {
+            background-color: var(--bg-brand-disabled);
+        }
+    }
+
+    &.ghost
+    {
+        background-color: transparent;
+        color: var(--text-brand);
+
+        &.disabled
+        {
+            color: var(--text-placeholder);
+        }
+    }
+}
+
+.button-mimic.disabled,
+.button-mimic.loading
+{
+    cursor: auto;
+}
+
+content.loading
+{
+    visibility: hidden;
+}
+
+spinner-wrapper
+{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
