@@ -5,6 +5,7 @@
     import "#lib/styles/base.css";
     import "#lib/styles/prose.css";
     import Header from "#lib/components/header.svelte";
+    import Footer from "#lib/components/footer.svelte";
 
     let { data, children } = $props()
 
@@ -31,6 +32,4 @@
     {@render children()}
 </page-content>
 
-<site-footer>
-    <p>{ data.site.footer.note }</p>
-</site-footer>
+<Footer />
