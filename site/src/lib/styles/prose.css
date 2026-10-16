@@ -29,9 +29,7 @@ site-header a[aria-current="page"]
 doc-layout
 {
     display: grid;
-    grid-template-columns: 14rem minmax(0, 46rem);
-    gap: 3rem;
-    padding: 2rem 1rem;
+    grid-template-columns: 20rem auto 20rem;
 }
 
 doc-toc
