@@ -1,0 +1,28 @@
+@font-face 
+{
+    font-family: "Lora";
+    src: url("/Lora-VariableFont_wght.woff2") format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+@font-face 
+{
+    font-family: "Lora";
+    src: url("/Lora-Italic-VariableFont_wght.woff2") format('woff2');
+    font-weight: 100 900;
+    font-style: italic;
+    font-display: swap;
+}
+
+
+@font-face 
+{
+    font-family: "Manrope";
+    src: url("/Manrope-VariableFont_wght.woff2") format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+}
