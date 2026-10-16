@@ -91,15 +91,19 @@
 <style>
     nav
     {
+        --header-size: 81px;
+
         position: sticky;
-        top: 0;
+        top: var(--header-size);
         align-self: start;
-        max-height: 100%;
+        height: calc(100vh - var(--header-size));
         overflow-y: auto;
 
         display: flex;
         flex-direction: column;
         padding: 32px 16px;
+
+        border-right: 1px solid var(--text-placeholder);
 
         ul
         {

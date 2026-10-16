@@ -2,9 +2,12 @@ html,
 body
 {
     margin: 0;
+
     font-family: Manrope;
     font-size: var(--text-body);
+
     color: var(--text);
+    background-color: var(--bg);
 }
 
 
