@@ -1,6 +1,7 @@
 html,
 body
 {
+    margin: 0;
     font-family: Manrope;
     font-size: var(--text-body);
     color: var(--text);
@@ -21,4 +22,10 @@ button {
     border-radius: 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+}
+
+
+h1, h2, h3, h4, h5, h6, p 
+{ 
+    margin: 0;
 }

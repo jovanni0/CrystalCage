@@ -11,16 +11,23 @@ repository: https://github.com/jovanni0/CrystalCage
 nav:
   - label: Home
     href: /
-  - label: The app
+    icon: home
+
+  - label: App
     href: /docs/app
+    icon: phone
+
   - label: Hosting
     href: /docs/hosting
-  - label: Formats
-    href: /docs/formats
+    icon: server
+
   - label: Roadmap
     href: /roadmap
+    icon: signpost
+
   - label: Contact
     href: /contact
+    icon: mail
 
 social:
   - name: GitHub

@@ -4,6 +4,7 @@
     import "#lib/styles/fonts.css";
     import "#lib/styles/base.css";
     import "#lib/styles/prose.css";
+    import Header from "#lib/components/header.svelte";
 
     let { data, children } = $props()
 
@@ -22,15 +23,9 @@
 
 
 
-<site-header>
-    <a class = "brand" href = "/">{ data.site.name }</a>
-
-    <nav>
-        {#each data.site.nav as link (link.href)}
-            <a href = { link.href } aria-current = { isActiveLink(link.href) ? "page" : undefined }>{ link.label }</a>
-        {/each}
-    </nav>
-</site-header>
+<Header 
+    nav_items = { data.site.nav } 
+/>
 
 <page-content>
     {@render children()}

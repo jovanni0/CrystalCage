@@ -1,7 +1,8 @@
 export type NavLink =
 {
     label: string
-    href: string
+    href:  string
+    icon:  string
 }
 
 export type SocialLink =
