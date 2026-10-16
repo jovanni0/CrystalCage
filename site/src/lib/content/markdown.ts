@@ -3,7 +3,8 @@ import type { Element,
 import type { Glossary }                from "./directives"
 import      { toString }                from "hast-util-to-string"
 import      { unified }                 from "unified"
-import      { visit }                   from "unist-util-visit"
+import      { SKIP, 
+              visit }                   from "unist-util-visit"
 import      { remarkSanctumDirectives } from "./directives"
 import      rehypeSlug                  from "rehype-slug"
 import      rehypeStringify             from "rehype-stringify"
@@ -44,6 +45,7 @@ export async function renderMarkdown(markdown: string, glossary: Glossary): Prom
         .use(remarkSanctumDirectives, { glossary })
         .use(remarkRehype)
         .use(rehypeSlug)
+        .use(rehypeWrapTables)
         .use(rehypeCollectHeadings, { headings })
         .use(rehypeStringify)
         .process(markdown)
@@ -67,6 +69,32 @@ function rehypeCollectHeadings(options: { headings: Heading[] })
             }
 
             options.headings.push({ depth, id: String(node.properties.id), text: toString(node) })
+        })
+    }
+}
+
+
+
+function rehypeWrapTables()
+{
+    return (tree: HastRoot) =>
+    {
+        visit(tree, "element", (node: Element, index, parent) =>
+        {
+            if (node.tagName !== "table" || parent === undefined || index === undefined)
+            {
+                return
+            }
+
+            parent.children[index] =
+            {
+                type: "element",
+                tagName: "table-scroll",
+                properties: { tabindex: 0 },
+                children: [node],
+            }
+
+            return [SKIP, index + 1]
         })
     }
 }

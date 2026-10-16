@@ -1,79 +1,223 @@
-site-header, site-footer, page-content, doc-layout, doc-toc, doc-body,
-callout-box, tab-group, tab-panel
+doc-body
 {
     display: block;
-}
+    max-width: 750px;
+    line-height: 1.6;
 
-site-header
-{
-    position: sticky;
-    top: 0;
-    display: flex;
-    gap: 2rem;
-    padding: 1rem;
-    background: white;
-    border-bottom: 1px solid #ddd;
-}
 
-site-header nav
-{
-    display: flex;
-    gap: 1rem;
-}
+    /* ── vertical rhythm ─────────────────────────────── */
 
-site-header a[aria-current="page"]
-{
-    font-weight: bold;
-}
+    > * + *
+    {
+        margin-block-start: var(--flow-space, 1em);
+    }
 
-doc-layout
-{
-    display: grid;
-    grid-template-columns: 20rem auto 20rem;
-}
+    > h2
+    {
+        --flow-space: 2.5em;
+    }
 
-doc-toc
-{
-    position: sticky;
-    top: 5rem;
-    align-self: start;
-}
+    > h3
+    {
+        --flow-space: 1.75em;
+    }
 
-doc-toc .nested
-{
-    padding-left: 1rem;
-}
+    > :is(h1, h2, h3) + *
+    {
+        --flow-space: 0.75em;
+    }
 
-callout-box
-{
-    padding: 0.5rem 1rem;
-    border-left: 4px solid #888;
-}
 
-callout-box[kind="warning"]
-{
-    border-color: #d97706;
-}
+    /* ── headings ────────────────────────────────────── */
 
-tab-panel::before
-{
-    content: attr(label);
-    font-weight: bold;
-}
+    h1
+    {
+        font-size: var(--text-heading-lg);
+        font-weight: 600;
+        line-height: 1.2;
+    }
 
-help-term
-{
-    text-decoration: underline dotted;
-    cursor: help;
-}
+    h2
+    {
+        font-size: var(--text-heading-md);
+        font-weight: 600;
+        line-height: 1.3;
+        scroll-margin-top: calc(var(--header-height) + 24px);
+    }
 
-table
-{
-    border-collapse: collapse;
-}
+    h3
+    {
+        font-size: var(--text-heading-sm);
+        font-weight: 500;
+        line-height: 1.3;
+        scroll-margin-top: calc(var(--header-height) + 24px);
+    }
 
-th, td
-{
-    padding: 0.4rem 0.8rem;
-    border: 1px solid #ddd;
+
+    /* ── inline ──────────────────────────────────────── */
+
+    strong
+    {
+        font-weight: 700;
+    }
+
+    a
+    {
+        color: var(--text-brand);
+        text-underline-offset: 3px;
+    }
+
+    code
+    {
+        font-family: var(--font-mono);
+        font-size: 0.875em;
+        font-variant-ligatures: none;
+    }
+
+    :not(pre) > code
+    {
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    help-term
+    {
+        text-decoration: underline dotted;
+        text-underline-offset: 2px;
+        cursor: help;
+    }
+
+
+    /* ── lists ───────────────────────────────────────── */
+
+    :is(ul, ol)
+    {
+        padding-inline-start: 0;
+    }
+
+    li
+    {
+        margin-inline-start: 1.5em;
+    }
+
+    li + li
+    {
+        margin-block-start: 0.25em;
+    }
+
+    ul > li::marker
+    {
+        color: var(--text-muted);
+    }
+
+    ol > li::marker
+    {
+        color: var(--text-muted);
+    }
+
+    li > * + *
+    {
+        margin-block-start: 0.75em;
+    }
+
+
+    /* ── code blocks ─────────────────────────────────── */
+
+    pre
+    {
+        padding: 16px 20px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.1);
+        overflow-x: auto;
+        line-height: 1.5;
+    }
+
+    pre code
+    {
+        font-size: var(--text-body-sm);
+    }
+
+
+    /* ── tables ──────────────────────────────────────── */
+
+    table-scroll
+    {
+        display: block;
+        position: relative;
+        left: 50%;
+        translate: -50% 0;
+
+        width: max-content;
+        min-width: 100%;
+        max-width: calc(100cqi - 48px);
+        overflow-x: auto;
+    }
+
+    table
+    {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-body-sm);
+    }
+
+    th
+    {
+        text-align: left;
+        font-weight: 600;
+    }
+
+    :is(th, td)
+    {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+    }
+
+
+    /* ── callouts ────────────────────────────────────── */
+
+    callout-box
+    {
+        position: relative;
+        display: block;
+        padding: 16px 20px;
+        border-radius: 0 8px 8px 0;
+        background: var(--callout-background);
+
+        &:before
+        {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 4px;
+            border-radius: 999px;
+            background-color: var(--callout-accent);
+        }
+
+        > * + *
+        {
+            margin-block-start: 0.75em;
+        }
+
+        code
+        {
+            background: var(--callout-code-background);
+        }
+    }
+
+    callout-box[kind="warning"]
+    {
+        --callout-accent:          hsl(30, 60%, 38%);
+        --callout-background:      hsl(38, 65%, 90%);
+        --callout-code-background: hsl(36, 45%, 82%);
+    }
+
+    callout-box[kind="note"]
+    {
+        --callout-accent:          hsl(210, 35%, 38%);
+        --callout-background:      hsl(210, 30%, 92%);
+        --callout-code-background: hsl(210, 25%, 85%);
+    }
 }
