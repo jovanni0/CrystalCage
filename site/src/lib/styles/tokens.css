@@ -36,4 +36,6 @@
 
     --font-body: "Manrope", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+    --header-height: 81px;
 }

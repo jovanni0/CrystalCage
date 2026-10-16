@@ -91,12 +91,10 @@
 <style>
     nav
     {
-        --header-size: 81px;
-
         position: sticky;
-        top: var(--header-size);
+        top: var(--header-height);
         align-self: start;
-        height: calc(100vh - var(--header-size));
+        height: calc(100vh - var(--header-height));
         overflow-y: auto;
 
         display: flex;
