@@ -55,6 +55,17 @@ Decisions:
 
 
 
+## Documentation site (`site/`, branch `feat/documentation-site`)
+
+- Public product + docs site for Sanctum, also the university web project (needs: fixed nav with active item, search, image gallery with Previous/Next, table, validated contact form, video, social icons, help button, up/down button, responsive, light/dark, Google Analytics, optional chatbot).
+- Separate SvelteKit project (own `package.json`, pnpm, `adapter-static`, everything prerendered). Not a workspace with `client/`.
+- Content lives only in `site/content/` and is edited without touching source: `docs/*.md` (frontmatter `title`, `description`, `nav_label`, `order`, optional `status`), `site.yaml` (nav, social, footer), `home.yaml`, `roadmap.yaml`, `gallery.yaml`, `glossary.yaml`.
+- Markdown pipeline at build time: unified + remark-gfm + remark-directive, a custom plugin that maps directives to custom elements (`:::note|tip|warning|danger` → `callout-box kind`, `::::tabs`/`:::tab{label}` → `tab-group`/`tab-panel`, `:term[text]{key}` → `help-term` with the glossary definition inlined; unknown directives or glossary keys fail the build), rehype-slug, headings (h2/h3) collected for the TOC and the search index. Interactivity (tabs, tooltips) is added on the page, never in content.
+- Docs describe the intended product, ahead of the code (eg password change, edition download); the branch is merged only once the code catches up.
+- Internal `docs/` (for developers) and `site/content/` (for users) stay separate.
+
+
+
 ## Open items
 
 - Server: authors, universes and series only have `POST` (no `PATCH`/`DELETE`); tags have both. Delete semantics for entities still referenced by books are undefined (block with 409 vs reassign/merge).
