@@ -4,6 +4,7 @@
     --bg-brand:            hsl(116, 21%, 32%);
     --bg-brand-disabled:   hsl(117, 15%, 70%);
     --bg-brand-secondary:  hsl(30, 42%, 39%);
+    --bg-brand-secondary-dark: color-mix(in srgb, var(--bg-brand-secondary) 65%, black 35%);
     --bg-brand-pale:       hsl(116, 25%, 88%);
     --bg-inverted-muted:   hsl(33, 14%, 85%);
     --bg-overlay:          hsl(39, 47%, 98%);

@@ -1,82 +1,95 @@
-# Home page. Short texts are plain strings; longer ones allow Markdown.
-
 hero:
-  title: Your library, your rules.
-  lead: >-
-    Sanctum is an open-source, self-hosted book manager. Keep your ebook
-    files, your read history and your covers in one place, on a server you own.
-  image: /images/home/hero-library.png     # TODO: screenshot of the library
-  image_alt: The Sanctum library, a grid of book covers.
-  actions:
-    - label: Get the app
-      href: "#download"
-      style: primary
-    - label: Host your server
-      href: /docs/hosting
-      style: secondary
+    eyebrow: Open source • Self-hosted
+    title: Your library, your rules.
+    lead: Sanctum is an open-source, self-hosted book manager. Keep your ebook files, your read history and your covers in one place, on a server you own.
+    actions:
+        - label: Get the app
+          href: "#start"
+          style: primary
+        - label: Host your server
+          href: /docs/hosting
+          style: secondary
+    screenshots:
+        - src: /images/reads.png
+          alt: The Reads tab of a book profile.
+        - src: /images/library.png
+          alt: The library, a grid of book covers.
+        - src: /images/book.png
+          alt: The Book tab of a book profile.
+
 
 features:
-  - title: Store your ebooks
-    text: Upload your ebook files to your server, in any format. EPUB, MOBI and PDF get their own color; anything else is kept as is.
-    icon: file
-  - title: Track every read
-    text: Log when you started and finished a book, how far you are, rereads, past reads and books you did not finish.
-    icon: history
-  - title: Choose your covers
-    text: Keep several covers for each book and pick the one your library shows.
-    icon: image
-  - title: Rich metadata
-    text: Author, universe, series and volume, release date, word count, tags, a blurb and your own thoughts.
-    icon: tag
+    title: Everything about your books, in one place
+    items:
+        - title: Store your ebooks
+          text: Upload your ebook files to your server, in any format.
+          icon: file_type
+        - title: Track every read
+          text: Log when you started and finished a book, how far you are, rereads, past reads and books you did not finish.
+          icon: calendar
+        - title: Choose your covers
+          text: Keep several covers for each book and pick the one your library shows.
+          icon: file_image
+        - title: Rich metadata
+          text: Author, universe, series and volume, release date, word count, tags, a blurb and your own thoughts.
+          icon: tags
 
-why:
-  title: Why Sanctum instead of Goodreads or StoryGraph?
-  body: |
-    These platforms combine a large user base with a huge catalog and
-    recommendation algorithms, but none of them give you full access and
-    control over your data, and none let you store the book files themselves.
 
-    Sanctum is the opposite. It gives you control, at the cost of being
-    individual: each account is an isolated library on a server you run.
-    Your ebook files and your read history live in the same place, and no
-    platform can remove them from your account. Think of it as your physical
-    bookshelf, on the go.
+gallery:
+    title: See it in action
+    screenshots:
+        - src: /images/library.png
+          alt: The library, a grid of book covers.
+          caption: Your library at a glance.
+        - src: /images/book.png
+          alt: A book profile on the Book tab, with title, series and blurb.
+          caption: Everything about a book on one page.
+        - src: /images/covers.png
+          alt: The Covers tab with several covers for one book.
+          caption: Several covers per book, one of them shown in the library.
+        - src: /images/library.png
+          alt: The library, a grid of book covers.
+          caption: Your library at a glance.
+        - src: /images/book.png
+          alt: A book profile on the Book tab, with title, series and blurb.
+          caption: Everything about a book on one page.
+        - src: /images/covers.png
+          alt: The Covers tab with several covers for one book.
+          caption: Several covers per book, one of them shown in the library.
 
-paths:
-  title: Where do you want to start?
-  items:
-    - title: I want to read
-      text: See what the app does, screen by screen.
-      href: /docs/app
-      icon: book
-    - title: I want to host a server
-      text: Install the server with Docker or a direct build.
-      href: /docs/hosting
-      icon: server
 
 video:
-  title: Sanctum in two minutes
-  youtube_id: ""          # TODO: id of the demo video
-  caption: A walkthrough of the library, a book profile and logging a read.
+    title: Sanctum in 2 minutes
+    youtube_id: ""
+    thumbnail: /images/video-thumbnail.webp
+    thumbnail_alt: "Thumbnail for a video presenting Sanctum functionality."
+    caption: Plays from YouTube
 
-download:
-  title: Get the app
-  text: Sanctum is an Android app. You also need a Sanctum server to connect to.
-  links:
-    - label: F-Droid
-      href: ""            # TODO
-      status: coming-soon
-    - label: IzzyOnDroid
-      href: ""            # TODO
-      status: coming-soon
-    - label: GitHub releases
-      href: https://github.com/jovanni0/CrystalCage/releases
-      status: available
 
-tech:
-  title: Under the hood
-  items:
-    - Android app built with SvelteKit and Capacitor
-    - Server built with Ktor (Kotlin)
-    - PostgreSQL database
-    - Runs with Docker or as a single JAR
+why:
+    title: Why Sanctum instead of Goodreads or StoryGraph?
+    body: |
+        These platforms combine a large user base with a huge catalog and recommendation algorithms, but none of them give you full access and control over your data, and none let you store the book files themselves.
+
+        Sanctum is the opposite. It gives you control, at the cost of being individual: each account is an isolated library on a server you run. Your ebook files and your read history live in the same place, and no platform can remove them from your account. Think of it as your physical bookshelf, on the go.
+
+
+start:
+    title: Where do you want to start?
+    items:
+        -   title: I want to get the app
+            text: Directly from our GitHub page, or from a third-party store.
+            icon: smartphone
+            action:
+                {
+                    label: Get the app,
+                    href: https://github.com/jovanni0/CrystalCage/releases,
+                }
+        -   title: I want to host a server
+            text: Install the server with Docker or a direct build.
+            icon: server_stack
+            action: 
+                { 
+                    label: Host your server, 
+                    href: /docs/hosting 
+                }

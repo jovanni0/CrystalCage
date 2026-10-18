@@ -34,6 +34,13 @@
         }
     }
 
+    &.secondary
+    {
+        background-color: var(--bg-brand-pale);
+        color: var(--text-brand);
+        border: 1px solid var(--text-brand);
+    }
+
     &.ghost
     {
         background-color: transparent;
