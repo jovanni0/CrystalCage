@@ -7,6 +7,12 @@
     }: {
         content: HomeContent_VideoSection
     } = $props()
+
+
+
+    let is_playing: boolean = $state(false)
+
+    let embed_URL: string = $derived(`https://www.youtube-nocookie.com/embed/${ content.youtube_id }?autoplay=1&rel=0`)
 </script>
 
 
@@ -14,12 +20,25 @@
 <video-section>
     <p class = "title">{ content.title }</p>
 
-    <button>
-        <img
-            src = { content.thumbnail }
-            alt = { content.thumbnail_alt }
-        />
-    </button>
+    {#if is_playing}
+        <iframe 
+            src             = { embed_URL }
+            title           = { content.title }
+            allow           = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy  = "strict-origin-when-cross-origin"
+            allowfullscreen
+        ></iframe>
+    {:else}
+        <button
+            onclick = { () => is_playing = true }
+            disabled = { content.youtube_id === "" }
+        >
+            <img
+                src = { content.thumbnail }
+                alt = { content.thumbnail_alt }
+            />
+        </button>
+    {/if}
 
     <p class = "caption">{ content.caption }</p>
 </video-section>
@@ -42,9 +61,10 @@
             font-weight: 600;
         }
 
-        button
+        button,
+        iframe
         {
-            width: 525px;
+            width: 600px;
             height: auto;
             aspect-ratio: 16/9;
 
