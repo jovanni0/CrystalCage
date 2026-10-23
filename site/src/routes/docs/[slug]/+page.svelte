@@ -1,5 +1,5 @@
 <script lang="ts">
-    import TableOfContents from '#lib/components/table-of-contents.svelte';
+    import TableOfContents from '#lib/elements/table-of-contents.svelte';
 
     let { data } = $props()
 </script>

@@ -23,8 +23,10 @@
                     height = { 48 } 
                 />
 
-                <p class = "title">{ feature.title }</p>
-                <p class = "text">{ feature.text }</p>
+                <text-wrapper>
+                    <p class = "feature-title">{ feature.title }</p>
+                    <p class = "text">{ feature.text }</p>
+                </text-wrapper>
             </feature-item>
         {/each}
     </feature-wrapper>
@@ -35,38 +37,59 @@
 <style>
     features-section
     {
+        container-type: inline-size;
+
         display: flex;
         flex-direction: column;
         align-items: center;
 
         gap: 48px;
-        padding: 64px 0 96px 0;
+        padding: 64px 20px 96px 20px;
 
         p.title
         {
             font-size: var(--text-heading-md);
             font-weight: 600;
+            text-align: center;
         }
 
         feature-wrapper
         {
-            display: flex;
-            flex-direction: row;
-            justify-content: center;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
 
             gap: 48px;
+            
+            
+            @container (width < 1104px)
+            {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            @container (width < 528px)
+            {
+                grid-template-columns: repeat(1, 1fr);
+                justify-items: center;
+                align-self: stretch;
+            }
 
             feature-item
             {
                 width: 240px;
                 height: auto;
 
-                display: flex;
-                flex-direction: column;
-                align-items: center;
+                display: grid;
+                grid-template-columns: 1fr;
+                justify-items: center;
 
                 gap: 24px;
+
+                @container (width < 528px)
+                {
+                    grid-template-columns: auto 1fr;
+                    width: min(100%, 360px);
+                    align-items: center;
+                }
 
                 & > :global(svg)
                 {
@@ -74,19 +97,34 @@
                     stroke-width: 1.5;
                 }
 
-                p.title
+                text-wrapper
                 {
-                    font-size: var(--text-body-lg);
-                    font-weight: 600;
+                    display: flex;
+                    flex-direction: column;
 
-                    margin-bottom: -12px;
-                }
+                    gap: 12px;
 
-                p.text
-                {
-                    color: var(--text-muted);
                     text-align: center;
+
+                    @container (width < 528px)
+                    {
+                        text-align: start;
+                        align-self: stretch;
+                        gap: 8px;
+                    }
+
+                    p.feature-title
+                    {
+                        font-size: var(--text-body-lg);
+                        font-weight: 600;
+                    }
+    
+                    p.text
+                    {
+                        color: var(--text-muted);
+                    }
                 }
+
             }
         }
     }

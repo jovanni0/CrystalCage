@@ -1,9 +1,9 @@
 <script lang="ts">
-    import Fdroid      from "./icons/fdroid.svelte";
-    import Gitea       from "./icons/gitea.svelte";
-    import Github      from "./icons/github.svelte";
-    import Obtainium   from "./icons/obtainium.svelte";
-    import SanctumLogo from "./icons/sanctum-logo.svelte";
+    import Fdroid      from "../components/icons/fdroid.svelte";
+    import Gitea       from "../components/icons/gitea.svelte";
+    import Github      from "../components/icons/github.svelte";
+    import Obtainium   from "../components/icons/obtainium.svelte";
+    import SanctumLogo from "../components/icons/sanctum-logo.svelte";
 </script>
 
 
@@ -11,16 +11,15 @@
 <footer>
     <top-wrapper>
         <brand-wrapper>
-            <brand-top>
-                <SanctumLogo 
-                    width  = { 48 }
-                    height = { 48 }
-                />
-        
+            <SanctumLogo 
+                width  = { 48 }
+                height = { 48 }
+            />
+
+            <brand-text>
                 <p class = "brand">Sanctum</p>
-            </brand-top>
-    
-            <p class = "tag-line">Your library. Your rules.</p>
+                <p class = "tag-line">Your library. Your rules.</p>
+            </brand-text>
         </brand-wrapper>
     
         <nav aria-label = "footer">
@@ -117,23 +116,29 @@
             flex-direction: row;
             justify-content: space-between;
 
+            @media (width <= 750px)
+            {
+                flex-direction: column;
+                gap: 48px;
+            }
+
             brand-wrapper
             {
                 display: flex;
-                flex-direction: column;
+                flex-direction: row;
                 align-items: center;
+                align-self: flex-start;
                 gap: 16px;
 
                 font-family: Lora;
 
-                brand-top
+                brand-text
                 {
                     display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    gap: 12px;
+                    flex-direction: column;
 
                     font-size: var(--text-display-sm);
+                    text-wrap-mode: nowrap;
                 }
 
                 p.tag-line
@@ -152,6 +157,16 @@
                 display: flex;
                 flex-direction: row;
                 gap: 128px;
+
+                @media (width <= 1000px)
+                {
+                    gap: 32px;
+                }
+
+                @media (width <= 750px)
+                {
+                    justify-content: space-between;
+                }
 
                 nav-group
                 {
@@ -198,6 +213,13 @@
             flex-direction: row;
             justify-content: space-between;
 
+            font-size: var(--text-body-sm);
+
+            @media (width <= 500px) 
+            {
+                flex-direction: column;
+            }
+            
             left-wrapper
             {
                 display: flex;
@@ -205,5 +227,6 @@
                 gap: 4px;
             }
         }
+
     }
 </style>

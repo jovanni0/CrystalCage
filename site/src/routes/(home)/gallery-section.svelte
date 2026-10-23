@@ -134,6 +134,8 @@
         >
             <IconButton
                 label = "previous"
+                shape = "square"
+                class = "previous"
                 onclick = { () => scrollCarousel(-1) }
             >
                 <ChevronLeft />
@@ -162,6 +164,8 @@
         >
             <IconButton
                 label = "next"
+                shape = "square"
+                class = "next"
                 onclick = { () => scrollCarousel(1) }
             >
                 <ChevronRight />
@@ -228,10 +232,20 @@
         flex-direction: column;
         align-items: center;
 
-        padding: 96px 0;
+        padding: 64px 64px 72px 64px;
         gap: 48px;
 
         background-color: var(--bg-brand-secondary-dark);
+
+        @media (width <= 1280px)
+        {
+            padding: 64px 32px 72px 32px;
+        }
+
+        @media (width <= 780px)
+        {
+            padding: 64px 0 72px 0;
+        }
 
         p.title
         {
@@ -245,15 +259,23 @@
             display: flex;
             flex-direction: row;
             align-items: center;
+            align-self: stretch;
 
             gap: 32px;
-            
+
+            @media (width <= 780px)
+            {
+                arrow-slot
+                {
+                    display: none;
+                }
+            }
+
             image-carousel
             {
                 display: flex;
                 flex-direction: row;
-    
-                max-width: 950px;
+                flex: 1;
     
                 gap: 16px;
     
@@ -262,13 +284,18 @@
                 scroll-behavior: smooth;
                 scrollbar-width: none;
 
+                @media (width <= 780px) 
+                {
+                    padding-left: 16px;
+                }
+
                 button.image-preview
                 {
                     line-height: 0;
 
                     img
                     {
-                        width: 200px;
+                        width: 300px;
                         height: auto;
                         
                         border-radius: 16px;
@@ -276,6 +303,16 @@
                         box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.2);
     
                         scroll-snap-align: start;
+
+                        @media (width <= 1280px)
+                        {
+                            width: 250px;
+                        }
+
+                        @media (width <= 780px)
+                        {
+                            width: 200px;
+                        }
                     }
                 }
     
@@ -370,5 +407,11 @@
                 font-size: var(--text-body-lg);
             }
         }
+    }
+
+    :global(button.next.next),
+    :global(button.previous.previous)
+    {
+        color: var(--text-inverted);
     }
 </style>

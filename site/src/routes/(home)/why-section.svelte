@@ -26,7 +26,7 @@
         align-items: center;
 
         gap: 48px;
-        padding: 64px 0 96px 0;
+        padding: 64px 20px 96px 20px;
 
         background-color: var(--bg-brand-secondary-dark);
         color: var(--text-inverted);
@@ -35,6 +35,7 @@
         {
             font-size: var(--text-heading-md);
             font-weight: 600;
+            text-align: center;
         }
     }
 </style>

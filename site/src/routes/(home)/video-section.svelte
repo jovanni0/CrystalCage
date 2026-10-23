@@ -53,18 +53,20 @@
         align-items: center;
 
         gap: 48px;
-        padding: 64px 0 96px 0;
+        padding: 64px 20px 96px 20px;
+        
+        text-align: center;
 
         p.title
         {
             font-size: var(--text-heading-md);
             font-weight: 600;
         }
-
+        
         button,
         iframe
         {
-            width: 600px;
+            width: min(100%, 600px);
             height: auto;
             aspect-ratio: 16/9;
 

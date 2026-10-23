@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Header from "#lib/components/header.svelte";
-    import Footer from "#lib/components/footer.svelte";
+    import Header from "#lib/elements/header.svelte";
+    import Footer from "#lib/elements/footer.svelte";
     import "#lib/styles/tokens.css";
     import "#lib/styles/fonts.css";
     import "#lib/styles/base.css";
