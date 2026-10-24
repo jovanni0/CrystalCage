@@ -107,8 +107,8 @@
         padding: 32px 32px 16px 32px;
         gap: 48px;
 
-        background-color: var(--text);
-        color: var(--text-inverted-muted);
+        background-color: var(--bg-surface-footer);
+        color: var(--text-on_strong-subtle);
 
         top-wrapper
         {

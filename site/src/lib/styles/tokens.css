@@ -1,26 +1,32 @@
 :root
 {
-    --bg:                  hsl(39, 47%, 94%);
-    --bg-brand:            hsl(116, 21%, 32%);
-    --bg-brand-disabled:   hsl(117, 15%, 70%);
-    --bg-brand-secondary:  hsl(30, 42%, 39%);
-    --bg-brand-secondary-dark: color-mix(in srgb, var(--bg-brand-secondary) 65%, black 35%);
-    --bg-brand-pale:       hsl(116, 25%, 88%);
-    --bg-inverted-muted:   hsl(33, 14%, 85%);
-    --bg-overlay:          hsl(39, 47%, 98%);
+    --bg-brand-subtle:        light-dark(oklch(0.915 0.028 143), oklch(0.290 0.030 143));
+    --bg-brand-strong:        light-dark(oklch(0.470 0.070 143), oklch(0.520 0.075 143));
+    --bg-brand-disabled:      light-dark(oklch(0.780 0.035 143), oklch(0.360 0.025 143));
+    --bg-danger-subtle:       light-dark(oklch(0.910 0.025  29), oklch(0.290 0.035  29));
+    --bg-neutral-subtle:      light-dark(oklch(0.900 0.010  78), oklch(0.300 0.010  78));
+    --bg-neutral-strong:      light-dark(oklch(0.500 0.010  78), oklch(0.500 0.010  78));
+    --bg-accent-strong:       light-dark(oklch(0.520 0.080  68), oklch(0.540 0.080  68));
+    --bg-accent-subtle:       light-dark(oklch(0.900 0.035  68), oklch(0.300 0.035  68));
+    --bg-surface-raised:      light-dark(oklch(0.988 0.005  78), oklch(0.235 0.012  78));
+    --bg-surface-page:        light-dark(oklch(0.965 0.012  78), oklch(0.190 0.010  78));
+    --bg-surface-accent:      light-dark(oklch(0.400 0.055  68), oklch(0.300 0.040  68));
+    --bg-surface-footer:      light-dark(oklch(0.280 0.014  78), oklch(0.235 0.012  78));
 
-    --text:                       hsl(33, 15%, 15%);
-    --text-muted:                 hsl(34, 5%, 40%);
-    --text-placeholder:           hsl(36, 5%, 60%);
-    --text-brand:                 var(--bg-brand);
-    --text-brand-disabled:        var(--bg-brand-disabled);
-    --text-brand-secondary:       var(--bg-brand-secondary);
-    --text-brand-secondary-muted: hsl(30, 35%, 60%);
-    --text-error:                 hsl(6, 59%, 30%);
-    --text-error-muted:           hsl(6, 15%, 50%);
-    --text-inverted:              hsl(30, 15%, 95%);
-    --text-inverted-muted:        hsl(33, 14%, 85%);
-    
+    --border-neutral-subtle:  light-dark(oklch(0.860 0.012 78), oklch(0.340 0.012 78));
+    --border-neutral-default: light-dark(oklch(0.640 0.012 78), oklch(0.520 0.012 78));
+
+    --text-accent-subtle:     light-dark(oklch(0.660 0.060  68), oklch(0.620 0.050  68));
+    --text-accent-default:    light-dark(oklch(0.480 0.080  68), oklch(0.760 0.080  68));
+    --text-brand-default:     light-dark(oklch(0.420 0.065 143), oklch(0.780 0.080 143));
+    --text-danger-default:    light-dark(oklch(0.430 0.120  29), oklch(0.740 0.110  29));
+    --text-danger-subtle:     light-dark(oklch(0.580 0.050  29), oklch(0.620 0.050  29));
+    --text-neutral-faint:     light-dark(oklch(0.660 0.010  78), oklch(0.540 0.010  78));
+    --text-neutral-subtle:    light-dark(oklch(0.500 0.010  78), oklch(0.710 0.010  78));
+    --text-neutral-default:   light-dark(oklch(0.280 0.014  78), oklch(0.910 0.012  78));
+    --text-on_strong-subtle:  light-dark(oklch(0.880 0.012  78), oklch(0.880 0.012  78));
+    --text-on_strong-default: light-dark(oklch(0.970 0.006  78), oklch(0.970 0.006  78));
+    --text-on_strong-faint:   light-dark(oklch(0.744 0.009  78), oklch(0.744 0.009  78));
 
     --text-body:       16px;
     --text-body-lg:    18px;
@@ -32,11 +38,22 @@
     --text-heading-md: 24px;
     --text-heading-sm: 20px;
 
-
+    color-scheme: light dark;
+    
     --border: hsl(36, 5%, 60%);
 
     --font-body: "Manrope", system-ui, sans-serif;
     --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
     --header-height: 81px;
+}
+
+:root.light
+{
+    color-scheme: light;
+}
+
+:root.dark
+{
+    color-scheme: dark;
 }

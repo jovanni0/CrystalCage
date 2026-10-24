@@ -25,8 +25,8 @@
 {
     &.primary
     {           
-        background-color: var(--bg-brand);
-        color: var(--text-inverted);
+        background-color: var(--bg-brand-strong);
+        color: var(--text-on_strong-default);
 
         &.disabled
         {
@@ -36,19 +36,19 @@
 
     &.secondary
     {
-        background-color: var(--bg-brand-pale);
-        color: var(--text-brand);
-        border: 1px solid var(--text-brand);
+        background-color: var(--bg-brand-subtle);
+        color: var(--text-brand-default);
+        border: 1px solid var(--text-brand-default);
     }
 
     &.ghost
     {
         background-color: transparent;
-        color: var(--text-brand);
+        color: var(--text-brand-default);
 
         &.disabled
         {
-            color: var(--text-placeholder);
+            color: var(--text-neutral-faint);
         }
     }
 }

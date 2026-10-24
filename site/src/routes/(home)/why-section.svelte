@@ -28,8 +28,8 @@
         gap: 48px;
         padding: 64px 20px 96px 20px;
 
-        background-color: var(--bg-brand-secondary-dark);
-        color: var(--text-inverted);
+        background-color: var(--bg-surface-accent);
+        color: var(--text-on_strong-default);
 
         p.title
         {

@@ -41,8 +41,14 @@
     
     {@attach rippleOn("indicator-element")}
 >
-    <indicator-element class = "ripple-container"></indicator-element>
-    <icon-wrapper>{@render children?.()}</icon-wrapper>
+    <indicator-element 
+        class = "ripple-container"
+    ></indicator-element>
+
+    <icon-wrapper>
+        {@render children?.()}
+    </icon-wrapper>
+    
     <p class = "button-label">{ label }</p>
 </svelte:element>
 
@@ -65,7 +71,7 @@
         overflow: hidden;
 
         text-decoration: none;
-        color: var(--text);
+        color: var(--text-neutral-default);
         
         icon-wrapper
         {
@@ -140,18 +146,18 @@
     a:hover,
     button:hover
     {
-        color: var(--text-brand);
+        color: var(--text-brand-default);
     }
 
 
     a.selected,
     button.selected
     {
-        color: var(--text-brand);
+        color: var(--text-brand-default);
         
         indicator-element
         {
-            background-color: #d9e8d7;
+            background-color: var(--bg-brand-subtle);
         }
 
         p.button-label

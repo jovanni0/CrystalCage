@@ -71,7 +71,7 @@
             {
                 font-size: var(--text-body-sm);
                 font-weight: 600;
-                color: var(--text-muted);
+                color: var(--text-neutral-subtle);
             }
     
             p.title
@@ -119,7 +119,7 @@
                 height: auto;
 
                 border-radius: 16px;
-                border: 1px solid var(--text-placeholder);
+                border: 1px solid var(--text-neutral-faint);
                 box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.2);
             }
 
@@ -155,7 +155,7 @@
             height: 66%;
             margin-inline: -20px;
 
-            background-color: var(--bg-brand-secondary-dark);
+            background-color: var(--bg-surface-accent);
         }
     }
 

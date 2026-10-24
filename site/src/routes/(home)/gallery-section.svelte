@@ -235,7 +235,7 @@
         padding: 64px 64px 72px 64px;
         gap: 48px;
 
-        background-color: var(--bg-brand-secondary-dark);
+        background-color: var(--bg-surface-accent);
 
         @media (width <= 1280px)
         {
@@ -249,7 +249,7 @@
 
         p.title
         {
-            color: var(--text-inverted);
+            color: var(--text-on_strong-default);
             font-size: var(--text-heading-md);
             font-weight: 600;
         }
@@ -299,7 +299,7 @@
                         height: auto;
                         
                         border-radius: 16px;
-                        border: 1px solid var(--text-placeholder);
+                        border: 1px solid var(--text-neutral-subtle);
                         box-shadow: 4px 4px 4px 0 rgba(0, 0, 0, 0.2);
     
                         scroll-snap-align: start;
@@ -325,7 +325,7 @@
         margin: auto;
         border: none;
         background: transparent;
-        color: var(--text-inverted);
+        color: var(--text-on_strong-default);
 
         &:not([open])
         {
@@ -334,7 +334,7 @@
     
         &::backdrop
         {
-            background: color-mix(in srgb, var(--text) 85%, transparent 15%);
+            background: color-mix(in srgb, var(--bg-surface-page) 85%, transparent 15%);
             backdrop-filter: blur(8px);
         }
 
@@ -343,7 +343,7 @@
             position: fixed;
             top: 16px;
             left: 32px;
-            color: var(--text-inverted)
+            color: var(--text-on_strong-default)
         }
 
         :global(button.previous),
@@ -398,7 +398,7 @@
                     max-height: 100cqh;
 
                     border-radius: 24px;
-                    border: 1px solid var(--text-placeholder);
+                    border: 1px solid var(--text-neutral-subtle);
                 }
             }
 
@@ -412,6 +412,6 @@
     :global(button.next.next),
     :global(button.previous.previous)
     {
-        color: var(--text-inverted);
+        color: var(--text-on_strong-default);
     }
 </style>

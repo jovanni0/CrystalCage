@@ -97,7 +97,7 @@
 
                 & > :global(svg)
                 {
-                    color: var(--text-brand-secondary);
+                    color: var(--text-accent-default);
                     stroke-width: 1.5;
                 }
                 
@@ -122,7 +122,7 @@
     
                     p.text
                     {
-                        color: var(--text-muted);
+                        color: var(--text-neutral-subtle);
                     }
                 }
 

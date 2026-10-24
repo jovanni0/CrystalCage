@@ -82,7 +82,7 @@
         p.caption
         {
             font-size: var(--text-body);
-            color: var(--text-muted);
+            color: var(--text-neutral-subtle);
             
             margin-top: -32px;
         }

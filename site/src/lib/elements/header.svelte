@@ -40,6 +40,26 @@
 
         return page.url.pathname.startsWith(href)
     }
+
+
+    function toggleTheme()
+    {
+        const root = document.documentElement
+        const is_dark = root.classList.contains("dark") || (!root.classList.contains("light") && matchMedia("(prefers-color-scheme: dark)").matches)
+        const next = is_dark ? "light" : "dark"
+
+        root.classList.remove("light", "dark")
+        root.classList.add(next)
+
+        try
+        {
+            localStorage.setItem("theme", next)
+        }
+        catch
+        {
+
+        }
+    }
 </script>
 
 
@@ -74,8 +94,9 @@
 
     <tools-wrapper>
         <IconButton
-            label = "switch theme"
-            shape = "square"
+            label   = "switch theme"
+            shape   = "square"
+            onclick = { toggleTheme }
         >
             <Sun />
         </IconButton>
@@ -90,14 +111,14 @@
         position: sticky;
         top: 0;
         z-index: 10;
-        background-color: var(--bg);
+        background-color: var(--bg-surface-page);
 
         display: grid;
         grid-template-columns: 1fr auto 1fr;
         align-items: center;
         padding: 0 16px 0 32px;
 
-        border-bottom: 1px solid var(--text-placeholder);
+        border-bottom: 1px solid var(--border-neutral-subtle);
 
         brand-wrapper
         {
@@ -116,8 +137,8 @@
                 font-size: var(--text-display-sm);
                 font-weight: 600;
     
-                color: var(--text-brand-secondary);
-                fill: var(--bg-brand-secondary);
+                color: var(--text-accent-default);
+                fill: var(--text-accent-default);
     
                 text-decoration: none;
 
