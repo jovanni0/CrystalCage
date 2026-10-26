@@ -53,53 +53,91 @@
     onresize = { updateScrollPosition }
 />
 
-{#if !is_near_top}
-    <top-actions 
-        transition:fade = {{ duration: 150 }}
-    >
-        <IconButton 
-            label = "Back to top" 
-            shape = "square" 
-            onclick = { scrollToTop }
-        >
-            <ArrowUp />
-        </IconButton>
-    </top-actions>
-{/if}
-
-<bottom-actions>
-    <Button 
-        class = "ai-button"
-    >
-        <Sparkles />
-        Ask AI
-    </Button>
-
-    {#if !is_near_bottom}
-        <down-action 
-            transition:slide = {{ duration: 200 }}
+<floating-actions>
+    {#if !is_near_top}
+        <top-actions 
+            transition:fade = {{ duration: 150 }}
         >
             <IconButton 
-                label = "Go to bottom" 
+                label = "Back to top" 
                 shape = "square" 
-                onclick = { scrollToBottom }
+                onclick = { scrollToTop }
             >
-                <ArrowDown />
+                <ArrowUp />
             </IconButton>
-        </down-action>
+        </top-actions>
     {/if}
-</bottom-actions>
+    
+    <bottom-actions>
+        <Button 
+            class = "ai-button"
+        >
+            <Sparkles />
+            <p class = "button-text">Ask AI</p>
+        </Button>
+    
+        {#if !is_near_bottom}
+            <down-action 
+                transition:slide = {{ duration: 200 }}
+            >
+                <IconButton 
+                    label = "Go to bottom" 
+                    shape = "square" 
+                    onclick = { scrollToBottom }
+                >
+                    <ArrowDown />
+                </IconButton>
+            </down-action>
+        {/if}
+    </bottom-actions>
+</floating-actions>
 
 
 
 <style>
+    floating-actions
+    {
+        position: sticky;
+        top: var(--header-height);
+        align-self: start;
+        height: calc(100vh - var(--header-height));
+        overflow-y: auto;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-self: end;
+
+        padding: 32px 32px 32px 0;
+
+        box-sizing: border-box;
+
+        @media (width <= 1350px)
+        {
+            padding: 32px 16px 32px 0;
+            
+            
+            p.button-text
+            {
+                display: none;
+            }
+        }
+
+        @media (width <= 1000px)
+        {
+            display: none;
+        }
+    }
+
     top-actions,
     bottom-actions
     {
-        position: fixed;
+        /* position: fixed;
         right: 8rem;
         translate: 50% 0;
-        z-index: 20;
+        z-index: 20; */
+
+
 
         display: flex;
         flex-direction: column;
@@ -108,7 +146,7 @@
 
         :global(button.square.square)
         {
-            color: var(--text-placeholder);
+            color: var(--text-neutral-faint);
         }
 
         :global(.ai-button > content)
@@ -129,6 +167,8 @@
     {
         bottom: 24px;
         gap: 0;
+
+        margin-top: auto;
         
         down-action
         {

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import ChevronDown from "#lib/components/icons/chevron-down.svelte";
     import type { Heading } from "#lib/content/markdown.ts";
 
 
@@ -16,6 +17,7 @@
 
 
     let active_id: string | null = $state(null)
+    let is_open:   boolean       = $state(false)
 
 
     $effect(() =>
@@ -69,7 +71,18 @@
 
 <nav
     aria-label = "on this page"
+    data-open  = { is_open }
 >
+    <button 
+        onclick    = { () => is_open  = !is_open } 
+        class:open = { is_open }
+    >
+        On this page
+
+        <ChevronDown />
+    </button>
+
+
     <ul>
         {#each headings as heading (heading.id)}
             <li>
@@ -95,19 +108,84 @@
         top: var(--header-height);
         align-self: start;
         height: calc(100vh - var(--header-height));
+        max-width: 700px;
         overflow-y: auto;
 
         display: flex;
         flex-direction: column;
         padding: 32px 16px;
 
-        border-right: 1px solid var(--text-placeholder);
+        border-right: 1px solid var(--border-neutral-subtle);
+
+
+        @media (width <= 800px)
+        {
+            position: relative;
+            top: 0;
+            height: auto;
+
+            background-color: var(--bg-surface-raised);
+            border: 1px solid var(--border-neutral-default);
+            border-radius: 16px;
+
+            padding: 0;
+            margin: 16px 32px;
+
+            &[data-open="false"] > ul
+            {
+                display: none;
+            }
+        }
+
+        @media (width <= 500px)
+        {
+            margin: 16px 20px;
+        }
+
+        button
+        {
+            display: none;
+
+            flex-direction: row;
+            justify-content: space-between;
+
+            padding: 12px 16px;
+
+
+            @media (width <= 800px)
+            {
+                display: flex;
+
+                &.open > :global(svg)
+                {
+                    transform: rotate(180deg);
+                }
+            }
+
+
+            &.open
+            {
+                border-bottom: 1px solid var(--border-neutral-default);
+            }
+
+            & > :global(svg)
+            {
+                transition: transform 0.4s;
+            }
+        }
 
         ul
         {
             margin: 0;
             padding: 0;
             list-style: none;
+
+
+            /* @media (width <= 500px) 
+            {
+                
+            } */
+
 
             a
             {
@@ -120,7 +198,7 @@
 
                 &:hover
                 {
-                    background-color: rgba(0, 0, 0, 0.1);
+                    background-color: var(--bg-brand-subtle);
                 }
 
                 &[aria-current="location"]
@@ -141,7 +219,7 @@
                         width: 1px;
                         position: absolute;
                         inset: 4px auto 4px 0;
-                        background-color: var(--text-placeholder);
+                        background-color: var(--text-neutral-subtle);
                     }
                 }
             }

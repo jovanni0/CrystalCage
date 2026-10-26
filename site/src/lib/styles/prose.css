@@ -1,6 +1,7 @@
 doc-body
 {
     display: block;
+    width: 100%;
     max-width: 750px;
     line-height: 1.6;
 
@@ -78,7 +79,7 @@ doc-body
     {
         padding: 2px 6px;
         border-radius: 4px;
-        background: rgba(0, 0, 0, 0.1);
+        background: var(--bg-overlay-subtle);
     }
 
     help-term
@@ -108,12 +109,12 @@ doc-body
 
     ul > li::marker
     {
-        color: var(--text-muted);
+        color: var(--text-neutral-subtle);
     }
 
     ol > li::marker
     {
-        color: var(--text-muted);
+        color: var(--text-neutral-subtle);
     }
 
     li > * + *
@@ -127,9 +128,9 @@ doc-body
     pre
     {
         padding: 16px 20px;
-        border: 1px solid var(--border);
+        border: 1px solid var(--border-neutral-default);
         border-radius: 8px;
-        background: rgba(0, 0, 0, 0.1);
+        background: var(--bg-overlay-subtle);
         overflow-x: auto;
         line-height: 1.5;
     }
@@ -171,7 +172,7 @@ doc-body
     :is(th, td)
     {
         padding: 10px 12px;
-        border-bottom: 1px solid var(--border);
+        border-bottom: 1px solid var(--border-neutral-default);
         vertical-align: top;
     }
 
@@ -203,21 +204,31 @@ doc-body
 
         code
         {
-            background: var(--callout-code-background);
+            background: var(--bg-overlay-subtle);
         }
-    }
-
-    callout-box[kind="warning"]
-    {
-        --callout-accent:          hsl(30, 60%, 38%);
-        --callout-background:      hsl(38, 65%, 90%);
-        --callout-code-background: hsl(36, 45%, 82%);
     }
 
     callout-box[kind="note"]
     {
-        --callout-accent:          hsl(210, 35%, 38%);
-        --callout-background:      hsl(210, 30%, 92%);
-        --callout-code-background: hsl(210, 25%, 85%);
+        --callout-accent:          var(--text-info-default);
+        --callout-background:      var(--bg-info-subtle);
+    }
+
+    callout-box[kind="warning"]
+    {
+        --callout-accent:          var(--text-warning-default);
+        --callout-background:      var(--bg-warning-subtle);
+    }
+
+    callout-box[kind="tip"]
+    {
+        --callout-accent:          var(--text-brand-default);
+        --callout-background:      var(--bg-brand-subtle);
+    }
+
+    callout-box[kind="danger"]
+    {
+        --callout-accent:          var(--text-danger-default);
+        --callout-background:      var(--bg-danger-subtle);
     }
 }
