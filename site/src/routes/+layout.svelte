@@ -5,6 +5,7 @@
     import "#lib/styles/fonts.css";
     import "#lib/styles/base.css";
     import "#lib/styles/prose.css";
+    import "#lib/styles/resets.css"
 
 
     

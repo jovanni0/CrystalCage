@@ -1,10 +1,12 @@
 <script lang="ts">
     let {
         width = 24,
-        height = 24
+        height = 24,
+        class: className,
     } : {
-        width?: number
+        width?:  number
         height?: number
+        class?:  string
     } = $props()
 </script>
 
@@ -20,7 +22,7 @@
     stroke-width="2" 
     stroke-linecap="round" 
     stroke-linejoin="round" 
-    class="lucide lucide-chevron-down preview-icon"
+    class = {[ "lucide lucide-chevron-down preview-icon", className ]}
 >
     <path d="m6 9 6 6 6-6"/>
 </svg>

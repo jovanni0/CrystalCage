@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { HTMLButtonAttributes } from "svelte/elements";
     import      { ripple_effect }        from "./ripple-effect";
-    // import      Spinner                  from "../loading-spinner.svelte";
+    import      Spinner                  from "../loading-spinner.svelte";
     import      "./button-styles.css"
     import      "./ripple-effect.css"
 
@@ -37,9 +37,9 @@
         {@render children?.()}
     </content>
 
-    <!-- {#if state === "loading"}
+    {#if state === "loading"}
         <spinner-wrapper>
             <Spinner />
         </spinner-wrapper>
-    {/if} -->
+    {/if}
 </button>

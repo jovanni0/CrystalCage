@@ -1,8 +1,5 @@
 :root
 {
-    
-    
-    
     --bg-brand-default:       light-dark(oklch(0.865 0.045 143), oklch(0.340 0.045 143));
     --bg-brand-subtle:        light-dark(oklch(0.915 0.028 143), oklch(0.290 0.030 143));
     --bg-brand-strong:        light-dark(oklch(0.470 0.070 143), oklch(0.520 0.075 143));

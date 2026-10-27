@@ -1,0 +1,130 @@
+<script lang="ts">
+    import type { HTMLInputAttributes } from "svelte/elements";
+    import LoadingSpinner from "./loading-spinner.svelte";
+
+
+
+    let {
+        value        = $bindable(),
+        preallocate  = false,
+        loading      = false,
+        is_mandatory = false,
+        label,
+        error,
+        style,
+        ...rest
+    }: HTMLInputAttributes & {
+        value?:        string
+        error?:        string
+        preallocate?:  boolean
+        loading?:      boolean
+        is_mandatory?: boolean
+        label:         string
+        style?:        string
+    } = $props()
+</script>
+
+
+
+<input-field 
+    style = { style }
+>
+    <fieldset>
+        <legend>
+            { label }
+            {#if is_mandatory}
+                <span class = "mandatory-mark">*</span>
+            {/if}
+        </legend>
+        <input
+            bind:value
+            { ...rest }
+        >
+
+        {#if loading}
+            <div class = "spinner-wrapper">
+                <LoadingSpinner class = "input-spinner" />
+            </div>
+        {/if}
+    </fieldset>
+    
+    {#if preallocate || error}
+        <p class = "error-message">{ error }</p>
+    {/if}
+</input-field>
+
+
+
+<style>
+    input-field
+    {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        align-self: stretch;
+    }
+
+    fieldset
+    {
+        all: unset;
+
+        position: relative;
+        display: block;
+        border: 1px solid var(--text-neutral-default);
+        padding: 4px 16px 12px 16px;
+        border-radius: 16px;
+        align-self: stretch;
+        margin: 0 1px 1px 1px;
+
+        &:has(input:focus-visible)
+        {
+            border: 2px solid var(--text-brand-default);
+            margin: 0px;
+        }
+    }
+
+    legend
+    {
+        font-size: var(--text-body-sm);
+        color: var(--text-neutral-default);
+    }
+
+    input
+    {
+        all: unset;
+        width: 100%;
+        padding-right: 24px;
+        box-sizing: border-box;
+        font-size: var(--text-body);
+    }
+
+    .error-message
+    {
+        font-size: var(--text-body-sm);
+        color: var(--text-danger-default);
+        padding-left: 16px;
+    }
+
+    p
+    {
+        min-height: 1.2rem;
+    }
+
+    .spinner-wrapper
+    {
+        position: absolute;
+        top: 50%;
+        right: 16px;
+        transform: translateY(calc(-50% - 2px));
+
+        :global(.input-spinner)
+        {
+            color: var(--text-default-subtle);
+        }
+    }
+
+    .mandatory-mark
+    {
+        color: var(--text-danger-default);
+    }
+</style>
