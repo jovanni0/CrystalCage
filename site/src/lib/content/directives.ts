@@ -2,6 +2,7 @@ import type { Root }              from "mdast"
 import type { ContainerDirective, 
               LeafDirective, 
               TextDirective }     from "mdast-util-directive"
+import      { toString }          from "mdast-util-to-string"
 import      { visit }             from "unist-util-visit"
 
 
@@ -26,6 +27,14 @@ export function remarkSanctumDirectives(options: DirectiveOptions)
 {
     return (tree: Root) =>
     {
+        let term_count = 0
+
+        const nextTermId = () =>
+        {
+            term_count += 1
+            return `term-${ term_count }`
+        }
+
         visit(tree, (node) =>
         {
             const is_directive = DIRECTIVE_TYPES.includes(node.type)
@@ -35,14 +44,13 @@ export function remarkSanctumDirectives(options: DirectiveOptions)
                 return
             }
 
-            transformDirective(node as DirectiveNode, options.glossary)
+            transformDirective(node as DirectiveNode, options.glossary, nextTermId)
         })
     }
 }
 
 
-
-function transformDirective(node: DirectiveNode, glossary: Glossary)
+function transformDirective(node: DirectiveNode, glossary: Glossary, nextTermId: () => string)
 {
     const is_container = node.type === "containerDirective"
 
@@ -74,11 +82,48 @@ function transformDirective(node: DirectiveNode, glossary: Glossary)
             throw directiveError(node, `unknown glossary key "${ term_key }"`)
         }
 
-        setElement(node, "help-term", { term: term_key, definition })
+        setTermElement(node, term_key, definition, nextTermId())
         return
     }
 
     throw directiveError(node, `unknown directive "${ node.name }"`)
+}
+
+
+
+function setTermElement(node: DirectiveNode, term_key: string, definition: string, term_id: string)
+{
+    const label = toString(node)
+
+    node.data = {
+        ...node.data,
+        hName:       "help-term",
+        hProperties: { term: term_key },
+        hChildren:   [
+            {
+                type:       "element",
+                tagName:    "button",
+                properties: {
+                    type:          "button",
+                    className:     ["term-trigger"],
+                    popovertarget: term_id,
+                    style:         `anchor-name: --${ term_id }`,
+                },
+                children:   [{ type: "text", value: label }],
+            },
+            {
+                type:       "element",
+                tagName:    "span",
+                properties: {
+                    id:        term_id,
+                    popover:   "",
+                    className: ["term-popover"],
+                    style:     `position-anchor: --${ term_id }`,
+                },
+                children:   [{ type: "text", value: definition }],
+            },
+        ],
+    }
 }
 
 
