@@ -7,6 +7,13 @@ import      { visit }             from "unist-util-visit"
 
 
 
+const CALLOUT_TITLES: Record<string, string> = {
+    note:    "Note",
+    tip:     "Tip",
+    warning: "Warning",
+    danger:  "Danger",
+}
+
 export type Glossary = Record<string, string>
 
 type DirectiveNode = ContainerDirective | LeafDirective | TextDirective
@@ -56,7 +63,7 @@ function transformDirective(node: DirectiveNode, glossary: Glossary, nextTermId:
 
     if (is_container && CALLOUT_KINDS.includes(node.name))
     {
-        setElement(node, "callout-box", { kind: node.name })
+        setCalloutElement(node as ContainerDirective)
         return
     }
 
@@ -87,6 +94,30 @@ function transformDirective(node: DirectiveNode, glossary: Glossary, nextTermId:
     }
 
     throw directiveError(node, `unknown directive "${ node.name }"`)
+}
+
+
+
+function setCalloutElement(node: ContainerDirective)
+{
+    const first_child = node.children[0]
+    const has_custom_title = first_child?.type === "paragraph" && first_child.data?.directiveLabel === true
+
+    let title = CALLOUT_TITLES[node.name]
+
+    if (has_custom_title)
+    {
+        title = toString(first_child)
+        node.children.shift()
+    }
+
+    node.children.unshift({
+        type:     "paragraph",
+        data:     { hName: "callout-title" },
+        children: [{ type: "text", value: title }],
+    })
+
+    setElement(node, "callout-box", { kind: node.name, role: "note" })
 }
 
 

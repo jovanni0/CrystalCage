@@ -245,29 +245,54 @@ doc-body
         {
             background: var(--bg-overlay-subtle);
         }
+
+        callout-title
+        {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            font-weight: 600;
+            color: var(--callout-accent);
+
+            &::before
+            {
+                content: "";
+                flex-shrink: 0;
+                width: 20px;
+                height: 20px;
+
+                background-color: currentColor;
+                mask: var(--callout-icon) center / contain no-repeat;
+            }
+        }
     }
 
     callout-box[kind="note"]
     {
-        --callout-accent:          var(--text-info-default);
-        --callout-background:      var(--bg-info-subtle);
+        --callout-accent:     var(--text-info-default);
+        --callout-background: var(--bg-info-subtle);
+        --callout-icon:       url("/callout-icons/flag.svg");
     }
 
     callout-box[kind="warning"]
     {
-        --callout-accent:          var(--text-warning-default);
-        --callout-background:      var(--bg-warning-subtle);
+        --callout-accent:     var(--text-warning-default);
+        --callout-background: var(--bg-warning-subtle);
+        --callout-icon:       url("/callout-icons/triangle-alert.svg");
     }
 
     callout-box[kind="tip"]
     {
-        --callout-accent:          var(--text-brand-default);
-        --callout-background:      var(--bg-brand-subtle);
+        --callout-accent:     var(--text-brand-default);
+        --callout-background: var(--bg-brand-subtle);
+        --callout-icon:       url("/callout-icons/lightbulb.svg");
     }
 
     callout-box[kind="danger"]
     {
-        --callout-accent:          var(--text-danger-default);
-        --callout-background:      var(--bg-danger-subtle);
+        --callout-accent:     var(--text-danger-default);
+        --callout-background: var(--bg-danger-subtle);
+        --callout-icon:       url("/callout-icons/octagonal-alert.svg");
     }
 }
