@@ -17,7 +17,7 @@
         ...rest
     }: HTMLButtonAttributes & {
         size?:    "fat" | "slim"
-        variant?: "primary" | "ghost"
+        variant?: "primary" | "secondary" | "ghost"
         state?:   "default" | "loading" | "disabled"
     } = $props()
 </script>

@@ -1,9 +1,10 @@
 <script lang="ts">
-    import Fdroid      from "../components/icons/fdroid.svelte";
-    import Gitea       from "../components/icons/gitea.svelte";
-    import Github      from "../components/icons/github.svelte";
-    import Obtainium   from "../components/icons/obtainium.svelte";
-    import SanctumLogo from "../components/icons/sanctum-logo.svelte";
+    import { analytics_consent } from "#lib/states/analytics-consent-state.svelte.ts";
+    import Fdroid                from "../components/icons/fdroid.svelte";
+    import Gitea                 from "../components/icons/gitea.svelte";
+    import Github                from "../components/icons/github.svelte";
+    import Obtainium             from "../components/icons/obtainium.svelte";
+    import SanctumLogo           from "../components/icons/sanctum-logo.svelte";
 </script>
 
 
@@ -85,8 +86,9 @@
         <left-wrapper>
             <p>© 2026 jovanni0 · AGPL 3.0 · </p>
             <button
-                type = "button"
-                class = "link-button"
+                type    = "button"
+                class   = "link-button"
+                onclick = { () => analytics_consent.reopen() }
             >
                 Privacy settings
             </button>
@@ -228,5 +230,10 @@
             }
         }
 
+    }
+
+    button.link-button
+    {
+        text-decoration: underline;
     }
 </style>
