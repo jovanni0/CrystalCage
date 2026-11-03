@@ -17,7 +17,7 @@
     <text-wrapper>
         <p class = "title">Help improve this site?</p>
         <p class = "message">With your permission, this site uses Google Analytics to count visits and see which pages are read. Nothing will be  loaded until you consent to it.</p>
-        <a class = "privacy-details" href = "..">Privacy details</a>
+        <a class = "privacy-details">Privacy details</a>
     </text-wrapper>
 
     <Button

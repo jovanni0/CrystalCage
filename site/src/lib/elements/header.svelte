@@ -11,6 +11,13 @@
     import      Signpost      from "#lib/components/icons/signpost.svelte";
     import      Mail          from "#lib/components/icons/mail.svelte";
     import      ButtonNavbar  from "#lib/components/buttons/button-navbar.svelte";
+    import      Search        from "#lib/components/icons/search.svelte";
+    import      Menu          from "#lib/components/icons/menu.svelte";
+    import      Sparkles      from "#lib/components/icons/sparkles.svelte";
+    import      HeaderMenu    from "#lib/elements/header-menu.svelte";
+    import      { chat_store }          from "#lib/stores/chat-store.svelte.ts";
+    import      { search_state }        from "#lib/states/search-state.svelte.ts";
+    import      { PUBLIC_CHAT_ENABLED } from "$app/env/public";
 
 
 
@@ -28,6 +35,18 @@
         server: ServerStack,
         signpost: Signpost,
         mail: Mail,
+    }
+
+
+    let is_menu_open: boolean = $state(false)
+
+    // the chat only exists on docs pages; below 1000px its floating button is hidden, so the header offers it
+    const can_ask_ai: boolean = $derived(PUBLIC_CHAT_ENABLED && (page.route.id?.startsWith("/docs") ?? false))
+
+
+    function openChat()
+    {
+        chat_store.is_open = true
     }
 
 
@@ -93,15 +112,58 @@
     </nav>
 
     <tools-wrapper>
+        <button
+            type       = "button"
+            class      = "search-trigger"
+            aria-label = "Search"
+            onclick    = { () => search_state.open() }
+        >
+            <span class = "search-hint">Search…</span>
+            <Search />
+        </button>
+
+        {#if can_ask_ai}
+            <IconButton
+                label   = "Ask AI"
+                shape   = "square"
+                class   = "ask-ai"
+                onclick = { openChat }
+            >
+                <Sparkles />
+            </IconButton>
+        {/if}
+
         <IconButton
             label   = "switch theme"
             shape   = "square"
+            class   = "theme-toggle"
             onclick = { toggleTheme }
         >
             <Sun />
         </IconButton>
+
+        <IconButton
+            label         = "open menu"
+            shape         = "square"
+            class         = "menu-toggle"
+            aria-haspopup = "dialog"
+            aria-expanded = { is_menu_open }
+            onclick       = { () => is_menu_open = true }
+        >
+            <Menu />
+        </IconButton>
     </tools-wrapper>
 </header>
+
+<HeaderMenu
+    bind:is_open  = { is_menu_open }
+    nav_items     = { nav_items }
+    nav_icons     = { NAV_ICONS }
+    is_current    = { isActiveLink }
+    show_ai       = { can_ask_ai }
+    onAskAi       = { openChat }
+    onToggleTheme = { toggleTheme }
+/>
 
 
 
@@ -160,20 +222,82 @@
         {
             display: flex;
             flex-direction: row;
+            align-items: center;
             justify-content: flex-end;
-        }
+            gap: 4px;
 
-        @media (width <= 1350px)
-        {
-            brand-wrapper > a.logo > p.brand
+            :global(button.ask-ai),
+            :global(button.menu-toggle)
             {
                 display: none;
             }
         }
 
-        @media (width <= 1000px)
+        button.search-trigger
+        {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+
+            box-sizing: border-box;
+            width: 220px;
+            height: 44px;
+            padding: 0 12px 0 20px;
+
+            border: 1px solid var(--border-neutral-default);
+            border-radius: 999px;
+
+            color: var(--text-neutral-subtle);
+
+            &:hover
+            {
+                background-color: var(--bg-overlay-subtle);
+            }
+
+            &:focus-visible
+            {
+                outline: 2px solid var(--text-brand-default);
+                outline-offset: 2px;
+            }
+        }
+
+        @media (width <= 1400px)
+        {
+            brand-wrapper > a.logo > p.brand
+            {
+                display: none;
+            }
+
+            button.search-trigger
+            {
+                justify-content: center;
+
+                width: 48px;
+                height: 48px;
+                padding: 0;
+
+                border: none;
+                border-radius: 8px;
+
+                color: var(--text-neutral-default);
+
+                span.search-hint
+                {
+                    display: none;
+                }
+            }
+        }
+
+        @media (width <= 1050px)
         {
             padding: 0 0 0 16px;
+
+            tools-wrapper :global(button.ask-ai)
+            {
+                display: flex;
+            }
 
             nav
             {
@@ -196,20 +320,42 @@
             }
         }
 
-        @media (width <= 770px)
+        @media (width <= 800px)
         {
+            grid-template-columns: auto 1fr auto;
+
+            nav
+            {
+                justify-content: center;
+            }
+
             brand-wrapper > a.logo > p.brand
             {
                 display: none;
             }
         }
 
-        @media (width <= 560px)
+        @media (width <= 700px)
         {
             grid-template-columns: 1fr 1fr;
             nav
             {
                 display: none;
+            }
+
+            /* the hidden navigation, the theme switch and the chat move into the menu */
+            tools-wrapper
+            {
+                :global(button.ask-ai),
+                :global(button.theme-toggle)
+                {
+                    display: none;
+                }
+
+                :global(button.menu-toggle)
+                {
+                    display: flex;
+                }
             }
         }
     }

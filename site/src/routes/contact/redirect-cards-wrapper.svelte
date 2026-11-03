@@ -35,7 +35,7 @@
             <ChevronRight />
         </a>
 
-        <a class = "redirect-card" href = "/hosting">
+        <a class = "redirect-card" href = "/docs/hosting">
             <ServerOff class = "main-icon" />
 
             <text-wrapper>

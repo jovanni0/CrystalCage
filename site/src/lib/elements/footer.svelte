@@ -28,8 +28,8 @@
                 <p class = "group-header">Docs</p>
     
                 <ul>
-                    <li><a href = "/app">App</a></li>
-                    <li><a href = "/hosting">Hosting</a></li>
+                    <li><a href = "/docs/app">App</a></li>
+                    <li><a href = "/docs/hosting">Hosting</a></li>
                 </ul>
             </nav-group>
 
@@ -49,28 +49,28 @@
     
                 <ul>
                     <li><a 
-                        href = "..."
+                        // href = ""
                         class = "icon-text"
                     >
                         <Github />
                         GitHub
                     </a></li>
                     <li><a 
-                        href = "..."
+                        // href = ""
                         class = "icon-text"
                     >
                         <Gitea />
                         Gitea
                     </a></li>
                     <li><a 
-                        href = "..."
+                        // href = ""
                         class = "icon-text"
                     >
                         <Fdroid />
                         F-Droid
                     </a></li>
                     <li><a 
-                        href = "..."
+                        // href = ""
                         class = "icon-text"
                     >
                         <Obtainium />

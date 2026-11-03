@@ -4,7 +4,7 @@ hero:
     lead: Sanctum is an open-source, self-hosted book manager. Keep your ebook files, your read history and your covers in one place, on a server you own.
     actions:
         - label: Get the app
-          href: "#start"
+          href: "https://github.com/jovanni0/CrystalCage/releases"
           style: primary
         - label: Host your server
           href: /docs/hosting
