@@ -114,8 +114,9 @@
     <tools-wrapper>
         <button
             type       = "button"
-            class      = "search-trigger"
-            aria-label = "Search"
+            class         = "search-trigger"
+            aria-label    = "Search"
+            aria-haspopup = "dialog"
             onclick    = { () => search_state.open() }
         >
             <span class = "search-hint">Search…</span>

@@ -4,6 +4,7 @@
     import AnalyticsConsent      from "#lib/elements/analytics-consent.svelte";
     import Header                from "#lib/elements/header.svelte";
     import Footer                from "#lib/elements/footer.svelte";
+    import SearchDialog          from "#lib/elements/search-dialog.svelte";
     import "#lib/styles/tokens.css";
     import "#lib/styles/fonts.css";
     import "#lib/styles/base.css";
@@ -30,6 +31,8 @@
 </page-content>
 
 <Footer />
+
+<SearchDialog />
 
 {#if analytics_consent.is_ready && analytics_consent.choice === null}
     <AnalyticsConsent 

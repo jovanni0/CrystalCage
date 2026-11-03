@@ -1,4 +1,4 @@
-// opened from the header (search button); the search dialog reads it once it exists
+// opened from the header search button or a shortcut; read by elements/search-dialog.svelte
 class SearchState
 {
     public is_open: boolean = $state(false)
