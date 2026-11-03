@@ -3,6 +3,7 @@
     import FloatingActions from '#lib/elements/floating-actions.svelte';
     import TableOfContents from '#lib/elements/table-of-contents.svelte';
     import { chat_store } from '#lib/stores/chat-store.svelte.js';
+    import { PUBLIC_CHAT_ENABLED } from '$app/env/public';
 
     let { data } = $props()
 </script>
@@ -26,7 +27,7 @@
         </doc-body>
     </doc-size-limiter>
     
-    <FloatingActions onOpenChat = { () => chat_store.is_open = true } />
+    <FloatingActions onOpenChat = { PUBLIC_CHAT_ENABLED ? () => chat_store.is_open = true : undefined } />
 
     {#if chat_store.is_open}
         <ChatOverlay
@@ -88,6 +89,12 @@
             }
         }
     }
+
+    /* while the chat is open only the chat scrolls, not the page behind it */
+    /* :global(html:has(chat-overlay.chat))
+    {
+        overflow: hidden;
+    } */
 
     :global(chat-overlay.chat)
     {

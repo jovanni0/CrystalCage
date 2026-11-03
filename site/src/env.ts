@@ -29,4 +29,10 @@ export const variables = defineEnvVars({
         description: "Ollama model name used by the chat.",
         schema:      (value) => value ?? "qwen2.5:7b",
     },
+    PUBLIC_CHAT_ENABLED: {
+        public:      true,
+        static:      true,
+        description: "Shows the AI chat. Only enable it where an Ollama server is reachable (local demo).",
+        schema:      (value) => value === "true",
+    },
 })

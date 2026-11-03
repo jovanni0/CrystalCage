@@ -4,11 +4,13 @@
 
 
     let {
-        value = $bindable(),
+        value    = $bindable(),
+        disabled = false,
         placeholder,
         onSubmit,
     }: {
         value:       string
+        disabled?:   boolean
         placeholder: string
         onSubmit:    (text: string) => void
     } = $props()
@@ -18,7 +20,7 @@
     {
         event.preventDefault()
 
-        if (value.trim() === "")
+        if (disabled || value.trim() === "")
         {
             return
         }
@@ -42,7 +44,7 @@
         shape = "square"
         class = "send"
         type  = "submit"
-        state = { !value.trim() ? "disabled" : "default" }
+        state = { disabled || !value.trim() ? "disabled" : "default" }
     >
         <SendHorizontal />
     </IconButton>

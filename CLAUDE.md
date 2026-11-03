@@ -63,6 +63,8 @@ Decisions:
 - Markdown pipeline at build time: unified + remark-gfm + remark-directive, a custom plugin that maps directives to custom elements (`:::note|tip|warning|danger` → `callout-box kind`, `::::tabs`/`:::tab{label}` → `tab-group`/`tab-panel`, `:term[text]{key}` → `help-term` with the glossary definition inlined; unknown directives or glossary keys fail the build), rehype-slug, headings (h2/h3) collected for the TOC and the search index. Interactivity (tabs, tooltips) is added on the page, never in content.
 - Docs describe the intended product, ahead of the code (eg password change, edition download); the branch is merged only once the code catches up.
 - Internal `docs/` (for developers) and `site/content/` (for users) stay separate.
+- SvelteKit 3: env vars are declared in `site/src/env.ts` (`defineEnvVars`) and imported from `$app/env/public` / `$app/env/private`; `dev`/`browser` come from `$app/env` (no `$env/*`, no `$app/environment`).
+- AI chat (docs pages only, MVP for a local demo): `chat-store.svelte.ts` streams from Ollama's `/api/chat` directly from the browser (`PUBLIC_OLLAMA_URL`, `PUBLIC_OLLAMA_MODEL`), with all docs + glossary as the system prompt from the prerendered `/ai-context.txt` (`num_ctx` 8192, only the last 8 messages sent). Shown only when `PUBLIC_CHAT_ENABLED=true`, because visitors of the deployed site can't reach a local Ollama.
 
 
 

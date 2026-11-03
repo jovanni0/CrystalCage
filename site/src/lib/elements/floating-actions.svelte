@@ -17,7 +17,7 @@
     let {
         onOpenChat
     }: {
-        onOpenChat: () => void
+        onOpenChat?: () => void
     } = $props()
 
 
@@ -76,13 +76,15 @@
     {/if}
     
     <bottom-actions>
-        <Button 
-            class = "ai-button"
-            onclick = { onOpenChat }
-        >
-            <Sparkles />
-            <p class = "button-text">Ask AI</p>
-        </Button>
+        {#if onOpenChat}
+            <Button 
+                class = "ai-button"
+                onclick = { onOpenChat }
+            >
+                <Sparkles />
+                <p class = "button-text">Ask AI</p>
+            </Button>
+        {/if}
     
         {#if !is_near_bottom}
             <down-action 

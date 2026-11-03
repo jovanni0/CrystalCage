@@ -56,8 +56,9 @@
 
         {#if !is_chat_empty}
             <IconButton
-                label   = "close chat"
+                label   = "clear chat"
                 shape   = "square"
+                class   = "clear-chat"
                 onclick = { onReset }
             >
                 <Trash />
@@ -116,6 +117,7 @@
 
         <MessageBar 
             value = ""
+            disabled = { status !== "idle" }
             placeholder = "Ask a question..." 
             onSubmit = { onSend }
         />
@@ -159,6 +161,12 @@
         font-weight: 600;
 
         flex: 1;
+    }
+
+
+    :global(button.clear-chat:hover)
+    {
+        color: var(--text-danger-default);
     }
 
 
@@ -231,18 +239,28 @@
         flex: 1;
         min-height: 0;
         overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     message-wrapper
     {
+        box-sizing: border-box;
+        max-width: 100%;
         padding: 12px;
         border-radius: 8px;
+        overflow-wrap: anywhere;
+
+        :global(pre)
+        {
+            overflow-x: auto;
+        }
     }
     
     message-wrapper.user
     {
         background-color: var(--bg-accent-subtle);
         align-self: flex-end;
+        max-width: 85%;
     }
 
 

@@ -19,6 +19,9 @@ End every answer that uses the documentation with one line: "Sources: Page › S
 Documentation:
 `
 
+// only the latest messages are sent, so the docs at the start of the request always fit in num_ctx
+const MAX_HISTORY_MESSAGES = 8
+
 
 
 export class ChatStore
@@ -53,6 +56,7 @@ export class ChatStore
 
             const history = this.messages
                 .filter((message) => !message.is_error)
+                .slice(-MAX_HISTORY_MESSAGES)
                 .map((message) => ({ role: message.role, content: message.content }))
 
             const response = await fetch(`${ PUBLIC_OLLAMA_URL }/api/chat`, {
