@@ -45,8 +45,8 @@
         position: relative;
         user-select: none;
         cursor: pointer;
-        width: 54px;
-        height: 54px;
+        width: 48px;
+        height: 48px;
     }
 
     button.round

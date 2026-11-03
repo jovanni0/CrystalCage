@@ -1,6 +1,8 @@
 <script lang="ts">
+    import ChatOverlay from '#lib/elements/chat-overlay.svelte';
     import FloatingActions from '#lib/elements/floating-actions.svelte';
     import TableOfContents from '#lib/elements/table-of-contents.svelte';
+    import { chat_store } from '#lib/stores/chat-store.svelte.js';
 
     let { data } = $props()
 </script>
@@ -24,7 +26,19 @@
         </doc-body>
     </doc-size-limiter>
     
-    <FloatingActions />
+    <FloatingActions onOpenChat = { () => chat_store.is_open = true } />
+
+    {#if chat_store.is_open}
+        <ChatOverlay
+            is_chat_empty = { chat_store.is_empty }
+            messages      = { chat_store.messages }
+            status        = { chat_store.status }
+            class         = "chat"
+            onClose       = { () => chat_store.is_open = false }
+            onReset       = { () => chat_store.reset() }
+            onSend        = { (text) => chat_store.send(text) }
+        />
+    {/if}
 </doc-layout>
 
 
@@ -73,5 +87,15 @@
                 padding: 16px 20px 48px 20px;
             }
         }
+    }
+
+    :global(chat-overlay.chat)
+    {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        right: 0;
+
+        z-index: 100;
     }
 </style>

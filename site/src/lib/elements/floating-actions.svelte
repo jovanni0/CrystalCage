@@ -14,6 +14,13 @@
 
 
 
+    let {
+        onOpenChat
+    }: {
+        onOpenChat: () => void
+    } = $props()
+
+
     let is_near_top:    boolean = $state(true)
     let is_near_bottom: boolean = $state(true)
 
@@ -71,6 +78,7 @@
     <bottom-actions>
         <Button 
             class = "ai-button"
+            onclick = { onOpenChat }
         >
             <Sparkles />
             <p class = "button-text">Ask AI</p>

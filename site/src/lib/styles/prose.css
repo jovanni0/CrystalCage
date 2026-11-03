@@ -1,4 +1,5 @@
-doc-body
+doc-body,
+.doc-body
 {
     display: block;
     width: 100%;

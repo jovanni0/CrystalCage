@@ -17,4 +17,16 @@ export const variables = defineEnvVars({
             return value
         },
     },
+    PUBLIC_OLLAMA_URL: {
+        public:      true,
+        static:      true,
+        description: "Base URL of the Ollama server used by the chat.",
+        schema:      (value) => value ?? "http://localhost:11434",
+    },
+    PUBLIC_OLLAMA_MODEL: {
+        public:      true,
+        static:      true,
+        description: "Ollama model name used by the chat.",
+        schema:      (value) => value ?? "qwen2.5:7b",
+    },
 })
