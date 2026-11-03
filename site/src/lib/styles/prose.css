@@ -309,4 +309,20 @@ doc-body,
         --callout-background: var(--bg-danger-subtle);
         --callout-icon:       url("/callout-icons/octagonal-alert.svg");
     }
+
+
+    /* ── images ────────────────────────────────────── */
+
+    img
+    {
+        display: block;
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: min(560px, 70vh);
+        margin-inline: auto;
+
+        border: 1px solid var(--border-neutral-subtle);
+        border-radius: 16px;
+    }
 }

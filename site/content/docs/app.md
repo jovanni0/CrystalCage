@@ -11,13 +11,13 @@ The first time you open Sanctum, it looks for a server on your network. Pick you
 
 ## The library
 
-<!-- ![The library, a grid of book covers.](/images/app/library.png) -->
+![The library, a grid of book covers.](/images/library.png)
 
 The library shows all your books as a grid of covers, each with its title. Tap a book to open its profile.
 
 ## Adding a book
 
-<!-- ![The add book form.](/images/app/add-book.png) -->
+![The add book form.](/images/add-book.png)
 
 A book is described by:
 
@@ -33,13 +33,13 @@ Covers and ebook files are not added in this form. Once the book exists, you add
 
 ## The book profile
 
-<!-- ![A book profile on the Book tab.](/images/app/book-profile.png) -->
+![A book profile on the Book tab.](/images/book.png)
 
 Everything about a book is on its profile, split into four tabs: **Covers**, **Book**, **Reads** and **Editions**. Swipe sideways to move between them. The button in the top bar changes with the tab, so it always does the main action for what you are looking at.
 
 ### Covers
 
-<!-- ![The Covers tab with several covers.](/images/app/covers.png) -->
+![The Covers tab with several covers.](/images/covers.png)
 
 A book can have several covers, for example from different editions or printings. Pick the one the library shows. Tap a cover to open it full screen: pinch or double tap to zoom, swipe sideways to see the next cover, and swipe down to close it.
 
@@ -49,7 +49,7 @@ The **Book** tab shows the book's details, tags, blurb and your thoughts, along 
 
 ### Editions
 
-<!-- ![The Editions tab with an EPUB and a PDF edition.](/images/app/editions.png) -->
+![The Editions tab with an EPUB and a PDF edition.](/images/editions.png)
 
 An :term[edition]{key="edition"} is one of your ebook files for the book. Upload as many as you have, in any format. EPUB, MOBI and PDF are color-coded; other formats are kept as they are.
 
@@ -59,7 +59,7 @@ Deleting an edition also deletes the reads logged on it. The app tells you how m
 
 ## Tracking reads
 
-<!-- ![The Reads tab with a read in progress.](/images/app/reads.png) -->
+![The Reads tab with a read in progress.](/images/reads.png)
 
 A read is one time you read the book. Start a read on one of the book's editions, then update your progress as you go. Progress is saved as a percentage on the server; page numbers depend on your device and font size, so they are kept only on your phone.
 

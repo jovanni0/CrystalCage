@@ -27,8 +27,8 @@ Every user on a server has an :term[isolated library]{key="isolated-library"}.
 
 ## Installation
 
-::::tabs
-:::tab{label="Docker"}
+### Docker
+
 1. Clone the repository and open the server folder:
 
    ```bash
@@ -61,8 +61,9 @@ Every user on a server has an :term[isolated library]{key="isolated-library"}.
    ```
 
    You should see a line like `server trying to listen for API on port 7489, with discovery on port 7490`.
-:::
-:::tab{label="Direct build"}
+
+### Direct build
+
 1. Start a PostgreSQL 16 database. The simplest way is still a container:
 
    ```bash

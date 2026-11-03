@@ -41,21 +41,21 @@ gallery:
         - src: /images/library.png
           alt: The library, a grid of book covers.
           caption: Your library at a glance.
+        - src: /images/add-book.png
+          alt: A list of all the information you can add about a book.
+          caption: Adding a book to the library.
         - src: /images/book.png
           alt: A book profile on the Book tab, with title, series and blurb.
           caption: Everything about a book on one page.
         - src: /images/covers.png
           alt: The Covers tab with several covers for one book.
           caption: Several covers per book, one of them shown in the library.
-        - src: /images/library.png
-          alt: The library, a grid of book covers.
-          caption: Your library at a glance.
-        - src: /images/book.png
-          alt: A book profile on the Book tab, with title, series and blurb.
-          caption: Everything about a book on one page.
-        - src: /images/covers.png
-          alt: The Covers tab with several covers for one book.
-          caption: Several covers per book, one of them shown in the library.
+        - src: /images/editions.png
+          alt: The Editions tab with several edition files.
+          caption: Store and organize the each book's editions.
+        - src: /images/reads.png
+          alt: The Reads tab with a history of all the reads and notes associated with the book.
+          caption: As many reads of the book as you want.
 
 
 video:
