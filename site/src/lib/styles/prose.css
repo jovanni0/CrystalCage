@@ -100,6 +100,19 @@ doc-body,
                 outline-offset: 2px;
                 border-radius: 2px;
             }
+
+            &::after
+            {
+                content: "";
+                display: inline-block;
+                width: 0.9em;
+                height: 0.9em;
+                margin-inline-start: 0.2em;
+                vertical-align: -0.1em;
+
+                background-color: var(--text-brand-default);
+                mask: url("/callout-icons/help.svg") center / contain no-repeat;
+            }
         }
 
         .term-popover
