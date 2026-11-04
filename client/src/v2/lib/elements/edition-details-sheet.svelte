@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Pencil from "@root/icons/Pencil.svelte";
     import BottomSheet from "../components/_other/bottom-sheet.svelte";
     import Button from "../components/buttons/button.svelte";
     import IconButton from "../components/buttons/icon-button.svelte";
@@ -20,6 +21,7 @@
         is_downloadable,
         onTrash,
         onDownload,
+        onEdit,
     }: {
         is_open:         boolean
         label:           string
@@ -31,6 +33,7 @@
         is_downloadable: boolean
         onTrash?:        () => void
         onDownload?:     () => void
+        onEdit?: () => void
     } = $props()
 </script>
 
@@ -87,6 +90,14 @@
             >
                 Download file
             </Button>
+
+            <IconButton
+                label = "edit edition"
+                shape = "round"
+                onclick = { onEdit }
+            >
+                <Pencil />
+            </IconButton>
         </buttons-wrapper>
     {/snippet}
 </BottomSheet>

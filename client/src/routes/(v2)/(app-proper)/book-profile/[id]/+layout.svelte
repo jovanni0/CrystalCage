@@ -128,9 +128,30 @@
 
         nav.goTo(next_tab.href, true)
     }
+
+    let file_input: HTMLInputElement
+
+    function onFilesPicked()
+    {
+        if (file_input.files)
+        {
+            store.stageFile(file_input.files[0])
+            store.is_edition_add_sheet_open = true
+        }
+
+        file_input.value = ""
+    }
 </script>
 
 
+
+<input
+    type      = "file"
+    accept    = ".epub,.mobi,.azw3,.fvb,.pdf,application/epub+zip,application/pdf"
+    hidden
+    bind:this = { file_input }
+    onchange  = { onFilesPicked }
+/>
 
 <Page 
     class = "page-layout"
@@ -168,7 +189,7 @@
                     <IconButton
                         shape = "square"
                         label = "manage editions"
-                        onclick = { () => nav.goTo(`/manage-editions/${store.book_id}`) }
+                        onclick = { () => file_input.click() }
                     >
                         <FilePlusCorner />
                     </IconButton>

@@ -6,6 +6,8 @@
     import      EditionPreviewListItem from "@v2/lib/components/list-items/edition-preview-list-item.svelte";
     import      EditionDetailsSheet from "@v2/lib/elements/edition-details-sheet.svelte";
     import { PageSlots } from "@v2/lib/utils/page-slots.svelte";
+    import EditionAddSheet from "@v2/lib/elements/edition-add-sheet.svelte";
+    import EditionUpdateSheet from "@v2/lib/elements/edition-update-sheet.svelte";
 
 
     
@@ -39,6 +41,7 @@
         }
     }
 </script>
+
 
 
 {#if store.has_editions}
@@ -82,6 +85,25 @@
         is_downloadable = { false }
         onTrash         = { deleteInspectedEdition }
         onDownload      = { () => {} }
+        onEdit = { () => store.editEdition(store.inspected_edition_id) }
+    />
+
+    <EditionAddSheet
+        bind:is_open = { store.is_edition_add_sheet_open }
+        bind:label = { store.new_edition_label }
+        bind:release_date = { store.new_edition_release_date }
+        file_name = { store.new_edition_filename }
+        error_message = { store.edition_upload_message }
+        onSave = { () => store.uploadDrafts() }
+    />
+
+    <EditionUpdateSheet
+        bind:is_open = { store.is_edition_update_sheet_open }
+        bind:label = { store.new_edition_label }
+        bind:release_date = { store.new_edition_release_date }
+        file_name = { store.new_edition_filename }
+        error_message = { store.edition_update_message }
+        onUpdate = { () => store.updateEdition() }
     />
 {/snippet}
 

@@ -30,4 +30,9 @@
         padding: 12px 8px;
         border-bottom: 1px solid var(--text-placeholder);
     }
+
+    p.key
+    {
+        flex-shrink: 0;
+    }
 </style>

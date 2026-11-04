@@ -21,6 +21,9 @@ import type { ReadRecordCreateRequest } from "@root/dtos/ReadRecordCreateRequest
 import { edition_format_color_registry } from "@root/CompositionRoot"
 import { EditionFormatColorRegistry, type EditionFileFormatDefinition } from "../utils/format-color-registry.svelte"
 import type { ReadRecordUpdateRequest } from "@root/dtos/ReadRecordUpdateRequest"
+import { generateEphemeralId } from "@root/utils/IdGenerator"
+import type { EditionCreateRequest } from "@root/dtos/EditionCreateRequest"
+import type { EditionUpdateRequest } from "@root/dtos/EditionUpdateRequest"
 
 
 
@@ -63,6 +66,19 @@ export type BookProfile_EditionDetails = {
     added_at:     string
     format:       EditionFileFormatDefinition
 }
+
+
+
+export type EditionDraft2 = {
+    local_id: string
+    file:     File
+    label:    string
+    format:   string
+    status:   "pending" | "uploading" | "failed"
+    error:    string | null
+    filename: string
+}
+
 
 
 
@@ -164,8 +180,19 @@ export class BookProfileStore
 
     public is_edition_details_sheet_open: boolean = $state(false)
     public inspected_edition_id:          string  = $state("")
+    public edited_edition_id: string = $state("")
     
     public inspected_edition_details: BookProfile_EditionDetails = $derived(this.toEditionDetails(this.editions.find(it => it.id === this.inspected_edition_id) ?? null))
+
+    public pending_edition: EditionDraft2 | null = $state(null)
+    public is_edition_add_sheet_open: boolean = $state(false)
+    public new_edition_label: string = $state("")
+    public new_edition_release_date: string = $state("")
+    public new_edition_filename: string = $derived(this.pending_edition?.filename ?? "")
+    public is_uploading_edition: boolean = $state(false)
+    public edition_upload_message: string = $state("")
+    public is_edition_update_sheet_open: boolean = $state(false)
+    public edition_update_message = $state("")
 
 
 
@@ -409,5 +436,119 @@ export class BookProfileStore
         }
 
         return result.ok
+    }
+
+
+    public stageFile(file: File)
+    {
+        this.pending_edition = {
+            local_id: generateEphemeralId(),
+            file:     file,
+            label:    "",
+            format:   this.formatOf(file),
+            status:   "pending",
+            error:    null,
+            filename: file.name
+        }
+
+        console.log(this.pending_edition)
+    }
+
+    private formatOf(file: File): string
+    {
+        const parts = file.name.split(".")
+
+        if (parts.length < 2)
+        {
+            return "unknown"
+        }
+
+        return parts.at(-1)!.toLowerCase()
+    }
+
+
+    public async uploadDrafts(): Promise<void>
+    {
+        if (this.is_uploading_edition || !this.pending_edition)
+        {
+            return
+        }
+
+        console.log("uploading...")
+
+        this.is_uploading_edition  = true
+
+        const edition_create_request: EditionCreateRequest = {
+            book_id: this.book_id,
+            label: this.new_edition_label,
+            release_date: this.new_edition_release_date,
+            format: this.pending_edition.format,
+            file: this.pending_edition.file
+        }
+
+        const result = await this.edition_repo.create(edition_create_request)
+
+        if (!result.ok)
+        {
+            this.edition_upload_message = "Failed to upload the file."
+        }
+        else
+        {
+            this.is_edition_add_sheet_open = false
+
+            this.pending_edition = null
+            this.new_edition_label = ""
+            this.new_edition_release_date = ""
+            this.edition_upload_message = ""
+        }
+
+        this.is_uploading_edition = false
+    }
+    
+
+    public editEdition(id: string)
+    {
+        const edition = this.editions.find(it => it.id === id)
+
+        if (!edition) return
+
+        this.new_edition_label = edition.label ?? ""
+        this.new_edition_release_date = edition.release_date ?? ""
+
+        this.is_edition_details_sheet_open = false
+        this.is_edition_update_sheet_open = true
+    }
+
+
+    public async updateEdition()
+    {
+        console.log(this.inspected_edition_id)
+
+        if (this.inspected_edition_id === "") return
+
+        console.log("updating...")
+
+        const update_request: EditionUpdateRequest = {
+            label: this.new_edition_label !== "" ? this.new_edition_label : undefined,
+            release_date: this.new_edition_release_date !== "" ? new Date(this.new_edition_release_date).toISOString().slice(0, 10) : undefined
+        }
+
+        console.log(update_request)
+
+        const result = await this.edition_repo.update(this.inspected_edition_id, update_request)
+
+        if (!result.ok)
+        {
+            this.edition_update_message = "Could not update edition"
+        }
+        else
+        {
+            this.edition_update_message = ""
+            this.new_edition_label = ""
+            this.new_edition_release_date = ""
+
+            this.is_edition_update_sheet_open = false
+            this.is_edition_details_sheet_open = true
+        }
     }
 }
