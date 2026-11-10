@@ -5,7 +5,7 @@ import type { ReadRecordRepository } from "../repositories/read-record-repositor
 import type { SeriesRepository } from "../repositories/series-repository.svelte"
 import type { UniverseRepository } from "../repositories/universe-repository.svelte"
 import type { BookSummaryResponse } from "@root/dtos/BookSummaryResponse"
-import type { AppError, AsyncResult } from "../utils/result"
+import { describeError, type AppError, type AsyncResult } from "../utils/result"
 import type { ReadRecordResponse } from "@root/dtos/ReadRecordResponse"
 import type { ReadStatusSummary } from "../rules/read-record-rules"
 import      { ReadRecordRules } from "../rules/read-record-rules"
@@ -24,6 +24,8 @@ import type { ReadRecordUpdateRequest } from "@root/dtos/ReadRecordUpdateRequest
 import { generateEphemeralId } from "@root/utils/IdGenerator"
 import type { EditionCreateRequest } from "@root/dtos/EditionCreateRequest"
 import type { EditionUpdateRequest } from "@root/dtos/EditionUpdateRequest"
+import { CoverSheetData } from "../_other/cover-sheet-data.svelte"
+import { Optional } from "../_other/optional"
 
 
 
@@ -193,6 +195,269 @@ export class BookProfileStore
     public edition_upload_message: string = $state("")
     public is_edition_update_sheet_open: boolean = $state(false)
     public edition_update_message = $state("")
+
+
+
+    //# manage covers
+    public is_manage_cover_sheet_open: boolean             = $state(false)
+    public manage_cover_sheet_data:    CoverSheetData.Type = $state(new CoverSheetData.Empty())
+    
+    public is_source_enabled:  boolean = $derived(!(this.manage_cover_sheet_data instanceof CoverSheetData.Create || this.manage_cover_sheet_data instanceof CoverSheetData.Update))
+
+    public get manage_cover_sheet_label(): string
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+            case "update": 
+                return this.manage_cover_sheet_data.label.getOrElse("")
+            
+            case "empty":
+            case "error":
+            case "fetching": 
+                return ""
+        }
+    }
+
+    public set manage_cover_sheet_label(value: string)
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+            case "update": 
+                this.manage_cover_sheet_data = this.manage_cover_sheet_data.setLabel(Optional.from(value !== "" ? value : null))
+                return
+            
+            case "empty":
+            case "error":
+            case "fetching": 
+                return
+        }
+    }
+
+
+    public get manage_cover_sheet_error(): string
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "error":
+                return this.manage_cover_sheet_data.error
+
+            case "create":
+            case "update": 
+            case "empty":
+            case "fetching": 
+                return ""
+        }
+    }
+
+    public get manage_cover_sheet_cover_id(): string | null
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {            
+            case "update": 
+               return this.manage_cover_sheet_data.cover_id
+            
+            case "create":
+            case "empty":
+            case "error":
+            case "fetching": 
+                return null
+        }
+    }
+
+
+    public get manage_cover_sheet_file(): File | null
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+                return this.manage_cover_sheet_data.file
+
+            case "update": 
+            case "empty":
+            case "error":
+            case "fetching": 
+                return null
+        }
+    }
+
+    public get manage_cover_sheet_resolution(): string | null
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+            case "update": 
+                return this.manage_cover_sheet_data.size
+            
+            case "empty":
+            case "error":
+            case "fetching": 
+                return ""
+        }
+    }
+
+    public get manage_cover_sheet_format(): string | null
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+            case "update": 
+                return this.manage_cover_sheet_data.format
+            
+            case "empty":
+            case "error":
+            case "fetching": 
+                return ""
+        }
+    }
+
+    public get is_manage_cover_button_enabled(): boolean
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "update": 
+                console.log(!this.manage_cover_sheet_data.original_label.equals(this.manage_cover_sheet_data.label))
+                return !this.manage_cover_sheet_data.original_label.equals(this.manage_cover_sheet_data.label)
+            
+            case "create":
+            case "empty":
+            case "error":
+            case "fetching": 
+                return true
+        }
+    }
+
+    public async addFromUrl(url: string): Promise<void>
+    {
+        const trimmed_url = url.trim()
+
+        if (trimmed_url === "")
+        {
+            this.manage_cover_sheet_data = new CoverSheetData.Error("the URL is empty")
+            return
+        }
+
+        const result = await this.cover_repo.fetchFromUrl(trimmed_url)
+
+        if (!result.ok)
+        {
+            this.manage_cover_sheet_data = new CoverSheetData.Error(`Could not get the image. ${describeError(result.error)}`)
+            return
+        }
+
+        this.manage_cover_sheet_data = new CoverSheetData.Create(
+            result.value,
+            "?x? px",
+            "IMG",
+            Optional.none()
+        )
+
+        return
+    }
+
+
+    public addFromDevice(file: File): void
+    {
+        this.manage_cover_sheet_data = new CoverSheetData.Create(
+            file,
+            "?x? px",
+            "IMG",
+            Optional.none()
+        )
+    }
+
+    public clearSheetData(): void
+    {
+        this.manage_cover_sheet_data = new CoverSheetData.Empty()
+    }
+
+    public async finishManageCover(): Promise<void>
+    {
+        switch (this.manage_cover_sheet_data.kind)
+        {
+            case "create":
+                const create_result = await this.cover_repo.create({
+                    book_id: this.book_id,
+                    label:   this.manage_cover_sheet_data.label.getOrNull(),
+                    file:    this.manage_cover_sheet_data.file,
+                })
+
+                if (!create_result.ok)
+                {
+                    this.manage_cover_sheet_data = new CoverSheetData.Error(`Could not upload: ${describeError(create_result.error)}`)
+                    return
+                }
+
+                this.manage_cover_sheet_data = new CoverSheetData.Empty()
+                this.is_manage_cover_sheet_open = false
+
+                return
+            case "update": 
+                const update_result = await this.cover_repo.update(
+                    this.manage_cover_sheet_data.cover_id,
+                    {
+                        label: this.manage_cover_sheet_data.label.getOrNull(),
+                    }
+                )
+
+                if (!update_result.ok)
+                {
+                    this.manage_cover_sheet_data = new CoverSheetData.Error(`Could not update: ${describeError(update_result.error)}`)
+                }
+
+                this.manage_cover_sheet_data = new CoverSheetData.Empty()
+                this.is_manage_cover_sheet_open = false
+
+                return
+            
+            case "empty":
+            case "error":
+            case "fetching": 
+                return
+        }
+    }
+
+    public triggerCoverEditSheet(id: string)
+    {
+        const cover_data = this.covers.find(cover => cover.id === id)
+
+        if (!cover_data) return
+
+        this.manage_cover_sheet_data = new CoverSheetData.Update(
+            cover_data.id,
+            Optional.from(cover_data.label),
+            Optional.from(cover_data.label),
+            "?x? px",
+            "IMG"
+        )
+        this.is_manage_cover_sheet_open = true
+    }
+
+    public async deleteCover(id: string)
+    {
+        const cover_data = this.covers.find(cover => cover.id === id)
+
+        if (!cover_data) return
+
+        const result = await this.cover_repo.delete(cover_data)
+
+        if (!result.ok)
+        {
+            this.manage_cover_sheet_data = new CoverSheetData.Error(`Failed to delete cover: ${describeError(result.error)}`)
+            return
+        }
+
+        this.manage_cover_sheet_data = new CoverSheetData.Empty()
+        this.is_manage_cover_sheet_open = false
+    }
+
+
+
+
+
+
+
 
 
 

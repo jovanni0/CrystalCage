@@ -7,6 +7,8 @@
     import      CoverViewerOverlay from "@v2/lib/elements/cover-viewer-overlay.svelte";
     import Button from "@v2/lib/components/buttons/button.svelte";
     import FileImage from "@v2/lib/components/icons/file-image.svelte";
+    import { PageSlots } from "@v2/lib/utils/page-slots.svelte";
+    import ManageCover from "@v2/lib/elements/manage-cover.svelte";
 
 
 
@@ -15,6 +17,8 @@
     }: {
         data: { book_profile_store: BookProfileStore }
     } = $props()
+
+    PageSlots.use({ sheets, })
 
     
     const store = $derived(data.book_profile_store)
@@ -61,6 +65,7 @@
                 covers            = { store.covers_preview }
                 start_index       = { page.state.cover_viewer_index }
                 is_saving_default = { store.is_saving_cover }
+                onEdit            = { (id: string) => store.triggerCoverEditSheet(id) }
                 onClose           = { () => nav.closeOverlay() }
                 onSetDefault      = { (cover_id) => store.setDefaultCover(cover_id) }
             />
@@ -76,12 +81,31 @@
         <p class = "empty-message">No covers added yet.<br/>Add one from your files or a link.</p>
 
         <Button
-            onclick = { () => nav.goTo(`/manage-covers/${store.book_id}`)}
+            onclick = { () => store.is_manage_cover_sheet_open = true }
         >
             Add the first cover
         </Button>
     </no-covers-wrapper>
 {/if}
+
+{#snippet sheets()}
+    <ManageCover 
+        bind:is_open           = { store.is_manage_cover_sheet_open }
+        bind:label             = { store.manage_cover_sheet_label }
+        error_message          = { store.manage_cover_sheet_error }
+        cover_id               = { store.manage_cover_sheet_cover_id }
+        cover_file             = { store.manage_cover_sheet_file }
+        resolution             = { store.manage_cover_sheet_resolution }
+        format                 = { store.manage_cover_sheet_format }
+        is_source_enabled      = { store.is_source_enabled }
+        is_main_button_enabled = { store.is_manage_cover_button_enabled }
+        onFetch                = { async (url: string) => await store.addFromUrl(url) }
+        onUpload               = { (file: File) => store.addFromDevice(file) }
+        onFinish               = { async () => await store.finishManageCover() }
+        onClear                = { () => store.clearSheetData() }
+        onDelete               = { (id: string) => store.deleteCover(id) }
+    />
+{/snippet}
 
 
 <style>

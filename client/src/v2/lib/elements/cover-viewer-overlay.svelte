@@ -7,6 +7,7 @@
     import      CoverViewerSlide   from "@v2/lib/components/covers/cover-viewer.svelte"
     import      Ex                 from "@v2/lib/components/icons/ex.svelte"
     import      Star               from "@root/icons/Star.svelte"
+    import Pencil from "@root/icons/Pencil.svelte";
 
 
 
@@ -31,6 +32,7 @@
         covers,
         start_index,
         is_saving_default,
+        onEdit,
         onClose,
         onSetDefault,
     }: {
@@ -38,6 +40,7 @@
         start_index:       number
         is_saving_default: boolean
         onClose:           () => void
+        onEdit:            (id: string) => void
         onSetDefault:      (cover_id: string) => void
     } = $props()
 
@@ -155,6 +158,13 @@
             </button>
 
             <p class = "label">{ current_cover.label ?? "" }</p>
+
+            <button 
+                class = "icon" 
+                onclick = { () => onEdit(current_cover.id) }
+            >
+                <Pencil />
+            </button>
 
             <button
                 class         = "icon"

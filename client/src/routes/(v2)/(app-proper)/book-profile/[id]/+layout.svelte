@@ -165,7 +165,7 @@
                     <IconButton
                         shape = "square"
                         label = "manage covers"
-                        onclick = { () => nav.goTo(`/manage-covers/${store.book_id}`) }
+                        onclick = { () => store.is_manage_cover_sheet_open = true }
                     >
                         <ImageEdit />
                     </IconButton>
