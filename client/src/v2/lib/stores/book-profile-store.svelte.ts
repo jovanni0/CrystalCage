@@ -26,6 +26,9 @@ import type { EditionCreateRequest } from "@root/dtos/EditionCreateRequest"
 import type { EditionUpdateRequest } from "@root/dtos/EditionUpdateRequest"
 import { CoverSheetData } from "../_other/cover-sheet-data.svelte"
 import { Optional } from "../_other/optional"
+import type { ReadDraft } from "../types/read-draft"
+import { ReadManageStore } from "./read-manage-store.svelte"
+import { ReadDetailsStore } from "./read-record-details-store.svelte"
 
 
 
@@ -456,8 +459,39 @@ export class BookProfileStore
 
 
 
+    public read_manage_store:  ReadManageStore
+    public read_details_store: ReadDetailsStore
 
 
+    public editRead(read_id: string)
+    {
+        this.read_manage_store.is_open = false
+        this.read_details_store.is_open = false
+
+        this.read_manage_store.editExisting(read_id)
+    }
+
+
+    public async deleteRead(read_id: string): Promise<boolean>
+    {
+        const reads = this.read_repo.get(this.book_id)
+        const read_target = reads.find(read => read.id === read_id)
+
+        if (!read_target)
+        {
+            return false
+        }
+
+        const result = await this.read_repo.delete(read_target)
+
+        if (result.ok)
+        {
+            this.read_details_store.is_open = false
+            return true
+        }
+
+        return false
+    }
 
 
 
@@ -467,6 +501,9 @@ export class BookProfileStore
     ) 
     {
         this.book_details = $state.raw(details)
+
+        this.read_manage_store = new ReadManageStore(dependencies.edition_repository, dependencies.read_records, details.id)
+        this.read_details_store   = new ReadDetailsStore(dependencies.read_records, dependencies.edition_repository, details.id)
     }
 
 

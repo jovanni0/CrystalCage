@@ -181,7 +181,7 @@
                     <IconButton
                         shape = "square"
                         label = "add new read"
-                        onclick = { () => store.is_start_read_sheet_open = true }
+                        onclick = { () => store.read_manage_store.startNew() }
                     >
                         <CalendarPlus />
                     </IconButton>

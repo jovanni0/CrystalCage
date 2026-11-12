@@ -15,6 +15,7 @@
         end_date,
         is_in_progress,
         is_historical,
+        onOpenDetails,
         onFinishRead,
     }: {
         id: string
@@ -25,6 +26,7 @@
         end_date: string | null
         is_in_progress: boolean
         is_historical: boolean
+        onOpenDetails: () => void
         onFinishRead?: () => void
     } = $props()
 </script>
@@ -33,9 +35,9 @@
 <read-record-preview 
     class:in-progress = { is_in_progress }
 >
-    <a 
+    <button 
         class = "header-wrapper"
-        href = { `/read-info/${id}` }
+        onclick = { onOpenDetails }
     >
         <FormatPill 
             label       = { format.label }
@@ -51,7 +53,7 @@
         {/if}
 
         <ChevronRight />
-    </a>
+    </button>
 
     {#if rendered_note}
         <note-wrapper>
@@ -108,7 +110,7 @@
     }
 
 
-    a.header-wrapper
+    button.header-wrapper
     {
         display: flex;
         flex-direction: row;
