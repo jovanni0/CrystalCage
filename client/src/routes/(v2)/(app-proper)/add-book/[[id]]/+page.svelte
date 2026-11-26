@@ -51,7 +51,7 @@
 
         if (result)
         {
-            nav.goTo(`/book/${result}`, true)
+            nav.goTo(`/book-profile/${result}`, true)
 
             return
         }

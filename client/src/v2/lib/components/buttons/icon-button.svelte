@@ -8,6 +8,7 @@
     let {
         shape     = "round",
         state     = "default",
+        shade     = "primary",
         children,
         class: className,
         label,
@@ -16,6 +17,7 @@
     }: HTMLButtonAttributes & {
         shape?: "round" | "square"
         state?: "default" | "disabled"
+        shade?: "primary" | "danger"
         label:  string
     } = $props()
 </script>
@@ -24,7 +26,7 @@
 
 <button
     disabled   = { state === "disabled" }
-    class      = {[ "ripple-container", shape, state, className ]}
+    class      = {[ "ripple-container", shape, shade, state, className ]}
     aria-label = { label }
     onclick    = { onclick}
 
@@ -55,6 +57,13 @@
         border: 1px solid var(--text-brand);
         color: var(--text-brand);
         background-color: var(--bg-brand-pale);
+
+        &.danger
+        {
+            color: var(--text-error);
+            border-color: currentColor;
+            background-color: var(--bg-error-pale);
+        }
 
         &.disabled
         {

@@ -54,6 +54,17 @@
             is_valid = true
         }
     }
+
+    $effect.pre(() =>
+    {
+        const is_changed_from_outside = DateRules.RISOtoISO(RISO_date) !== ISO_date
+
+        if (is_changed_from_outside)
+        {
+            RISO_date = DateRules.ISOtoRISO(ISO_date)
+            is_valid  = true
+        }
+    })
 </script>
 
 

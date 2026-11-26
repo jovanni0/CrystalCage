@@ -21,10 +21,10 @@ services:
       PORT: ${PORT}
       DISCOVERY_PORT: ${DISCOVERY_PORT}
     volumes:
-      - sanctum_fs:/app/sanctum-fs # cover files; must match STORAGE_BASE_DIR, or they are lost on every rebuild
+      - ${SANCTUM_FS_DIR:?set SANCTUM_FS_DIR in .env}:/app/sanctum-fs
     ports:
       - "${PORT}:${PORT}"
-      - "${DISCOVERY_PORT}:${DISCOVERY_PORT}"
+      - "${DISCOVERY_PORT}:${DISCOVERY_PORT}/udp"
     restart: unless-stopped
 
   db:
@@ -40,10 +40,4 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - db_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-volumes:
-  db_data:
-  sanctum_fs:
+      - ${SANCTUM_DB_DIR:?set SANCTUM_DB_DIR in .env}:/var/lib/postgresql/data

@@ -2,15 +2,14 @@
     import type { LibStore }            from "@v2/lib/stores/library-store.svelte.js";
     import      { PageSlots }           from "@v2/lib/utils/page-slots.svelte.js";
     import      { nav }                 from "@root/CompositionRoot.js";
-    import      CoverWrapper            from "@v2/lib/components/covers/cover-wrapper.svelte";
     import      CurrentlyReadingCarusel from "@v2/lib/elements/currently-reading-carusel.svelte";
     import      FilterChipBar           from "@v2/lib/components/_other/filter-chip-bar.svelte";
     import      UpdateProgressSheet     from "@v2/lib/elements/update-progress-sheet.svelte";
     import      TopbarBrandSearch       from "@v2/lib/components/bars/topbar-brand-search.svelte";
-    import { hasContext } from "svelte";
     import SearchX from "@v2/lib/components/icons/search-x.svelte";
     import ShelvingUnit from "@v2/lib/components/icons/shelving-unit.svelte";
     import LinkButton from "@v2/lib/components/buttons/link-button.svelte";
+    import CoverTileTitle from "@v2/lib/components/covers/cover-tile-title.svelte";
 
 
 
@@ -54,7 +53,7 @@
 
         <cover-grid>
             {#each library_store.items as item (item.book_id)}
-                <CoverWrapper 
+                <CoverTileTitle 
                     book_id    = { item.book_id }
                     cover_id   = { item.cover_id }
                     cover_type = "thumbnail"

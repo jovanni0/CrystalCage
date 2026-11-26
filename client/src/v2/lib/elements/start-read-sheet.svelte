@@ -4,7 +4,7 @@
     import { DateRules } from "../rules/date-rules";
     import EditionListItem from "../components/list-items/edition-list-item.svelte";
     import type { PickableEdition } from "../types/pickable-edition.type";
-    import Sheet from "../components/_other/bottom-sheet.svelte";
+    import BottomSheet from "../components/_other/bottom-sheet.svelte";
     import Button       from "@v2/lib/components/buttons/button.svelte";
     import IconButton   from "@v2/lib/components/buttons/icon-button.svelte";
     import { edition_format_color_registry } from "@root/CompositionRoot";
@@ -29,7 +29,7 @@
         is_dnf:          boolean
         is_historical:   boolean
         editions:        PickableEdition[]
-        edition_id:      string
+        edition_id:      string | null
         dont_have:       boolean
         onFinish:        () => void
     } = $props()
@@ -42,129 +42,161 @@
     const is_end_date_required:   boolean = $derived(is_dnf && !is_historical)
     const is_end_date_filled:     boolean = $derived(end_date.length === 10 && DateRules.isISOdateValid(end_date))
     const can_continue:           boolean = $derived((!is_start_date_required || is_start_date_filled) && (!is_end_date_required || is_end_date_filled))
+
+
+    $effect(() =>
+    {
+        if (is_sheet_opened === false)
+        {
+            sheet_step = 1
+        }
+    })
+
+    console.log(edition_id)
 </script>
 
 
 
-<Sheet
+<BottomSheet
     bind:is_open = { is_sheet_opened }
     policy = "fit"
 >
     {#if sheet_step === 1}
-        <list
-            class = "dates"DateRules
-        >
-            <DateListItem 
-                key           = "Start date"
-                bind:ISO_date = { start_date }
-                is_disabled   = { is_historical }
-                is_required   = { is_start_date_required }
-            />
-            <DateListItem 
-                key           = "End date"
-                bind:ISO_date = { end_date }
-                is_disabled   = { is_historical }
-                is_required   = { is_end_date_required }
-            />
-        </list>
-
-        <list 
-            class = "modifiers"
-        >
-            <CheckableMessage 
-                message = "Did not finish (DNF)"
-                bind:is_checked = { is_dnf }
-            />
-
-            <CheckableMessage 
-                message = "Is historical"
-                bind:is_checked = { is_historical }
-            />
-        </list>
-    {:else}
-        <h1>Pick the edition you are reading</h1>
-
-        <list>
-            {#each editions as edition (edition.id)}
-                <EditionListItem 
-                    variant     = { edition_format_color_registry.resolve(edition.variant_id) }
-                    is_checked  = { edition_id === edition.id }
-                    is_disabled = { dont_have }
-                    onChange    = { () => edition_id = edition.id }
+        <step-1-wrapper>
+            <date-list>
+                <DateListItem 
+                    key           = "Start date"
+                    bind:ISO_date = { start_date }
+                    is_disabled   = { is_historical }
+                    is_required   = { is_start_date_required }
                 />
-            {/each}
-        </list>
+                <DateListItem 
+                    key           = "End date"
+                    bind:ISO_date = { end_date }
+                    is_disabled   = { is_historical }
+                    is_required   = { is_end_date_required }
+                />
+            </date-list>
 
-        <CheckableMessage 
-            message = "I don't have this edition"
-            bind:is_checked = { dont_have }
-        />
+            <modifier-list>
+                <CheckableMessage 
+                    message = "Did not finish (DNF)"
+                    bind:is_checked = { is_dnf }
+                />
+
+                <CheckableMessage 
+                    message = "Is historical"
+                    bind:is_checked = { is_historical }
+                />
+            </modifier-list>
+        </step-1-wrapper>
+    {:else}
+        <step-2-wrapper>
+            <h1>Pick the edition you are reading</h1>
+
+            <edition-list>
+                {#each editions as edition (edition.id)}
+                    <EditionListItem 
+                        label       = { edition.label }
+                        added_at    = { edition.added_at }
+                        variant     = { edition_format_color_registry.resolve(edition.format_id) }
+                        is_checked  = { edition_id === edition.id }
+                        is_disabled = { dont_have }
+                        onChange    = { () => edition_id = edition.id }
+                    />
+                {/each}
+            </edition-list>
+
+            <CheckableMessage 
+                message = "I don't have this edition"
+                bind:is_checked = { dont_have }
+            />
+        </step-2-wrapper>
     {/if}
-        
-    <wrapper>
-        <IconButton 
-            class   = { [ "back", sheet_step > 1 && "open" ] }
-            shape   = "round"
-            label   = "back"
-            onclick = { () => sheet_step = 1 }
-        >
-            <ArrowLeft />
-        </IconButton>
 
-        <Button
-            size    = "fat"
-            variant = "primary"
-            state   = { can_continue ? "default" : "disabled" }
-            onclick = { sheet_step === 1 ? () => sheet_step = 2 : onFinish }
-            class   = "primary-action"
-        >
-            { sheet_step === 1 ? "Continue" : "Start read" }
-        </Button>
-    </wrapper>
-</Sheet>
+    {#snippet footer()}
+        <button-wrapper>
+            <IconButton 
+                class   = { [ "back", sheet_step > 1 && "open" ] }
+                shape   = "round"
+                label   = "back"
+                onclick = { () => sheet_step = 1 }
+            >
+                <ArrowLeft />
+            </IconButton>
+
+            <Button
+                size    = "fat"
+                variant = "primary"
+                state   = { can_continue ? "default" : "disabled" }
+                onclick = { sheet_step === 1 ? () => sheet_step = 2 : onFinish }
+                class   = "primary-action"
+            >
+                { sheet_step === 1 ? "Continue" : "Start read" }
+            </Button>
+        </button-wrapper>
+    {/snippet}
+</BottomSheet>
 
 
 
 <style>
-    .modifiers
+    step-1-wrapper
     {
         display: flex;
         flex-direction: column;
-    }
-
-    h1
-    {
-        font-size: var(--text-body-lg);
-        font-weight: 400;
-        text-align: center;
-    }
-
-    wrapper
-    {
-        display: flex;
-        flex-direction: row;
-    }
-
-    :global(button.back)
-    {
-        width: 0;
-        margin-right: 0;
-        opacity: 0;
-        overflow: hidden;
-
-        transition: width 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
-
-        &.open
+        gap: 24px;
+        
+        modifier-list
         {
-            width: 54px;
-            margin-right: 4px;
-            opacity: 1;
+            display: flex;
+            flex-direction: column;
         }
     }
 
-    :global(.primary-action)
+    step-2-wrapper
     {
-        flex: 1;
-        transition: width 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+
+        h1
+        {
+            font-size: var(--text-body-lg);
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: -16px;
+        }
     }
+
+    button-wrapper
+    {
+        display: flex;
+        flex-direction: row;
+        margin-top: 16px;
+
+        :global(button.back)
+        {
+            width: 0;
+            margin-right: 0;
+            opacity: 0;
+            overflow: hidden;
+    
+            transition: width 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+    
+            &.open
+            {
+                width: 54px;
+                margin-right: 4px;
+                opacity: 1;
+            }
+        }
+    
+        :global(button.primary-action)
+        {
+            flex: 1;
+            transition: width 200ms cubic-bezier(0.05, 0.7, 0.1, 1);
+        }
+    }
+
 </style>

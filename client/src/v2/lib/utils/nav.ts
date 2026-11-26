@@ -1,6 +1,7 @@
-import { goto } from "$app/navigation"
-import { App } from "@capacitor/app"
-import type { AfterNavigate } from "@sveltejs/kit"
+import type { AfterNavigate }       from "@sveltejs/kit"
+import      { goto, pushState }                from "$app/navigation"
+import      { App as CapacitorApp } from "@capacitor/app"
+import { page } from "$app/state"
 
 
 
@@ -90,13 +91,47 @@ export class Nav
     */ 
     public onNativeBack()
     {
+        if (this.isOverlayOpen())
+        {
+            history.back()
+            return
+        }
+
         if (this.depth === 0)
         {
-            App.exitApp()
+            CapacitorApp.exitApp()
         }
         else
         {
             this.goBack()
         }
+    }
+
+
+    /*
+    *   Opens an overlay (eg: the cover viewer) as a shallow history entry, without navigating.
+    */
+    public openOverlay(state: App.PageState)
+    {
+        pushState('', state)
+    }
+
+    /*
+    *   Closes the overlay opened with `openOverlay`. Does nothing when none is open.
+    */
+    public closeOverlay()
+    {
+        if (!this.isOverlayOpen()) return
+
+        history.back()
+    }
+
+
+    /*
+    *   Returns `true` if an overlay was opened with `openOverlay`, else `false`.
+    */
+    public isOverlayOpen(): boolean
+    {
+        return Object.keys(page.state).length > 0
     }
 }

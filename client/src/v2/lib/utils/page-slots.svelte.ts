@@ -6,9 +6,6 @@ const PAGE_SLOTS_KEY = Symbol("page-slots")
 
 
 
-/*
-*   Everything a page can hand to the layout's `Page`. Add new slots here; nothing else needs to change.
-*/
 export type PageSlotContents = {
     topbar:  Snippet
     sheets:  Snippet
@@ -19,10 +16,26 @@ export type PageSlotContents = {
 export type PageSlotName = keyof PageSlotContents
 
 
+type SlotEntry =
+{
+    contents: Partial<PageSlotContents>
+}
+
+
 
 export class PageSlots
 {
-    public contents: Partial<PageSlotContents> = $state({})
+    /*
+    *   What the layout renders: the slots of every registered page merged, later pages winning.
+    */
+    public contents: Partial<PageSlotContents> = $state.raw({})
+
+    /*
+    *   Not reactive on purpose. In Svelte 5, state read inside an effect teardown returns the value from before the current
+    *   update, so a page leaving during a navigation would see its own contents and remove the next page's. A plain list
+    *   gives each page an exact record to remove, whatever order pages mount and unmount in.
+    */
+    private entries: SlotEntry[] = []
 
 
     /*
@@ -36,7 +49,6 @@ export class PageSlots
 
     /*
     *   Called by a page during initialisation, to hand its contents to the layout's `Page`.
-    *   Cleanup only clears a slot if it still holds this page's value, because the next page may already have filled it.
     */
     public static use(contents: Partial<PageSlotContents>): void
     {
@@ -47,22 +59,31 @@ export class PageSlots
             throw new Error("PageSlots.use() needs a layout that calls PageSlots.provide()")
         }
 
-        const names = Object.keys(contents) as PageSlotName[]
+        const entry: SlotEntry = { contents }
 
-        Object.assign(slots.contents, contents)
+        slots.entries = [ ...slots.entries, entry ]
+        slots.publish()
 
         $effect(() =>
         {
             return () =>
             {
-                for (const name of names)
-                {
-                    if (slots.contents[name] === contents[name])
-                    {
-                        delete slots.contents[name]
-                    }
-                }
+                slots.entries = slots.entries.filter(it => it !== entry)
+                slots.publish()
             }
         })
+    }
+
+
+    private publish(): void
+    {
+        const merged: Partial<PageSlotContents> = {}
+
+        for (const entry of this.entries)
+        {
+            Object.assign(merged, entry.contents)
+        }
+
+        this.contents = merged
     }
 }
